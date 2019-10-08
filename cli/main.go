@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/adrianosela/padl/commands"
+	"github.com/adrianosela/padl/cli/commands"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
