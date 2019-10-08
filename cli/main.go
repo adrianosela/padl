@@ -19,6 +19,7 @@ var appflags = []cli.Flag{
 
 var appcmds = []cli.Command{
 	commands.ProjectCmds,
+	commands.RunCmds,
 }
 
 func main() {
