@@ -3,5 +3,7 @@ package store
 // Database represents all database operations
 // for the padl API
 type Database interface {
-	// TODO: add methods here
+	// CreateUser takes in an email and
+	// an armoured PGP public key
+	CreateUser(string, string) error
 }
