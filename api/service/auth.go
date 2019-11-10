@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/payloads"
+
 	"github.com/gorilla/mux"
 )
 
@@ -13,7 +15,7 @@ func (c *Config) addAuthEndpoints(r *mux.Router) {
 
 func (c *Config) registrationHandler(w http.ResponseWriter, r *http.Request) {
 	// pick up email and public key from request body
-	var reg *registrationRequest
+	var reg *payloads.RegistrationRequest
 	if err := unmarshalRequestBody(r, &reg); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
@@ -36,8 +38,6 @@ func (c *Config) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not create new user: %s", err)))
 		return
 	}
-	fmt.Println(reg.Email) // FIXME: remove
-	fmt.Println(reg.PubKey) // FIXME: remove
 	// return success
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf("successful registration of %s", reg.Email)))

@@ -1,5 +1,5 @@
 package user
- 
+
 type User struct {
 	ID       string // user id
 	Key      string // PEM encoded PGP key
