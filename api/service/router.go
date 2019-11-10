@@ -9,6 +9,7 @@ import (
 // Config holds the service configuration
 // necessary for endpoints to respond to requests
 type Config struct {
+	Version    string // server git hash
 	DeployTime time.Time
 	Database   store.Database
 }
