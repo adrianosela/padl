@@ -18,10 +18,11 @@ type Config struct {
 	Version    string // server git hash
 	DeployTime time.Time
 	Env        string `yaml:"env"`
+	Port       string `yaml:"port"`
 }
 
 // GetConfig returns a populated config struct from a yaml file
-func GetConfig(filePath string) Config {
+func GetConfig(filePath string) *Config {
 	config := configFromYaml(filePath)
 
 	config.DeployTime = time.Now()
@@ -30,17 +31,16 @@ func GetConfig(filePath string) Config {
 	return config
 }
 
-func configFromYaml(filePath string) Config {
-	config := Config{}
+func configFromYaml(filePath string) *Config {
+	config := &Config{}
 
 	yamlFile, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		log.Fatal(err)
 	}
 
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		log.Fatalf("error: %v", err)
+	if err = yaml.Unmarshal(yamlFile, config); err != nil {
+		log.Fatal(err)
 	}
 
 	return config
