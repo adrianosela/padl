@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	"github.com/adrianosela/padl/api/payloads"
-
-	"github.com/gorilla/mux"
 )
 
 func (s *Service) addAuthEndpoints() {
