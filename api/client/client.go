@@ -11,13 +11,13 @@ import (
 	"github.com/adrianosela/padl/api/payloads"
 )
 
-// Client represents a padl API client
-type Client struct {
+// Padl represents a padl API client
+type Padl struct {
 	HostURL string
 }
 
 // NewClient is the constructor for the Client object
-func NewClient(hostURL string) (*Client, error) {
+func NewPadlClient(hostURL string) (*Padl, error) {
 	if hostURL == "" {
 		return nil, errors.New("host cannot be empty")
 	}
@@ -25,7 +25,7 @@ func NewClient(hostURL string) (*Client, error) {
 }
 
 // Register registers a new user with email and a public PGP key
-func (c *Client) Register(email, pubKey string) error {
+func (p *Padl) Register(email, pubKey string) error {
 	pl := &payloads.RegistrationRequest{
 		Email:  email,
 		PubKey: pubKey,
@@ -37,7 +37,7 @@ func (c *Client) Register(email, pubKey string) error {
 	}
 
 	req, err := http.NewRequest(http.MethodPost,
-		fmt.Sprintf("%s/register", c.HostURL),
+		fmt.Sprintf("%s/register", p.HostURL),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return fmt.Errorf("could not build http request: %s", err)
