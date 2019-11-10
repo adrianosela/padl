@@ -14,7 +14,7 @@ const defaultConfigFilename = ".padl"
 // Config is the padl cli configuration
 type Config struct {
 	HostURL string `json:"host_url"`
-	AuthTK  string `json:"auth_token"`
+	// AuthTK  string `json:"auth_token"`
 }
 
 // GetDefaultPath returns the best place to save / look-for a config file.
@@ -30,13 +30,13 @@ func GetDefaultPath() string {
 }
 
 // SetConfig writes a configuration file to the given path
-func SetConfig(url, tk, path string) error {
+func SetConfig(url, path string) error {
 	if url == "" {
 		return errors.New("url cannot be empty")
 	}
-	if tk == "" {
-		return errors.New("token cannot be empty")
-	}
+	// if tk == "" {
+	// 	return errors.New("token cannot be empty")
+	// }
 	if path == "" {
 		path = GetDefaultPath()
 	}
@@ -44,7 +44,7 @@ func SetConfig(url, tk, path string) error {
 	if err != nil {
 		return fmt.Errorf("could not create new file %s: %s", path, err)
 	}
-	byt, err := json.Marshal(&Config{HostURL: url, AuthTK: tk})
+	byt, err := json.Marshal(&Config{HostURL: url})
 	if err != nil {
 		return fmt.Errorf("could not marshal configuration file: %s", err)
 	}

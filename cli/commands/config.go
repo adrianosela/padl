@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/adrianosela/padl/cli/config"
 	"github.com/olekukonko/tablewriter"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -18,7 +19,6 @@ var ConfigCmd = cli.Command{
 			Usage: "create configuration file with given options",
 			Flags: []cli.Flag{
 				asMandatory(urlFlag),
-				asMandatory(tokenFlag),
 				pathFlag,
 			},
 			Before: configSetValidator,
@@ -36,13 +36,12 @@ var ConfigCmd = cli.Command{
 }
 
 func configSetValidator(ctx *cli.Context) error {
-	return assertSet(ctx, urlFlag, tokenFlag)
+	return assertSet(ctx, urlFlag)
 }
 
 func configSetHandler(ctx *cli.Context) error {
 	if err := config.SetConfig(
 		ctx.String(name(urlFlag)),
-		ctx.String(name(tokenFlag)),
 		ctx.String(name(pathFlag)),
 	); err != nil {
 		return fmt.Errorf("could not set configuration: %s", err)
@@ -58,7 +57,6 @@ func configShowHandler(ctx *cli.Context) error {
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Append([]string{"HOST_URL", c.HostURL})
-	table.Append([]string{"AUTH_TK", c.AuthTK})
 	table.Render()
 	return nil
 }

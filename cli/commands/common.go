@@ -7,10 +7,9 @@ import (
 )
 
 func getClient(ctx *cli.Context) (*client.Padl, error) {
-	cPath := ctx.GlobalString("config")
-	config, err := config.GetConfig(cPath)
+	config, err := config.GetConfig(ctx.GlobalString("config"))
 	if err != nil {
 		return nil, err
 	}
-	return client.NewPadlClient(config.HostURL, config.AuthTK, nil)
+	return client.NewPadlClient(config.HostURL, nil)
 }

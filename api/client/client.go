@@ -13,15 +13,19 @@ import (
 
 // Padl represents a padl API client
 type Padl struct {
-	HostURL string
+	HostURL    string
+	HTTPClient *http.Client
 }
 
-// NewClient is the constructor for the Client object
-func NewPadlClient(hostURL string) (*Padl, error) {
+// NewPadlClient is the constructor for the Client object
+func NewPadlClient(hostURL string, httpClient *http.Client) (*Padl, error) {
 	if hostURL == "" {
 		return nil, errors.New("host cannot be empty")
 	}
-	return &Client{HostURL: hostURL}, nil
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &Padl{HostURL: hostURL, HTTPClient: httpClient}, nil
 }
 
 // Register registers a new user with email and a public PGP key

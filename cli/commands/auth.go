@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/adrianosela/padl/api/client"
-
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -33,9 +31,9 @@ func registerAccountValidator(ctx *cli.Context) error {
 }
 
 func registerAccountHandler(ctx *cli.Context) error {
-	c, err := client.NewClient("http://localhost")
+	c, err := getClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
 	email := ctx.String(name(emailFlag))
