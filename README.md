@@ -21,7 +21,7 @@ padl is an attempt at simplyfing secrets management for inexperienced developers
 	- you have access to the email address on the key
 
 ```
-gpg --key-gen
+gpg --full-generate-key
 ``` 
 
 - create an account using the padl CLI
