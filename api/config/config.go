@@ -1,10 +1,10 @@
 package config
 
 import (
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
 	"time"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -12,41 +12,36 @@ var (
 	version string
 )
 
-type External struct {
-	Config struct {
-		Test string `yaml:"test"`
-	} `yaml:"conf"`
-}
-
 // Config holds the service configuration
 // necessary for endpoints to respond to requests
 type Config struct {
 	Version    string // server git hash
 	DeployTime time.Time
-	External   External
+	Env        string `yaml:"env"`
 }
 
+// GetConfig returns a populated config struct from a yaml file
 func GetConfig(filePath string) Config {
-	config := Config{
-		Version:    version,
-		DeployTime: time.Now(),
-		External:   parseYaml(filePath),
-	}
+	config := configFromYaml(filePath)
+
+	config.DeployTime = time.Now()
+	config.Version = version
+
 	return config
 }
 
-func parseYaml(filePath string) External {
-	externalConfig := External{}
+func configFromYaml(filePath string) Config {
+	config := Config{}
 
 	yamlFile, err := ioutil.ReadFile(filePath)
-    if err != nil {
-        log.Printf("yamlFile.Get err   #%v ", err)
-    }
+	if err != nil {
+		log.Printf("yamlFile.Get err   #%v ", err)
+	}
 
-	err = yaml.Unmarshal(yamlFile, &externalConfig)
+	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	return externalConfig
+	return config
 }

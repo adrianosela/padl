@@ -1,14 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/adrianosela/padl/api/config"
 	"github.com/adrianosela/padl/api/service"
 	"log"
 	"net/http"
-	"fmt"
 )
 
-var filePath = "./config.yaml"
+var filePath = "./config/config.yaml"
 
 func main() {
 	c := config.GetConfig(filePath)

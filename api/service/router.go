@@ -9,18 +9,18 @@ import (
 // Service holds the service configuration
 // necessary for endpoints to respond to requests
 type Service struct {
-	Config     *config.Config
-	Router     *mux.Router
-	Database   store.Database
+	Config   *config.Config
+	Router   *mux.Router
+	Database store.Database
 }
 
 // NewPadlService returns an HTTP router multiplexer with
 // attached handler functions
 func NewPadlService(c *config.Config) *Service {
 	svc := &Service{
-		Config: 	c,
-		Router: 	mux.NewRouter(),
-		Database:   store.NewMockDatabase(),
+		Config:   c,
+		Router:   mux.NewRouter(),
+		Database: store.NewMockDatabase(),
 	}
 
 	svc.addAuthEndpoints()
