@@ -1,4 +1,4 @@
-package padl
+package main
 
 type Project struct {
 	ID         string            // project id
