@@ -1,6 +1,6 @@
-package service
+package payloads
 
-type registrationRequest struct {
+type RegistrationRequest struct {
 	Email  string `json:"email"`
 	PubKey string `json:"pub"`
 }
