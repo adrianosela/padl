@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+var (
+	// injected at build-time
+	version string
+)
+
 func main() {
 	c := getConfig()
 
