@@ -18,6 +18,10 @@ type Config struct {
 // attached handler functions
 func NewPadlService(c Config) *mux.Router {
 	router := mux.NewRouter()
+
+	c.addAuthEndpoints(router)
+
 	// TODO: add endpoints here
+
 	return router
 }
