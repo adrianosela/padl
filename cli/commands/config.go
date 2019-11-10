@@ -11,7 +11,7 @@ import (
 
 // ConfigCmd is the CLI command object for the config operation
 var ConfigCmd = cli.Command{
-	Name:  "config",
+	Name:  "config, c",
 	Usage: "configure command line tool",
 	Subcommands: []cli.Command{
 		{
