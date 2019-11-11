@@ -12,31 +12,25 @@ func (s *Service) addAuthEndpoints() {
 }
 
 func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
-	// pick up email and public key from request body
-	var reg *payloads.RegistrationRequest
-	if err := unmarshalRequestBody(r, &reg); err != nil {
+	var regPl *payloads.RegistrationRequest
+	if err := unmarshalRequestBody(r, &regPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
 		return
 	}
-	// validate email and pub key non-empty
-	if reg.Email == "" {
+	// validate payload
+	if err := regPl.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no email provided"))
-		return
-	}
-	if reg.PubKey == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no public key provided"))
+		w.Write([]byte(err.Error()))
 		return
 	}
 	// save new user in db
-	if err := s.Database.CreateUser(reg.Email, reg.PubKey); err != nil {
+	if err := s.Database.CreateUser(regPl.Email, regPl.Password, regPl.PubKey); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new user: %s", err)))
 		return
 	}
 	// return success
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("successful registration of %s", reg.Email)))
+	w.Write([]byte(fmt.Sprintf("successful registration of %s", regPl.Email)))
 }

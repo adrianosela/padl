@@ -29,6 +29,10 @@ var (
 		Name:  "email, e",
 		Usage: "user email for authentication",
 	}
+	passwordFlag = cli.StringFlag{
+		Name:  "password, p",
+		Usage: "user password for authentication",
+	}
 
 	// option flags
 	jsonFlag = cli.BoolFlag{
