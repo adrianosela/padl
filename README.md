@@ -39,7 +39,45 @@ $ padl config show
 
 ## Accounts:
 
-// TODO
+### Create a new account:
+
+Create an account by providing your email and choice of password:
+
+```
+$ padl account register --email adrianosela@protonmail.com --password @V3rYs3cuR3Pa$$w0rd
+registered user adrianosela@protonmail.com successfully!
+```
+
+<b>Note:</b> both of `--email` and `--password` are optional and the CLI will prompt if not given
+
+```
+$ padl account register
+Enter your email:
+adrianosela@protonmail.com
+Enter your password:
+registered user adrianosela@protonmail.com successfully!
+```
+
+After registering, your padl configuration directory (`~/.padl` by default) will contain your new account's private key.
+
+### Login to Your Account:
+
+```
+$ padl account login --email adrianosela@protonmail.com --password @V3rYs3cuR3Pa$$w0rd
+user adrianosela@protonmail.com logged in successfully!
+```
+
+<b>Note:</b> both of `--email` and `--password` are optional and the CLI will prompt if not given
+
+```
+15:25 $ padl account login
+Enter your email:
+adrianosela@protonmail.com
+Enter your password:
+user adrianosela@protonmail.com logged in successfully!
+```
+
+After logging in, your padl configuration file (`~/.padl/config` by default) will contain your fresh access token
 
 ## Projects
 

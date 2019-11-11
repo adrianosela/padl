@@ -68,7 +68,7 @@ func registerAccountHandler(ctx *cli.Context) error {
 		pass = strings.TrimSpace(string(password))
 	}
 
-	priv, pub, err := keys.GenerateRSAKeyPair(2048)
+	priv, pub, err := keys.GenerateRSAKeyPair(4096)
 	if err != nil {
 		return fmt.Errorf("could not generate key pair: %s", err)
 	}
