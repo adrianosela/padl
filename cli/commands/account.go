@@ -13,11 +13,11 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
-// AuthCmds - manage accounts and auth flows
-var AuthCmds = cli.Command{
-	Name:    "auth",
+// AccountCmds - manage accounts and auth flows
+var AccountCmds = cli.Command{
+	Name:    "account",
 	Aliases: []string{"a"},
-	Usage:   "manage accounts",
+	Usage:   "manage accounts and auth flows",
 	Subcommands: []cli.Command{
 		{
 			Name:  "register",
