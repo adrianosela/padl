@@ -5,20 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/project"
 )
 
 func (s *Service) addProjectEndpoints() {
-	r.Methods(http.MethodPost).Path("/newProject").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addOwner").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addEditor").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addReader").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeOwner").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeEditor").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeReader").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addSecret").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeSecret").HandlerFunc(s.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/createDeployKey").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/newProject").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/addOwner").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/addEditor").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/addReader").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/removeOwner").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/removeEditor").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/removeReader").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/addSecret").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/removeSecret").HandlerFunc(s.createNewProjectHandler)
+	s.Router.Methods(http.MethodPost).Path("/createDeployKey").HandlerFunc(s.createNewProjectHandler)
 
 }
 
@@ -31,12 +32,12 @@ func (s *Service) addProjectEndpoints() {
 //
 
 func (s *Service) createNewProjectHandler(w http.ResponseWriter, r *http.Request) {
-	var proj *newProjectRequest
+	var proj *payloads.NewProjRequest
 	if err := unmarshalRequestBody(r, &proj); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
 	}
-	if err := proj.validate(); err != nil {
+	if err := proj.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new project: %s", err)))
 		return
@@ -64,36 +65,31 @@ func (s *Service) createNewProjectHandler(w http.ResponseWriter, r *http.Request
 	fmt.Fprint(w, string(bytesJSON))
 }
 
-func (s *Service) addOwner(w http.ResponseWriter, r *http.Request) {
-	var req *addOwnerRequest
+func (s *Service) addOwnerHandler(w http.ResponseWriter, r *http.Request) {
+	var req *payloads.AddOwnerRequest
 	if err := unmarshalRequestBody(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
 	}
-	if err := req.validate(); err != nil {
+	if err := req.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not create new project: %s", err)))
+		w.Write([]byte(fmt.Sprintf("could not add owner to project: %s", err)))
+		return
+	}
+	// Find projects
+
+	if p, err := s.Database.GetProject(req.ProjectID); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
 		return
 	}
 
-	rules := project.Rules{
-		RequireMFA:     proj.RequireMFA,
-		RequireTeamKey: proj.RequireTeamKey,
-	}
-	project := project.NewProject(proj.Token, proj.Name, rules)
+	
 
-	if err := s.Database.CreateProject(project); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not create new project: %s", err)))
-		return
-	}
-
-	res := newProjectResponse{
-		ID: project.ID,
-	}
-
-	bytesJSON, _ := json.Marshal(&res)
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("successfully added %s to project %s as owner", req.Email, req.ProjectID)))
+}
 
-	fmt.Fprint(w, string(bytesJSON))
+func (s *Service) removeOwnerHandler(w http.ResponseWriter, r *http.Request) {
+	var 
 }

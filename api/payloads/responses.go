@@ -10,3 +10,7 @@ type HealthcheckResponse struct {
 type LoginResponse struct {
 	Token string `json:"token"`
 }
+
+type NewProjResponse struct {
+	ID string `json:"id"`
+}

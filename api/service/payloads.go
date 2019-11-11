@@ -23,7 +23,8 @@ type newProjectResponse struct {
 }
 
 type addOwnerRequest struct {
-	Email string `json:"email"`
+	Email     string `json:"email"`
+	ProjectID string `json:"projectId"`
 }
 
 func (p *newProjectRequest) validate() error {

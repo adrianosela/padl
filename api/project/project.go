@@ -20,9 +20,6 @@ type Rules struct {
 	RequireTeamKey bool
 }
 
-type ProjectConfig struct {
-}
-
 func NewProject(token string, name string, rules Rules) *Project {
 	// Get email using JWT
 	email := getEmail(token)
@@ -41,6 +38,16 @@ func NewProject(token string, name string, rules Rules) *Project {
 
 	return &project
 }
+
+func (p *Project) AddOwner(email string) {
+	append(p.Owners, email)
+}
+
+func (p *Project) AddReader(email string) {
+	append(p.Readers, email)
+}
+
+func (p *Project) Add
 
 // TODO: Use token to get user's email. For now just return email
 //		 Maybe should be part of another package

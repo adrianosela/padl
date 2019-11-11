@@ -15,5 +15,5 @@ type Database interface {
 
 	CreateProject(project *project.Project) error
 
-	GetProject(projectID string) error
+	GetProject(projectID string) (*project.Project, error)
 }
