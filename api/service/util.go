@@ -12,7 +12,6 @@ func unmarshalRequestBody(r *http.Request, intf interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	// unmarshal request payload
 	if err = json.Unmarshal(bodyBytes, intf); err != nil {
 		return err

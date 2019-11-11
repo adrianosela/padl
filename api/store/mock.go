@@ -16,7 +16,7 @@ func NewMockDatabase() *MockDatabase {
 }
 
 // CreateUser adds a new user to the database
-func (db *MockDatabase) CreateUser(email, pub string) error {
+func (db *MockDatabase) CreateUser(email, password, pub string) error {
 	if _, ok := db.users[email]; ok {
 		return errors.New("a padl account is already associated with that email")
 	}

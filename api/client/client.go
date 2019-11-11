@@ -29,12 +29,12 @@ func NewPadlClient(hostURL string, httpClient *http.Client) (*Padl, error) {
 }
 
 // Register registers a new user with email and a public PGP key
-func (p *Padl) Register(email, pubKey string) error {
+func (p *Padl) Register(email, password, pubKey string) error {
 	pl := &payloads.RegistrationRequest{
-		Email:  email,
-		PubKey: pubKey,
+		Email:    email,
+		Password: password,
+		PubKey:   pubKey,
 	}
-
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
 		return fmt.Errorf("could not marshall payload: %s", err)
