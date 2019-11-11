@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/adrianosela/padl/api/payloads"
+	"github.com/adrianosela/padl/api/user"
 )
 
 func (s *Service) addAuthEndpoints() {
@@ -24,8 +25,15 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	// create new user object
+	usr, err := user.NewUser(regPl.Email, regPl.Password, regPl.PubKey)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not create user: %s", err)))
+		return
+	}
 	// save new user in db
-	if err := s.Database.CreateUser(regPl.Email, regPl.Password, regPl.PubKey); err != nil {
+	if err := s.Database.PutUser(usr); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new user: %s", err)))
 		return
