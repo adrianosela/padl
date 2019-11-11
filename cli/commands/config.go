@@ -62,7 +62,7 @@ func configShowHandler(ctx *cli.Context) error {
 		table.Append([]string{"USER", c.User})
 	}
 	if c.Token != "" {
-		table.Append([]string{"AUTH_TOKEN", c.Token})
+		table.Append([]string{"AUTH_TOKEN", "SECRET-TOKEN-PRESENT"})
 	}
 	table.Render()
 	return nil
