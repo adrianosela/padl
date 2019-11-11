@@ -9,4 +9,6 @@ import (
 type Database interface {
 	// PutUser stores a new user in the db
 	PutUser(*user.User) error
+	// GetUser gets a user from the db by email
+	GetUser(string) (*user.User, error)
 }

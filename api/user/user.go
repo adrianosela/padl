@@ -26,3 +26,8 @@ func NewUser(email, pass, key string) (*User, error) {
 	}, nil
 
 }
+
+func (u *User) CheckPassword(pw string) error {
+	// TODO
+	return nil
+}
