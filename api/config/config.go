@@ -15,6 +15,7 @@ type Config struct {
 	DeployTime time.Time
 	Env        string `yaml:"env"`
 	Port       string `yaml:"port"`
+	Debug      bool   `yaml:"debug"`
 }
 
 // BuildConfig returns a populated config struct from a yaml file

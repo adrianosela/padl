@@ -1,11 +1,7 @@
 package service
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/adrianosela/padl/api/config"
-	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/store"
 	"github.com/gorilla/mux"
 )
@@ -27,22 +23,8 @@ func NewPadlService(c *config.Config) *Service {
 		Database: store.NewMockDatabase(),
 	}
 
-	// healthcheck endpoint
-	svc.Router.Methods(http.MethodGet).Path("/healthcheck").HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			byt, _ := json.Marshal(&payloads.HealthcheckResponse{
-				Version:    c.Version,
-				DeployTime: c.DeployTime.String(),
-			})
-			w.Write(byt)
-			return
-		},
-	)
-
+	svc.addDebugEndpoints()
 	svc.addAuthEndpoints()
-
-	// TODO: add endpoints here
 
 	return svc
 }
