@@ -42,8 +42,6 @@ func NewProject(token string, name string, rules Rules) *Project {
 	return &project
 }
 
-func AddOwner(userID, projectID)
-
 // TODO: Use token to get user's email. For now just return email
 //		 Maybe should be part of another package
 func getEmail(token string) string {

@@ -26,7 +26,7 @@ func NewPadlService(c *config.Config) *Service {
 	svc.addDebugEndpoints()
 	svc.addAuthEndpoints()
 	// TODO
-	c.addProjectEndpoints(router)
+	svc.addProjectEndpoints()
 
 	return svc
 }

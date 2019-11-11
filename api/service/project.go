@@ -6,20 +6,19 @@ import (
 	"net/http"
 
 	"github.com/adrianosela/padl/api/project"
-	"github.com/gorilla/mux"
 )
 
-func (c *Config) addProjectEndpoints(r *mux.Router) {
-	r.Methods(http.MethodPost).Path("/newProject").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addOwner").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addEditor").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addReader").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeOwner").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeEditor").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeReader").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/addSecret").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/removeSecret").HandlerFunc(c.createNewProjectHandler)
-	r.Methods(http.MethodPost).Path("/createDeployKey").HandlerFunc(c.createNewProjectHandler)
+func (s *Service) addProjectEndpoints() {
+	r.Methods(http.MethodPost).Path("/newProject").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/addOwner").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/addEditor").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/addReader").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/removeOwner").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/removeEditor").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/removeReader").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/addSecret").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/removeSecret").HandlerFunc(s.createNewProjectHandler)
+	r.Methods(http.MethodPost).Path("/createDeployKey").HandlerFunc(s.createNewProjectHandler)
 
 }
 
@@ -31,7 +30,7 @@ func (c *Config) addProjectEndpoints(r *mux.Router) {
 // Create deploy key
 //
 
-func (c *Config) createNewProjectHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) createNewProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var proj *newProjectRequest
 	if err := unmarshalRequestBody(r, &proj); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -49,7 +48,7 @@ func (c *Config) createNewProjectHandler(w http.ResponseWriter, r *http.Request)
 	}
 	project := project.NewProject(proj.Token, proj.Name, rules)
 
-	if err := c.Database.CreateProject(project); err != nil {
+	if err := s.Database.CreateProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new project: %s", err)))
 		return
@@ -65,7 +64,7 @@ func (c *Config) createNewProjectHandler(w http.ResponseWriter, r *http.Request)
 	fmt.Fprint(w, string(bytesJSON))
 }
 
-func (c *Config) addOwner(w http.ResponseWriter, r *http.Request) {
+func (s *Service) addOwner(w http.ResponseWriter, r *http.Request) {
 	var req *addOwnerRequest
 	if err := unmarshalRequestBody(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -83,7 +82,7 @@ func (c *Config) addOwner(w http.ResponseWriter, r *http.Request) {
 	}
 	project := project.NewProject(proj.Token, proj.Name, rules)
 
-	if err := c.Database.CreateProject(project); err != nil {
+	if err := s.Database.CreateProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new project: %s", err)))
 		return
