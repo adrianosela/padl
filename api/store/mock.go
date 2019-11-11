@@ -26,3 +26,12 @@ func (db *MockDatabase) PutUser(usr *user.User) error {
 	db.users[usr.Email] = usr
 	return nil
 }
+
+// GetUser gets a user from the database
+func (db *MockDatabase) GetUser(email string) (*user.User, error) {
+	if u, ok := db.users[email]; ok {
+		return u, nil
+	} else {
+		return nil, errors.New("user not found")
+	}
+}

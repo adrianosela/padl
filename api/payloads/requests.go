@@ -2,11 +2,28 @@ package payloads
 
 import "errors"
 
+// LoginRequest contains input for user login
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 // RegistrationRequest contains input for user registration
 type RegistrationRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	PubKey   string `json:"public_key"`
+}
+
+// Validate validates a login request payload
+func (l *LoginRequest) Validate() error {
+	if l.Email == "" {
+		return errors.New("no email provided")
+	}
+	if l.Password == "" {
+		return errors.New("no password provided")
+	}
+	return nil
 }
 
 // Validate validates a registration request payload
