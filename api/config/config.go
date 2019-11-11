@@ -16,6 +16,9 @@ type Config struct {
 	Env        string `yaml:"env"`
 	Port       string `yaml:"port"`
 	Debug      bool   `yaml:"debug"`
+	Auth       struct {
+		SigningKey string `yaml:"signingKey"`
+	} `yaml:"auth"`
 }
 
 // BuildConfig returns a populated config struct from a yaml file

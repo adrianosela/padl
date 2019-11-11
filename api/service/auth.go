@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -58,20 +59,29 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// get user object from db
-	usr, err := s.Database.GetUser(loginPl.Email)
-	if err != nil {
+	if err := s.Authenticator.Basic(loginPl.Email, loginPl.Password); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("invalid username or password")) // dont expose not-found
+		w.Write([]byte("invalid username or password")) // do not expose reason
 		return
 	}
-	// check passwords match
-	if err := usr.CheckPassword(loginPl.Password); err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("invalid username or password")) // dont expose bad password
+
+	token, err := s.Authenticator.GenerateJWTForUser(loginPl.Email, []string{"padl"}) // FIXME
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error())) // fixme: if this happens we want to know
+		return
 	}
+
+	lr := &payloads.LoginResponse{Token: token}
+	byt, err := json.Marshal(&lr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error())) // fixme: if this happens we want to know
+		return
+	}
+
 	// return success
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("{\"token\":\"%s\"}", "MOCK_TOKEN")))
+	w.Write(byt)
 	return
 }

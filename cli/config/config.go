@@ -48,7 +48,7 @@ func SetConfig(c *Config, path string) error {
 			return fmt.Errorf("could not create new directory %s: %s", path, err)
 		}
 	}
-	f, err := os.Create(fmt.Sprintf("%s/config", path))
+	f, err := os.Create(fmt.Sprintf("%s/config.json", path))
 	if err != nil {
 		return fmt.Errorf("could not create new file %s/config: %s", path, err)
 	}
@@ -71,7 +71,7 @@ func GetConfig(path string) (*Config, error) {
 }
 
 func readFSConfig(path string) (*Config, error) {
-	dat, err := ioutil.ReadFile(fmt.Sprintf("%s/config", path))
+	dat, err := ioutil.ReadFile(fmt.Sprintf("%s/config.json", path))
 	if err != nil {
 		return nil, fmt.Errorf("could not read configuration file %s: %s", path, err)
 	}
