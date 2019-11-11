@@ -71,7 +71,7 @@ func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
 	var cc CustomClaims
 	//parse onto a jwt token object
 	keyfunc := func(tk *jwt.Token) (interface{}, error) {
-		return a.signer, nil // we use a single key for now
+		return &a.signer.PublicKey, nil // we use a single key for now
 	}
 	token, err := jwt.ParseWithClaims(tkString, &cc, keyfunc)
 	if err != nil {

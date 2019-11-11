@@ -12,6 +12,7 @@ import (
 func (s *Service) addAuthEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/register").HandlerFunc(s.registrationHandler)
 	s.Router.Methods(http.MethodPost).Path("/login").HandlerFunc(s.loginHandler)
+	s.Router.Methods(http.MethodGet).Path("/valid").Handler(s.Auth(s.validHandler))
 }
 
 func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +82,19 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// return success
+	w.WriteHeader(http.StatusOK)
+	w.Write(byt)
+	return
+}
+
+func (s Service) validHandler(w http.ResponseWriter, r *http.Request) {
+	claims := GetClaims(r)
+	byt, err := json.Marshal(&claims)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("could not marshal claims"))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(byt)
 	return
