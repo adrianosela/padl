@@ -3,12 +3,12 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"syscall"
 
 	"github.com/adrianosela/padl/cli/config"
+	"github.com/adrianosela/padl/lib/keymgr"
 	"github.com/adrianosela/padl/lib/keys"
 	"golang.org/x/crypto/ssh/terminal"
 	cli "gopkg.in/urfave/cli.v1"
@@ -81,10 +81,14 @@ func registerAccountHandler(ctx *cli.Context) error {
 
 	// save private key in filesystem
 	// TODO: password encrypt
-	privPem := keys.EncodePrivKeyPEM(priv)
-	err = ioutil.WriteFile(fmt.Sprintf("%s.priv", email), privPem, 0644)
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
 	if err != nil {
-		return fmt.Errorf("could not write private key to file: %s", err)
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+
+	fName := fmt.Sprintf("%s.priv", strings.ReplaceAll(keys.GetFingerprint(pub), ":", ""))
+	if err = keyMgr.PutKey(fName, string(keys.EncodePrivKeyPEM(priv))); err != nil {
+		return fmt.Errorf("could not save private key: %s", err)
 	}
 
 	fmt.Printf("registered user %s successfully!\n", email)
