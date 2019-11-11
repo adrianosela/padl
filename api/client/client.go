@@ -64,3 +64,44 @@ func (p *Padl) Register(email, password, pubKey string) error {
 
 	return nil
 }
+
+// Login logs an existing user into a padl server
+func (p *Padl) Login(email, password string) (string, error) {
+	pl := &payloads.LoginRequest{
+		Email:    email,
+		Password: password,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost,
+		fmt.Sprintf("%s/login", p.HostURL),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http request: %s", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+
+	var lr payloads.LoginResponse
+	if err := json.Unmarshal(respByt, &lr); err != nil {
+		return "", fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+
+	return lr.Token, nil
+}
