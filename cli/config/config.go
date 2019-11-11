@@ -9,25 +9,27 @@ import (
 	"os/user"
 )
 
-const defaultConfigFilename = ".padl"
+const (
+	defaultConfigDirName = ".padl"
+)
 
 // Config is the padl cli configuration
 type Config struct {
 	HostURL string `json:"host_url"`
-	User    string `json:"user, omitempty"`
-	Token   string `json:"auth_token, omitempty"`
+	User    string `json:"user,omitempty"`
+	Token   string `json:"auth_token,omitempty"`
 }
 
-// GetDefaultPath returns the best place to save / look-for a config file.
-// Using this function for both saving and reading the config file (with the
-// same OS) guarantees that a file will be found
+// GetDefaultPath returns the best place to save / look-for a config directory.
+// Using this function for both saving and reading config or resources (with
+// the same OS) guarantees that a directory will be found
 func GetDefaultPath() string {
 	usr, err := user.Current()
 	if err != nil {
 		// settle for rootdir
-		return fmt.Sprintf("/%s", defaultConfigFilename)
+		return fmt.Sprintf("/%s", defaultConfigDirName)
 	}
-	return fmt.Sprintf("%s/%s", usr.HomeDir, defaultConfigFilename)
+	return fmt.Sprintf("%s/%s", usr.HomeDir, defaultConfigDirName)
 }
 
 // SetConfig writes a configuration file to the given path
@@ -41,9 +43,14 @@ func SetConfig(c *Config, path string) error {
 	if path == "" {
 		path = GetDefaultPath()
 	}
-	f, err := os.Create(path)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.Mkdir(path, 755); err != nil {
+			return fmt.Errorf("could not create new directory %s: %s", path, err)
+		}
+	}
+	f, err := os.Create(fmt.Sprintf("%s/config", path))
 	if err != nil {
-		return fmt.Errorf("could not create new file %s: %s", path, err)
+		return fmt.Errorf("could not create new file %s/config: %s", path, err)
 	}
 	byt, err := json.Marshal(c)
 	if err != nil {
@@ -64,7 +71,7 @@ func GetConfig(path string) (*Config, error) {
 }
 
 func readFSConfig(path string) (*Config, error) {
-	dat, err := ioutil.ReadFile(path)
+	dat, err := ioutil.ReadFile(fmt.Sprintf("%s/config", path))
 	if err != nil {
 		return nil, fmt.Errorf("could not read configuration file %s: %s", path, err)
 	}
