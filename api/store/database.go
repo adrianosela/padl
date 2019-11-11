@@ -1,15 +1,19 @@
 package store
 
-import "github.com/adrianosela/padl/api/project"
+import (
+	"github.com/adrianosela/padl/api/project"
+	"github.com/adrianosela/padl/api/user"
+)
 
 // Database represents all database operations
 // for the padl API
 type Database interface {
-	// CreateUser takes in an email and
-	// an armoured PGP public key
-	CreateUser(string, string) error
+	// PutUser stores a new user in the db
+	PutUser(*user.User) error
+	// GetUser gets a user from the db by email
+	GetUser(string) (*user.User, error)
 
 	CreateProject(project *project.Project) error
 
-	getProject(projectID string) error
+	GetProject(projectID string) error
 }

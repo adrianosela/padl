@@ -18,6 +18,8 @@ var appflags = []cli.Flag{
 }
 
 var appcmds = []cli.Command{
+	commands.ConfigCmd,
+	commands.AccountCmds,
 	commands.ProjectCmds,
 	commands.RunCmds,
 }

@@ -25,6 +25,15 @@ var (
 		Usage: "host URL to use",
 	}
 
+	emailFlag = cli.StringFlag{
+		Name:  "email, e",
+		Usage: "user email for authentication",
+	}
+	passwordFlag = cli.StringFlag{
+		Name:  "password",
+		Usage: "user password for authentication",
+	}
+
 	// option flags
 	jsonFlag = cli.BoolFlag{
 		Name:  "json, j",

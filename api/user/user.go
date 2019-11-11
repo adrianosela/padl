@@ -1,7 +1,33 @@
 package user
- 
+
+import (
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+)
+
+// User represents a padl user
 type User struct {
-	ID       string // user id
-	Key      string // PEM encoded PGP key
-	mfaToken string // e.g. duo mfa client to ping
+	Email      string
+	HashedPass string
+	Key        string
+}
+
+// NewUser takes in user email, password, and public key
+// and returns a populated User with the hashed password
+func NewUser(email, pass, key string) (*User, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.MinCost)
+	if err != nil {
+		return nil, fmt.Errorf("could not hash password: %s", err)
+	}
+	return &User{
+		Email:      email,
+		HashedPass: string(hash),
+		Key:        key,
+	}, nil
+
+}
+
+func (u *User) CheckPassword(pw string) error {
+	// TODO
+	return nil
 }

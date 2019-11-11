@@ -1,25 +1,37 @@
 package store
 
-import "errors"
+import (
+	"errors"
+	"github.com/adrianosela/padl/api/user"
+)
 
 // MockDatabase is an in-memory database mock
 type MockDatabase struct {
-	users map[string]string
+	users map[string]*user.User
 }
 
 // NewMockDatabase is the constructor for MockDatabase
 func NewMockDatabase() *MockDatabase {
 	mdb := &MockDatabase{
-		users: make(map[string]string),
+		users: make(map[string]*user.User),
 	}
 	return mdb
 }
 
-// CreateUser adds a new user to the database
-func (db *MockDatabase) CreateUser(email, pub string) error {
-	if _, ok := db.users[email]; ok {
-		return errors.New("a padl account is already associated with that user")
+// PutUser adds a new user to the database
+func (db *MockDatabase) PutUser(usr *user.User) error {
+	if _, ok := db.users[usr.Email]; ok {
+		return errors.New("a padl account is already associated with that email")
 	}
-	db.users[email] = pub
+	db.users[usr.Email] = usr
 	return nil
+}
+
+// GetUser gets a user from the database
+func (db *MockDatabase) GetUser(email string) (*user.User, error) {
+	if u, ok := db.users[email]; ok {
+		return u, nil
+	} else {
+		return nil, errors.New("user not found")
+	}
 }
