@@ -30,7 +30,7 @@ var (
 		Usage: "user email for authentication",
 	}
 	passwordFlag = cli.StringFlag{
-		Name:  "password, p",
+		Name:  "password",
 		Usage: "user password for authentication",
 	}
 

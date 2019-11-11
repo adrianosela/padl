@@ -72,6 +72,6 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// return success
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("successful login of %s", loginPl.Email)))
+	w.Write([]byte(fmt.Sprintf("{\"token\":\"%s\"}", "MOCK_TOKEN")))
 	return
 }

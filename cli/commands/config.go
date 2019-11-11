@@ -41,10 +41,9 @@ func configSetValidator(ctx *cli.Context) error {
 }
 
 func configSetHandler(ctx *cli.Context) error {
-	if err := config.SetConfig(
-		ctx.String(name(urlFlag)),
-		ctx.String(name(pathFlag)),
-	); err != nil {
+	if err := config.SetConfig(&config.Config{
+		HostURL: ctx.String(name(urlFlag)),
+	}, ctx.String(name(pathFlag))); err != nil {
 		return fmt.Errorf("could not set configuration: %s", err)
 	}
 	return nil
@@ -58,6 +57,13 @@ func configShowHandler(ctx *cli.Context) error {
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Append([]string{"HOST_URL", c.HostURL})
+	if c.User != "" {
+
+		table.Append([]string{"USER", c.User})
+	}
+	if c.Token != "" {
+		table.Append([]string{"AUTH_TOKEN", c.Token})
+	}
 	table.Render()
 	return nil
 }
