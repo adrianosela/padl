@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/adrianosela/padl/api/config"
-	"github.com/adrianosela/padl/api/service"
 	"log"
 	"net/http"
+
+	"github.com/adrianosela/padl/api/config"
+	"github.com/adrianosela/padl/api/service"
 )
 
 const filePath = "./config/config.yaml"
@@ -14,7 +15,7 @@ func main() {
 
 	svc := service.NewPadlService(c)
 
-	if err := http.ListenAndServe(c.Port, svc.Router); err != nil {
+	if err := http.ListenAndServe(svc.Config.Port, svc.Router); err != nil {
 		log.Fatal(err)
 	}
 }
