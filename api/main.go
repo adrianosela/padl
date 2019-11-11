@@ -10,8 +10,12 @@ import (
 
 const filePath = "./config/config.yaml"
 
+var (
+	version string // injected at build-time
+)
+
 func main() {
-	c := config.GetConfig(filePath)
+	c := config.BuildConfig(filePath, version)
 
 	svc := service.NewPadlService(c)
 

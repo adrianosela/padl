@@ -1,15 +1,11 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"time"
-)
 
-var (
-	// injected at build-time
-	version string
+	"gopkg.in/yaml.v2"
 )
 
 // Config holds the service configuration
@@ -21,8 +17,8 @@ type Config struct {
 	Port       string `yaml:"port"`
 }
 
-// GetConfig returns a populated config struct from a yaml file
-func GetConfig(filePath string) *Config {
+// BuildConfig returns a populated config struct from a yaml file
+func BuildConfig(filePath, version string) *Config {
 	config := configFromYaml(filePath)
 
 	config.DeployTime = time.Now()
