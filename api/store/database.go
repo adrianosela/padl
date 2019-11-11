@@ -1,9 +1,12 @@
 package store
 
+import (
+	"github.com/adrianosela/padl/api/user"
+)
+
 // Database represents all database operations
 // for the padl API
 type Database interface {
-	// CreateUser takes in an email, password,
-	// and an ASCII armoured RSA public key
-	CreateUser(string, string, string) error
+	// PutUser stores a new user in the db
+	PutUser(*user.User) error
 }
