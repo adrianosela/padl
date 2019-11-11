@@ -27,7 +27,6 @@ func NewProject(token string, name string, rules Rules) *Project {
 	owners := []string{email}
 
 	// Create a random ID
-
 	id := uuid.Must(uuid.NewRandom()).String()
 	var project = Project{
 		ID:       id,
@@ -40,14 +39,75 @@ func NewProject(token string, name string, rules Rules) *Project {
 }
 
 func (p *Project) AddOwner(email string) {
-	append(p.Owners, email)
+	p.Owners = append(p.Owners, email)
 }
 
 func (p *Project) AddReader(email string) {
-	append(p.Readers, email)
+	p.Readers = append(p.Readers, email)
 }
 
-func (p *Project) Add
+func (p *Project) AddEditor(email string) {
+	p.Readers = append(p.Readers, email)
+}
+
+func (p *Project) AddDeployKey(key string) {
+	id := uuid.Must(uuid.NewRandom()).String()
+	p.DeployKeys[id] = key
+}
+
+func (p *Project) RemoveDeployKey(keyId string) {
+	delete(p.DeployKeys, keyId)
+}
+
+func (p *Project) RemoveOwner(email string) {
+	for i, cur_email := range p.Owners {
+		if cur_email == email {
+			p.Owners = append(p.Owners[:i], p.Owners[i+1:]...)
+			break
+		}
+	}
+}
+
+func (p *Project) RemoveReader(email string) {
+	for i, cur_email := range p.Readers {
+		if cur_email == email {
+			p.Readers = append(p.Readers[:i], p.Readers[i+1:]...)
+			break
+		}
+	}
+}
+
+func (p *Project) RemoveEditor(email string) {
+	for i, cur_email := range p.Editors {
+		if cur_email == email {
+			p.Readers = append(p.Editors[:i], p.Editors[i+1:]...)
+			break
+		}
+	}
+}
+
+func (p *Project) AddSecret(secret string) string {
+	id := uuid.Must(uuid.NewRandom()).String()
+	p.Secrets[id] = secret
+	return id
+}
+
+func (p *Project) RemoveSecret(secretId string) {
+	delete(p.Secrets, secretId)
+}
+
+func (p *Project) RequireMFA(setting bool) {
+	p.Settings.RequireMFA = setting
+}
+
+func (p *Project) RequireTeamKey(setting bool) {
+	p.Settings.RequireTeamKey = setting
+}
+
+//TODO
+func (p *Project) GenerateDeployKey() string {
+	return "key"
+}
 
 // TODO: Use token to get user's email. For now just return email
 //		 Maybe should be part of another package

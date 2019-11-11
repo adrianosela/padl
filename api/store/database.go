@@ -13,7 +13,9 @@ type Database interface {
 	// GetUser gets a user from the db by email
 	GetUser(string) (*user.User, error)
 
-	CreateProject(project *project.Project) error
+	PutProject(project *project.Project) error
 
 	GetProject(projectID string) (*project.Project, error)
+
+	UpdateProject(project *project.Project) error
 }

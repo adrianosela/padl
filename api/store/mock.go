@@ -2,12 +2,15 @@ package store
 
 import (
 	"errors"
+
+	"github.com/adrianosela/padl/api/project"
 	"github.com/adrianosela/padl/api/user"
 )
 
 // MockDatabase is an in-memory database mock
 type MockDatabase struct {
-	users map[string]*user.User
+	users    map[string]*user.User
+	projects map[string]*project.Project
 }
 
 // NewMockDatabase is the constructor for MockDatabase
@@ -34,4 +37,37 @@ func (db *MockDatabase) GetUser(email string) (*user.User, error) {
 	} else {
 		return nil, errors.New("user not found")
 	}
+}
+
+func (db *MockDatabase) PutProject(p *project.Project) error {
+	if _, ok := db.projects[p.ID]; ok {
+		return errors.New("Project already exists in the DB")
+	}
+	db.projects[p.ID] = p
+	return nil
+}
+
+func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
+
+	if p, ok := db.projects[projectId]; ok {
+		return p, nil
+	} else {
+		return nil, errors.New("project not found")
+	}
+}
+
+func (db *MockDatabase) UpdateProject(p *project.Project) error {
+
+	oldP, ok := db.projects[p.ID]
+	if !ok {
+		return errors.New("project not found")
+	}
+
+	if oldP.ID != p.ID {
+		delete(db.projects, oldP.ID)
+	}
+
+	db.projects[p.ID] = p
+
+	return nil
 }

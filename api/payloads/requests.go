@@ -13,27 +13,33 @@ type RemoveOwnerRequest struct {
 }
 
 type AddEditorRequest struct {
+	Email     string `json:"email"`
 	ProjectID string `json:"projectId"`
 }
 
 type RemoveEditorRequest struct {
+	Email     string `json:"email"`
 	ProjectID string `json:"projectId"`
 }
 
 type AddReaderRequest struct {
+	Email     string `json:"email"`
 	ProjectID string `json:"projectId"`
 }
 
 type RemoveReaderRequest struct {
+	Email     string `json:"email"`
 	ProjectID string `json:"projectId"`
 }
 
 type AddSecretRequest struct {
 	ProjectID string `json:"projectId"`
+	Secret    string `json:"secret"`
 }
 
 type RemoveSecretRequest struct {
 	ProjectID string `json:"projectId"`
+	Secret    string `json:"secret"`
 }
 
 type UpdateRulesRequest struct {
@@ -119,6 +125,79 @@ func (p *NewProjRequest) Validate() error {
 func (a *AddOwnerRequest) Validate() error {
 	if a.Email == "" {
 		return errors.New("no email provided")
+	}
+	if a.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (r *RemoveOwnerRequest) Validate() error {
+	if r.Email == "" {
+		return errors.New("no email provided")
+	}
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (a *AddReaderRequest) Validate() error {
+	if a.Email == "" {
+		return errors.New("no email provided")
+	}
+	if a.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (r *RemoveReaderRequest) Validate() error {
+	if r.Email == "" {
+		return errors.New("no email provided")
+	}
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (a *AddEditorRequest) Validate() error {
+	if a.Email == "" {
+		return errors.New("no email provided")
+	}
+	if a.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (r *RemoveEditorRequest) Validate() error {
+	if r.Email == "" {
+		return errors.New("no email provided")
+	}
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (a *AddSecretRequest) Validate() error {
+	if a.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	if a.Secret == "" {
+		return errors.New("no secret provided")
+	}
+	return nil
+}
+
+func (r *RemoveSecretRequest) Validate() error {
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	if r.Secret == "" {
+		return errors.New("no secret provided")
 	}
 	return nil
 }
