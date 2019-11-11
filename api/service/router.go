@@ -1,9 +1,10 @@
 package service
 
 import (
+	"time"
+
 	"github.com/adrianosela/padl/api/store"
 	"github.com/gorilla/mux"
-	"time"
 )
 
 // Config holds the service configuration
@@ -20,7 +21,7 @@ func NewPadlService(c Config) *mux.Router {
 	router := mux.NewRouter()
 
 	c.addAuthEndpoints(router)
-
+	c.addProjectEndpoints(router)
 	// TODO: add endpoints here
 
 	return router
