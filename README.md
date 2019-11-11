@@ -4,47 +4,42 @@ padl is an attempt at simplyfing secrets management for inexperienced developers
 
 ## Contents
 
+### [Configure CLI](#configuration)
+* [Server Establishment](#setting-padl-server)
+* [Verify Configuration](#verify-configuration-file)
+
 ### [Accounts](#accounts)
-* [New User Registration](#new-user-registration)
-* [User Key Rotation](#user-key-rotation)
 
 ### [Projects](#projects)
 
 ### [Secrets](#secrets)
 
-## Accounts
+## Configuration:
 
-### New User Registration:
+<b>Note:</b> All configuration commands can have the default configuration file path (`~/.padl`) overriden with the `--path` flag
 
-- generate your personal PGP key following [these steps](http://irtfweb.ifa.hawaii.edu/~lockhart/gpg/). To be accepted by padl, the key must satisfy the following constraints:
-	- 4096-bit RSA
-	- you have access to the email address on the key
+### Setting Padl Server:
 
-```
-gpg --full-generate-key
-``` 
-
-- create an account using the padl CLI
-	- you will receive a confirmation email which must be confirmed within 24 hours, or the account will be purged
+Point your CLI to the padl server:
 
 ```
-padl account create --pub ${PATH_TO_YOUR_PGP_PUBLIC_KEY}
+$ padl config set --url ${PADL_SERVER_URL}
 ```
 
-- once you have confirmed your account via email, you will be able to manage projects and secrets on padl
+### Verify Configuration File:
 
-
-### User Key Rotation:
-
-- generate your new personal PGP key following [these steps](http://irtfweb.ifa.hawaii.edu/~lockhart/gpg/). To be accepted by padl, the key must satisfy the following constraints:
-	- 4096-bit RSA
-	- you have access to the email address on the key
+Verify your CLI can find the configuration file correctly:
 
 ```
-padl account rotate --old ${PATH_TO_OLD_PUB} --new ${PATH_TO_NEW_PUB}
+$ padl config show
++----------+---------------------------+
+| HOST_URL | https://api.padl.com:8080 |
++----------+---------------------------+
 ```
 
-- you will be emailed for confirmation; your new key will not be in place until you have confirmed the key rotation request
+## Accounts:
+
+// TODO
 
 ## Projects
 
