@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,7 +25,6 @@ func NewUser(email, pass, key string) (*User, error) {
 		HashedPass: string(hash),
 		Key:        key,
 	}, nil
-
 }
 
 func (u *User) CheckPassword(pw string) error {
