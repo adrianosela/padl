@@ -22,6 +22,7 @@ type Service struct {
 // NewPadlService returns an HTTP router multiplexer with
 // attached handler functions
 func NewPadlService(c *config.Config) *Service {
+	// TODO: Replace MockDb with Mongo
 	db := store.NewMockDatabase()
 
 	// FIXME
