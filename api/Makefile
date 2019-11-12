@@ -13,8 +13,11 @@ dockerbuild:
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=$(HASH)" -o $(NAME)
 	docker build -t $(NAME) .
 
-build:
+build: decrypt-conf
 	go build -ldflags "-X main.version=$(HASH)" -o $(NAME)
+
+decrypt-conf:
+	sops -d config/encrypted-config.yaml > config/config.yaml
 
 down:
 	(docker stop $(NAME)_service || true) && (docker rm $(NAME)_service || true)
