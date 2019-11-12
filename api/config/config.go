@@ -16,7 +16,7 @@ type Config struct {
 	Env        string `yaml:"env"`
 	Port       string `yaml:"port"`
 	Debug      bool   `yaml:"debug"`
-	Database   string `yaml:"database"`
+	mongoDbConnStr   string `yaml:"mongoDb"`
 	Auth       struct {
 		SigningKey string `yaml:"signingKey"`
 	} `yaml:"auth"`

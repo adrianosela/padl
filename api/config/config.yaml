@@ -1,4 +1,4 @@
 env: "dev"
 port: ":80"
 debug: true
-mongoDbConnStr: "mongodb://localhost:27017"
+mongoDb: "mongodb://localhost:27017"
