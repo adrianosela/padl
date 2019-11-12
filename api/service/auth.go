@@ -87,7 +87,7 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (s Service) validHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) validHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	byt, err := json.Marshal(&claims)
 	if err != nil {
