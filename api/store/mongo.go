@@ -10,14 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Datastore holds the mongoDb Collection
-type Datastore struct {
+// MongoDB holds the MongoDB Collection
+type MongoDB struct {
 	collection *mongo.Collection
 }
 
-// Initialize initializes mongoDb connection
-// returns datastore object
-func Initialize(dbUri string) (*Datastore, error) {
+// NewMongoDB initializes MongoDB connection
+// returns MongoDB object
+func NewMongoDB(dbUri string) (*MongoDB, error) {
 	clientOptions := options.Client().ApplyURI(dbUri)
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -31,15 +31,15 @@ func Initialize(dbUri string) (*Datastore, error) {
 
 	log.Println("Successfully connected to MongoDB")
 
-	ds := &Datastore{
-		collection: client.Database("test").Collection("Users"),
+	ds := &MongoDB{
+		collection: client.Database("padl").Collection("Users"),
 	}
 	return ds, nil
 }
 
 // PutUser adds a new user to the database
-func (ds *Datastore) PutUser(user *user.User) error {
-	_, err := ds.collection.InsertOne(context.TODO(), user)
+func (db *MongoDB) PutUser(user *user.User) error {
+	_, err := db.collection.InsertOne(context.TODO(), user)
 	if err != nil {
 		return err
 	}
@@ -48,11 +48,11 @@ func (ds *Datastore) PutUser(user *user.User) error {
 }
 
 // GetUser gets a user from the database
-func (ds *Datastore) GetUser(email string) (*user.User, error) {
+func (db *MongoDB) GetUser(email string) (*user.User, error) {
 	query := bson.D{{"email", email}}
 
 	var user user.User
-	err := ds.collection.FindOne(context.TODO(), query).Decode(&user)
+	err := db.collection.FindOne(context.TODO(), query).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
