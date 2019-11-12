@@ -25,4 +25,27 @@ func (s *Service) addDebugEndpoints() {
 			return
 		},
 	)
+
+	s.Router.Methods(http.MethodPost).Path("/getProject").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			var req *payloads.GetProjectRequest
+
+			// get payload data
+			if err := unmarshalRequestBody(r, &req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			p, err := s.Database.GetProject(req.ProjectID)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("no project found"))
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			byt, _ := json.Marshal(&p)
+			w.Write(byt)
+			return
+		},
+	)
 }

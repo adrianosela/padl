@@ -46,14 +46,22 @@ type UpdateRulesRequest struct {
 	ProjectID string `json:"projectId"`
 }
 
-type CreateDeployKey struct {
+type CreateDeployKeyRequest struct {
+	ProjectID string `json:"projectId"`
+}
+
+type RemoveDeployKeyRequest struct {
+	ProjectID string `json:"projectId"`
+	DeployKey string `json:"deployKey"`
+}
+
+type GetProjectRequest struct {
 	ProjectID string `json:"projectId"`
 }
 
 type NewProjRequest struct {
 	// Token could be sent in the header. For now sent as payload param
-	Token           string `json:"token"`
-	Name            string `json:"name"`
+ 	Name            string `json:"name"`
 	CreateDeployKey bool   `json:"createDeployKey"`
 	RequireMFA      bool   `json:"requireMFA"`
 	RequireTeamKey  bool   `json:"requireTeamKey"`
@@ -102,10 +110,6 @@ func (r *RegistrationRequest) Validate() error {
 func (p *NewProjRequest) Validate() error {
 	if p.Name == "" {
 		return errors.New("No project name defined")
-	}
-
-	if p.Token == "" {
-		return errors.New("No token")
 	}
 
 	if !p.CreateDeployKey {
@@ -198,6 +202,24 @@ func (r *RemoveSecretRequest) Validate() error {
 	}
 	if r.Secret == "" {
 		return errors.New("no secret provided")
+	}
+	return nil
+}
+
+func (r *CreateDeployKeyRequest) Validate() error {
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+	return nil
+}
+
+func (r *RemoveDeployKeyRequest) Validate() error {
+	if r.ProjectID == "" {
+		return errors.New("no projectId provided")
+	}
+
+	if r.DeployKey == "" {
+		return errors.New("No deploy keys provided")
 	}
 	return nil
 }

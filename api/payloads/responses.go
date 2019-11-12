@@ -14,3 +14,7 @@ type LoginResponse struct {
 type NewProjResponse struct {
 	ID string `json:"id"`
 }
+
+type CreateDeployKeyResponse struct {
+	DeployKey string `json:"deployKey"`
+}
