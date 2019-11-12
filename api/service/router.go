@@ -22,6 +22,7 @@ type Service struct {
 // NewPadlService returns an HTTP router multiplexer with
 // attached handler functions
 func NewPadlService(c *config.Config) *Service {
+	// db := store.NewMongoDB(c.Database.ConnectionString, c.Database.Name, c.Database.UsersCollectionName)
 	db := store.NewMockDatabase()
 
 	// FIXME

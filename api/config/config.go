@@ -16,7 +16,14 @@ type Config struct {
 	Env        string `yaml:"env"`
 	Port       string `yaml:"port"`
 	Debug      bool   `yaml:"debug"`
-	Auth       struct {
+
+	Database struct {
+		ConnectionString    string `yaml:"connectionString"`
+		Name                string `yaml:"name"`
+		UsersCollectionName string `yaml:"usersCollectionName"`
+	} `yaml:"database"`
+
+	Auth struct {
 		SigningKey string `yaml:"signingKey"`
 	} `yaml:"auth"`
 }
