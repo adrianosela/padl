@@ -1,4 +1,9 @@
 env: "dev"
 port: ":80"
 debug: true
-mongoDb: "mongodb://localhost:27017"
+database:
+  connectionString: "mongodb://localhost:27017"
+  name: "padldb"
+  usersCollectionName: "users"
+auth:
+  signingKey: "MOCK_SIGNING_KEY"

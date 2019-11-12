@@ -2,8 +2,9 @@ package store
 
 import (
 	"context"
-	"github.com/adrianosela/padl/api/user"
 	"log"
+
+	"github.com/adrianosela/padl/api/user"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,8 +18,8 @@ type MongoDB struct {
 
 // NewMongoDB initializes MongoDB connection
 // returns MongoDB object
-func NewMongoDB(dbUri string) (*MongoDB, error) {
-	clientOptions := options.Client().ApplyURI(dbUri)
+func NewMongoDB(connStr, dbName, usersCollName string) (*MongoDB, error) {
+	clientOptions := options.Client().ApplyURI(connStr)
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -32,7 +33,7 @@ func NewMongoDB(dbUri string) (*MongoDB, error) {
 	log.Println("Successfully connected to MongoDB")
 
 	ds := &MongoDB{
-		collection: client.Database("padl").Collection("Users"),
+		collection: client.Database(dbName).Collection(usersCollName),
 	}
 	return ds, nil
 }
