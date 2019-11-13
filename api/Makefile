@@ -7,7 +7,7 @@ clean:
 	rm -rf pkg bin
 
 deploy: decrypt-conf-prod
-	echo "NOT IMPLEMENTED"
+	gcloud app deploy
 
 up: dockerbuild down
 	docker run -d --name $(NAME)_service -p 8080:80 $(NAME)

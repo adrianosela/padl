@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -31,6 +33,13 @@ type Config struct {
 // BuildConfig returns a populated config struct from a yaml file
 func BuildConfig(filePath, version string) *Config {
 	config := configFromYaml(filePath)
+
+	// When running on Google App Engine, the PORT env
+	// variable is set by the runtime. If set, we will
+	// serve on the port specified there.
+	if port := os.Getenv("PORT"); port != "" {
+		config.Port = fmt.Sprintf(":%s", port)
+	}
 
 	config.DeployTime = time.Now()
 	config.Version = version
