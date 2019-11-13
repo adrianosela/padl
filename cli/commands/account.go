@@ -125,7 +125,7 @@ func loginAccountHandler(ctx *cli.Context) error {
 
 	tk, err := c.Login(email, pass)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not log in: %s", err)
 	}
 
 	conf, err := config.GetConfig(path)
