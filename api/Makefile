@@ -12,7 +12,7 @@ deploy: decrypt-conf-prod
 up: dockerbuild down
 	docker run -d --name $(NAME)_service -p 8080:80 $(NAME)
 
-dockerbuild:
+dockerbuild: decrypt-conf-dev
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=$(HASH)" -o $(NAME)
 	docker build -t $(NAME) .
 
