@@ -2,14 +2,17 @@ package commands
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
 
 	"github.com/adrianosela/padl/cli/config"
 	"github.com/adrianosela/padl/lib/keymgr"
 	"github.com/adrianosela/padl/lib/keys"
+	"github.com/olekukonko/tablewriter"
 	"golang.org/x/crypto/ssh/terminal"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -21,13 +24,13 @@ var AccountCmds = cli.Command{
 	Usage:   "manage accounts and auth flows",
 	Subcommands: []cli.Command{
 		{
-			Name:  "register",
-			Usage: "register a new account on a padl server",
+			Name:  "create",
+			Usage: "create a new account on a padl server",
 			Flags: []cli.Flag{
 				emailFlag,
 				passwordFlag,
 			},
-			Action: registerAccountHandler,
+			Action: createAccountHandler,
 		},
 		{
 			Name:  "login",
@@ -39,10 +42,18 @@ var AccountCmds = cli.Command{
 			},
 			Action: loginAccountHandler,
 		},
+		{
+			Name:  "show",
+			Usage: "show account details based on padl token",
+			Flags: []cli.Flag{
+				jsonFlag,
+			},
+			Action: showAccountHandler,
+		},
 	},
 }
 
-func registerAccountHandler(ctx *cli.Context) error {
+func createAccountHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
@@ -140,5 +151,45 @@ func loginAccountHandler(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("user %s logged in successfully!\n", email)
+	return nil
+}
+
+func showAccountHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	claims, err := c.Valid()
+	if err != nil {
+		return fmt.Errorf("could not get token details: %s", err)
+	}
+
+	if ctx.Bool(name(jsonFlag)) {
+		byt, err := json.Marshal(claims)
+		if err != nil {
+			return fmt.Errorf("could not marshal claims object: %s", err)
+		}
+		fmt.Println(string(byt))
+		return nil
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAlignment(tablewriter.ALIGN_RIGHT)
+	table.Append([]string{"aud", claims.Audience})
+	table.Append([]string{"iss", claims.Issuer})
+	table.Append([]string{"sub", claims.Subject})
+	table.Append([]string{"iat", strconv.FormatInt(claims.IssuedAt, 10)})
+	table.Append([]string{"exp", strconv.FormatInt(claims.ExpiresAt, 10)})
+	table.Append([]string{"jti", claims.Id})
+	for i, proj := range claims.Projects {
+		if i == 0 {
+			table.Append([]string{"proj", proj})
+		} else {
+			table.Append([]string{"", proj})
+		}
+	}
+	table.Render()
+
 	return nil
 }

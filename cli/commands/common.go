@@ -11,5 +11,5 @@ func getClient(ctx *cli.Context) (*client.Padl, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client.NewPadlClient(config.HostURL, nil)
+	return client.NewPadlClient(config.HostURL, config.Token, nil)
 }
