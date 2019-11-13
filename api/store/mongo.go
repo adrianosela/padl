@@ -30,7 +30,7 @@ func NewMongoDB(connStr, dbName, usersCollName string) (*MongoDB, error) {
 		return nil, err
 	}
 
-	log.Println("Successfully connected to MongoDB")
+	log.Println("[info] successfully connected to MongoDB")
 
 	ds := &MongoDB{
 		collection: client.Database(dbName).Collection(usersCollName),
