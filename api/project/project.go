@@ -42,11 +42,11 @@ func NewProject(name, creator string) *Project {
 func (p *Project) AddUser(email string, priv int) error {
 	switch priv {
 	case PrivilegeLvlOwner:
-		p.Owners = append(p.Owners, email)
+		p.Owners = addToSet(p.Owners, email)
 	case PrivilegeLvlEditor:
-		p.Editors = append(p.Editors, email)
+		p.Editors = addToSet(p.Editors, email)
 	case PrivilegeLvlReader:
-		p.Readers = append(p.Readers, email)
+		p.Readers = addToSet(p.Readers, email)
 	default:
 		return fmt.Errorf("invalid privilege level %d", priv)
 	}
@@ -57,20 +57,20 @@ func (p *Project) AddUser(email string, priv int) error {
 func (p *Project) HasUser(email string, priv int) bool {
 	switch priv {
 	case PrivilegeLvlOwner:
-		return setContains(email, p.Owners)
+		return setContains(p.Owners, email)
 	case PrivilegeLvlEditor:
-		return setContains(email, p.Editors)
+		return setContains(p.Editors, email)
 	case PrivilegeLvlReader:
-		return setContains(email, p.Readers)
+		return setContains(p.Readers, email)
 	}
 	return false
 }
 
 // RemoveUser removes a user from the project
 func (p *Project) RemoveUser(email string) {
-	p.Owners = removeFromSet(email, p.Owners)
-	p.Editors = removeFromSet(email, p.Editors)
-	p.Readers = removeFromSet(email, p.Readers)
+	p.Owners = removeFromSet(p.Owners, email)
+	p.Editors = removeFromSet(p.Editors, email)
+	p.Readers = removeFromSet(p.Readers, email)
 }
 
 // SetDeployKey sets a deploy key on a project
@@ -89,7 +89,7 @@ func (p *Project) RemoveDeployKey(name string) {
 	}
 }
 
-func setContains(elem string, slice []string) bool {
+func setContains(slice []string, elem string) bool {
 	for _, e := range slice {
 		if e == elem {
 			return true
@@ -98,7 +98,14 @@ func setContains(elem string, slice []string) bool {
 	return false
 }
 
-func removeFromSet(elem string, slice []string) []string {
+func addToSet(slice []string, elem string) []string {
+	if setContains(slice, elem) {
+		return slice
+	}
+	return append(slice, elem)
+}
+
+func removeFromSet(slice []string, elem string) []string {
 	for i, e := range slice {
 		if e == elem {
 			// move element to the back and pop it off
