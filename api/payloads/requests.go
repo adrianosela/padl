@@ -2,78 +2,32 @@ package payloads
 
 import "errors"
 
-// TODO: We could merge all the add/remove owner/reader/editor structs into a generic struct
-// For now added one per endpoint in case specific fields are needed in each struct
-
-type AddOwnerRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
+// AddUserToProjectRequest TODO
+type AddUserToProjectRequest struct {
+	Email        string `json:"email"`
+	PrivilegeLvl int    `json:"privilege"`
 }
 
-type RemoveOwnerRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
+// RemoveUserFromProjectRequest TODO
+type RemoveUserFromProjectRequest struct {
+	Email string `json:"email"`
 }
 
-type AddEditorRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
-}
-
-type RemoveEditorRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
-}
-
-type AddReaderRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
-}
-
-type RemoveReaderRequest struct {
-	Email     string `json:"email"`
-	ProjectID string `json:"projectId"`
-}
-
-type AddSecretRequest struct {
-	ProjectID string `json:"projectId"`
-	Secret    string `json:"secret"`
-}
-
-type RemoveSecretRequest struct {
-	ProjectID string `json:"projectId"`
-	Secret    string `json:"secret"`
-}
-
-type UpdateRulesRequest struct {
-	ProjectID string `json:"projectId"`
-}
-
+// CreateDeployKeyRequest TODO
 type CreateDeployKeyRequest struct {
-	ProjectID string `json:"projectId"`
+	DeployKeyName        string `json:"name"`
+	DeployKeyDescription string `json:"description"`
 }
 
-type RemoveDeployKeyRequest struct {
-	ProjectID string `json:"projectId"`
-	DeployKey string `json:"deployKey"`
+// DeleteDeployKeyRequest TODO
+type DeleteDeployKeyRequest struct {
+	DeployKeyName string `json:"deployKey"`
 }
 
-type GetProjectRequest struct {
-	ProjectID string `json:"projectId"`
-}
-
-type NewProjRequest struct {
-	// Token could be sent in the header. For now sent as payload param
-	Name            string `json:"name"`
-	CreateDeployKey bool   `json:"createDeployKey"`
-	RequireMFA      bool   `json:"requireMFA"`
-	RequireTeamKey  bool   `json:"requireTeamKey"`
-}
-
-// LoginRequest contains input for user login
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+// NewProjectRequest TODO
+type NewProjectRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // RegistrationRequest contains input for user registration
@@ -83,13 +37,54 @@ type RegistrationRequest struct {
 	PubKey   string `json:"public_key"`
 }
 
-// Validate validates a login request payload
-func (l *LoginRequest) Validate() error {
-	if l.Email == "" {
+// LoginRequest contains input for user login
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// Validate TODO
+func (a *AddUserToProjectRequest) Validate() error {
+	if a.Email == "" {
 		return errors.New("no email provided")
 	}
-	if l.Password == "" {
-		return errors.New("no password provided")
+	return nil
+}
+
+// Validate TODO
+func (a *RemoveUserFromProjectRequest) Validate() error {
+	if a.Email == "" {
+		return errors.New("no email provided")
+	}
+	return nil
+}
+
+// Validate TODO
+func (r *CreateDeployKeyRequest) Validate() error {
+	if r.DeployKeyName == "" {
+		return errors.New("No name provided")
+	}
+	if r.DeployKeyDescription == "" {
+		return errors.New("No description provided")
+	}
+	return nil
+}
+
+// Validate TODO
+func (r *DeleteDeployKeyRequest) Validate() error {
+	if r.DeployKeyName == "" {
+		return errors.New("No name provided")
+	}
+	return nil
+}
+
+// Validate TODO
+func (p *NewProjectRequest) Validate() error {
+	if p.Name == "" {
+		return errors.New("no project name provided")
+	}
+	if p.Description == "" {
+		return errors.New("no project description provided")
 	}
 	return nil
 }
@@ -110,107 +105,13 @@ func (r *RegistrationRequest) Validate() error {
 	return nil
 }
 
-func (p *NewProjRequest) Validate() error {
-	if p.Name == "" {
-		return errors.New("No project name defined")
-	}
-	return nil
-}
-
-func (a *AddOwnerRequest) Validate() error {
-	if a.Email == "" {
+// Validate validates a login request payload
+func (l *LoginRequest) Validate() error {
+	if l.Email == "" {
 		return errors.New("no email provided")
 	}
-	if a.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (r *RemoveOwnerRequest) Validate() error {
-	if r.Email == "" {
-		return errors.New("no email provided")
-	}
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (a *AddReaderRequest) Validate() error {
-	if a.Email == "" {
-		return errors.New("no email provided")
-	}
-	if a.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (r *RemoveReaderRequest) Validate() error {
-	if r.Email == "" {
-		return errors.New("no email provided")
-	}
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (a *AddEditorRequest) Validate() error {
-	if a.Email == "" {
-		return errors.New("no email provided")
-	}
-	if a.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (r *RemoveEditorRequest) Validate() error {
-	if r.Email == "" {
-		return errors.New("no email provided")
-	}
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (a *AddSecretRequest) Validate() error {
-	if a.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	if a.Secret == "" {
-		return errors.New("no secret provided")
-	}
-	return nil
-}
-
-func (r *RemoveSecretRequest) Validate() error {
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	if r.Secret == "" {
-		return errors.New("no secret provided")
-	}
-	return nil
-}
-
-func (r *CreateDeployKeyRequest) Validate() error {
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-	return nil
-}
-
-func (r *RemoveDeployKeyRequest) Validate() error {
-	if r.ProjectID == "" {
-		return errors.New("no projectId provided")
-	}
-
-	if r.DeployKey == "" {
-		return errors.New("No deploy keys provided")
+	if l.Password == "" {
+		return errors.New("no password provided")
 	}
 	return nil
 }

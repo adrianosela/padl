@@ -33,16 +33,16 @@ func (db *MockDatabase) PutUser(usr *user.User) error {
 
 // GetUser gets a user from the database
 func (db *MockDatabase) GetUser(email string) (*user.User, error) {
-	if u, ok := db.users[email]; ok {
-		return u, nil
-	} else {
+	u, ok := db.users[email]
+	if !ok {
 		return nil, errors.New("user not found")
 	}
+	return u, nil
 }
 
 func (db *MockDatabase) PutProject(p *project.Project) error {
 	if _, ok := db.projects[p.ID]; ok {
-		return errors.New("Project already exists in the DB")
+		return errors.New("project already exists in the DB")
 	}
 	db.projects[p.ID] = p
 	return nil
