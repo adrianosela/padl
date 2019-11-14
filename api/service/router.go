@@ -46,7 +46,6 @@ func NewPadlService(c *config.Config) *Service {
 
 	svc.addDebugEndpoints()
 	svc.addAuthEndpoints()
-	// TODO
 	svc.addProjectEndpoints()
 
 	return svc

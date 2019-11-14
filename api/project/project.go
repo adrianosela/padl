@@ -30,7 +30,6 @@ func NewProject(email string, name string, rules Rules) *Project {
 	// Create a random ID
 	id := uuid.Must(uuid.NewRandom()).String()
 
-	// TODO: init
 	var project = Project{
 		ID:          id,
 		Name:        name,
@@ -57,7 +56,6 @@ NOTES
 */
 
 func (p *Project) AddTeamMember(email string, userType int) (string, error) {
-
 	if _, ok := p.TeamMembers[email]; ok {
 		return "", errors.New("Team Member already exists")
 	} else {
@@ -162,10 +160,4 @@ func (p *Project) indexOfSplice(element string, list []string) int {
 		}
 	}
 	return -1
-}
-
-// TODO: Use token to get user's email. For now just return email
-//		 Maybe should be part of another package
-func getEmail(token string) string {
-	return "email"
 }

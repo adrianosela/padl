@@ -2,6 +2,9 @@ package payloads
 
 import "errors"
 
+// TODO: We could merge all the add/remove owner/reader/editor structs into a generic struct
+// For now added one per endpoint in case specific fields are needed in each struct
+
 type AddOwnerRequest struct {
 	Email     string `json:"email"`
 	ProjectID string `json:"projectId"`

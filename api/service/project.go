@@ -25,10 +25,10 @@ func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/removeSecret").Handler(s.Auth(s.removeSecretHandler))
 	// [ Deploy Keys ]
 	s.Router.Methods(http.MethodPost).Path("/createDeployKey").Handler(s.Auth(s.createDeployKeyHandler))
+	s.Router.Methods(http.MethodPost).Path("/removeDeployKey").Handler(s.Auth(s.removeDeployKeyHandler))
 
 	// TODO
 
-	s.Router.Methods(http.MethodPost).Path("/removeDeployKey").Handler(s.Auth(s.removeDeployKeyHandler))
 	// s.Router.Methods(http.MethodPost).Path("/updateRules").HandlerFunc(s.createNewProjectHandler)
 	// s.Router.Methods(http.MethodPost).Path("/removeProject").HandlerFunc(s.createNewProjectHandler)
 	// s.Router.Methods(http.MethodPost).Path("/updatePriviledge").HandlerFunc(s.createNewProjectHandler)
@@ -39,14 +39,6 @@ const Reader = 0
 const Editor = 1
 const Owner = 2
 
-// Change tules endpoint
-// Add owner, editor, reader endpoint
-// Remove owner, editor, reader endpoint
-// Add secret ednpoint
-// Remove secret endpoint
-// Create deploy key
-// Remove project
-// Change priviledge level
 // [ PROJECT ]
 func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var proj *payloads.NewProjRequest
@@ -84,7 +76,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := newProjectResponse{
+	res := payloads.NewProjResponse{
 		ID: project.ID,
 	}
 
