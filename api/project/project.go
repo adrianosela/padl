@@ -53,6 +53,19 @@ func (p *Project) AddUser(email string, priv int) error {
 	return nil
 }
 
+// HasUser checks whether a project has a user with a given priv level
+func (p *Project) HasUser(email string, priv int) bool {
+	switch priv {
+	case PrivilegeLvlOwner:
+		return setContains(email, p.Owners)
+	case PrivilegeLvlEditor:
+		return setContains(email, p.Editors)
+	case PrivilegeLvlReader:
+		return setContains(email, p.Readers)
+	}
+	return false
+}
+
 // RemoveUser removes a user from the project
 func (p *Project) RemoveUser(email string) {
 	p.Owners = removeFromSet(email, p.Owners)
@@ -74,6 +87,15 @@ func (p *Project) RemoveDeployKey(name string) {
 	if _, ok := p.DeployKeys[name]; ok {
 		delete(p.DeployKeys, name)
 	}
+}
+
+func setContains(elem string, slice []string) bool {
+	for _, e := range slice {
+		if e == elem {
+			return true
+		}
+	}
+	return false
 }
 
 func removeFromSet(elem string, slice []string) []string {

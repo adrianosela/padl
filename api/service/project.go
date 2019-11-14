@@ -166,7 +166,13 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	/*
 	   TODO: check user has privs for project or else return 403
 	*/
-	fmt.Println(claims.Subject) // REMOVE
+	if rmUserPl.Email == claims.Subject {
+		if p.HasUser(claims.Subject, project.PrivilegeLvlOwner) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("owners cannot remove themselves from projects"))
+			return
+		}
+	}
 	// update project
 	p.RemoveUser(rmUserPl.Email)
 	if err := s.Database.UpdateProject(p); err != nil {
