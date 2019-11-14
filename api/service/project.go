@@ -99,7 +99,7 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	var addUserPl *payloads.AddUserToProjectRequest
 	if err := unmarshalRequestBody(r, &addUserPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("could not unmarshall request body"))
+		w.Write([]byte(fmt.Sprintf("could not unmarshal request body: %s", err)))
 		return
 	}
 	// validate payload data

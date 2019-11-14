@@ -48,6 +48,9 @@ func (a *AddUserToProjectRequest) Validate() error {
 	if a.Email == "" {
 		return errors.New("no email provided")
 	}
+	if a.PrivilegeLvl < 0 || a.PrivilegeLvl > 3 {
+		return errors.New("invalid privilege level provided")
+	}
 	return nil
 }
 
