@@ -3,10 +3,12 @@ package commands
 import (
 	"bufio"
 	"fmt"
+	"github.com/adrianosela/padl/cli/config"
+	"github.com/adrianosela/padl/lib/keymgr"
+	"github.com/adrianosela/padl/lib/keys"
+	cli "gopkg.in/urfave/cli.v1"
 	"os"
 	"os/exec"
-
-	cli "gopkg.in/urfave/cli.v1"
 )
 
 // RunCmds - run a command with injected secrets
@@ -36,12 +38,28 @@ func runHandler(ctx *cli.Context) error {
 	}
 
 	// get secrets for project
-	secrets, err := c.GetSecrets( /*FIXME*/ )
+	secret, err := c.GetSecrets( /*FIXME*/ )
 	if err != nil {
 		return fmt.Errorf("could not get secrets from server: %s", err)
 	}
+	kid := secret.KeyID
 
-	decrypted, err := secrets.Decrypt( /*FIXME*/ )
+	mgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not initialize key manager: %s", err)
+	}
+
+	keyPEM, err := mgr.GetKey(kid)
+	if err != nil {
+		return fmt.Errorf("could not get key %s: %s", kid, err)
+	}
+
+	k, err := keys.DecodePrivKeyPEM([]byte(keyPEM))
+	if err != nil {
+		return fmt.Errorf("could not materialize key %s: %s", kid, err)
+	}
+
+	decrypted, err := secret.Decrypt(k)
 	if err != nil {
 		return fmt.Errorf("could not decrypt secrets: %s", err)
 	}
