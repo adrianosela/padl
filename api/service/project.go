@@ -11,19 +11,19 @@ import (
 
 func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/newProject").Handler(s.Auth(s.createProjectHandler))
-
+	// [ Owners ]
 	s.Router.Methods(http.MethodPost).Path("/addOwner").HandlerFunc(s.addOwnerHandler)
 	s.Router.Methods(http.MethodPost).Path("/removeOwner").HandlerFunc(s.removeOwnerHandler)
-
+	// [ Readers ]
 	s.Router.Methods(http.MethodPost).Path("/addReader").HandlerFunc(s.addReaderHandler)
 	s.Router.Methods(http.MethodPost).Path("/removeReader").HandlerFunc(s.removeReaderHandler)
-
+	// [ Editor ]
 	s.Router.Methods(http.MethodPost).Path("/addEditor").HandlerFunc(s.addEditorHandler)
 	s.Router.Methods(http.MethodPost).Path("/removeEditor").HandlerFunc(s.removeEditorHandler)
-
+	// [ Secret ]
 	s.Router.Methods(http.MethodPost).Path("/addSecret").HandlerFunc(s.addSecretHandler)
 	s.Router.Methods(http.MethodPost).Path("/removeSecret").HandlerFunc(s.removeSecretHandler)
-
+	// [ Deploy Keys ]
 	s.Router.Methods(http.MethodPost).Path("/createDeployKey").HandlerFunc(s.createDeployKeyHandler)
 
 	// TODO
@@ -48,7 +48,7 @@ const Owner = 2
 // Remove project
 // Change priviledge level
 // [ PROJECT ]
-func (s Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var proj *payloads.NewProjRequest
 	claims := GetClaims(r)
 	_, err := json.Marshal(&claims)
