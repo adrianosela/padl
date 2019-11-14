@@ -61,7 +61,7 @@ type GetProjectRequest struct {
 
 type NewProjRequest struct {
 	// Token could be sent in the header. For now sent as payload param
- 	Name            string `json:"name"`
+	Name            string `json:"name"`
 	CreateDeployKey bool   `json:"createDeployKey"`
 	RequireMFA      bool   `json:"requireMFA"`
 	RequireTeamKey  bool   `json:"requireTeamKey"`
@@ -110,18 +110,6 @@ func (r *RegistrationRequest) Validate() error {
 func (p *NewProjRequest) Validate() error {
 	if p.Name == "" {
 		return errors.New("No project name defined")
-	}
-
-	if !p.CreateDeployKey {
-		return errors.New("Create deploy key rule not set")
-	}
-
-	if !p.RequireMFA {
-		return errors.New("Require MFA rule not set")
-	}
-
-	if !p.RequireTeamKey {
-		return errors.New("Require TeamKey rule not set")
 	}
 	return nil
 }

@@ -16,7 +16,8 @@ type MockDatabase struct {
 // NewMockDatabase is the constructor for MockDatabase
 func NewMockDatabase() *MockDatabase {
 	mdb := &MockDatabase{
-		users: make(map[string]*user.User),
+		users:    make(map[string]*user.User),
+		projects: make(map[string]*project.Project),
 	}
 	return mdb
 }

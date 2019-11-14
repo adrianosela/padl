@@ -23,7 +23,7 @@ type Rules struct {
 
 func NewProject(email string, name string, rules Rules) *Project {
 	// Create new project
-	var deployKeys []string
+	deployKeys := []string{}
 	teamMembers := make(map[string]int)
 	teamKeys := make(map[string]string)
 	secrets := make(map[string]string)
