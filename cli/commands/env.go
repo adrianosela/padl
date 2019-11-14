@@ -14,12 +14,19 @@ var RunCmds = cli.Command{
 	Name:    "run",
 	Aliases: []string{"r"},
 	Usage:   "run a command with secrets in the environment",
-	Action:  runHandler,
+	Flags: []cli.Flag{
+		jsonFlag,
+	},
+	Action: runHandler,
 }
 
 func runHandler(ctx *cli.Context) error {
-	var cmd *exec.Cmd
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
 
+	var cmd *exec.Cmd
 	if len(os.Args) > 3 {
 		cmd = exec.Command(os.Args[2], os.Args[3:]...)
 	} else if len(os.Args) > 2 {
@@ -28,11 +35,23 @@ func runHandler(ctx *cli.Context) error {
 		return fmt.Errorf("no command provided")
 	}
 
+	// get secrets for project
+	secrets, err := c.GetSecrets( /*FIXME*/ )
+	if err != nil {
+		return fmt.Errorf("could not get secrets from server: %s", err)
+	}
+
+	decrypted, err := secrets.Decrypt( /*FIXME*/ )
+	if err != nil {
+		return fmt.Errorf("could not decrypt secrets: %s", err)
+	}
+
 	// copy parent environment
 	cmd.Env = os.Environ()
-
-	// we append all secrets as follows
-	// cmd.Env = append(cmd.Env, "MY_VAR=some_value")
+	// attach decrypted secret to the cmd's environment
+	for _, s := range decrypted {
+		cmd.Env = append(cmd.Env, s)
+	}
 
 	return runCmdAndPipeStdout(cmd)
 }
