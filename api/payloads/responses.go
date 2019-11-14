@@ -10,3 +10,13 @@ type HealthcheckResponse struct {
 type LoginResponse struct {
 	Token string `json:"token"`
 }
+
+// NewProjectResponse TODO
+type NewProjectResponse struct {
+	ID string `json:"id"`
+}
+
+// CreateDeployKeyResponse TODO
+type CreateDeployKeyResponse struct {
+	DeployKey string `json:"deployKey"`
+}
