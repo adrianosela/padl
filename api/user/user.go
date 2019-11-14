@@ -27,7 +27,7 @@ func NewUser(email, pass, key string) (*User, error) {
 	}, nil
 }
 
+// CheckPassword verifies that a password matches the hash on the user
 func (u *User) CheckPassword(pw string) error {
-	// TODO
-	return nil
+	return bcrypt.CompareHashAndPassword([]byte(u.HashedPass), []byte(pw))
 }

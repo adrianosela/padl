@@ -44,14 +44,14 @@ $ padl config show
 Create an account by providing your email and choice of password:
 
 ```
-$ padl account register --email adrianosela@protonmail.com --password @V3rYs3cuR3Pa$$w0rd
+$ padl account create --email adrianosela@protonmail.com --password @V3rYs3cuR3Pa$$w0rd
 registered user adrianosela@protonmail.com successfully!
 ```
 
 <b>Note:</b> both of `--email` and `--password` are optional and the CLI will prompt if not given
 
 ```
-$ padl account register
+$ padl account create
 Enter your email:
 adrianosela@protonmail.com
 Enter your password:
