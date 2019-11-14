@@ -10,6 +10,7 @@ import (
 
 	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/payloads"
+	"github.com/adrianosela/padl/api/secret"
 )
 
 // Padl represents a padl API client
@@ -142,4 +143,10 @@ func (p *Padl) Valid() (*auth.CustomClaims, error) {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
 	}
 	return &cc, nil
+}
+
+// GetSecrets returns the encrypted secrets for a given project
+func (p *Padl) GetSecrets( /*FIXME*/ ) (*secret.Secret, error) {
+	// TODO
+	return &secret.Secret{}, nil
 }
