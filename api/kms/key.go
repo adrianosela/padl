@@ -4,17 +4,17 @@ import (
 	"crypto/rsa"
 	"fmt"
 
-	"github.com/adrianosela/padl/api/project"
+	"github.com/adrianosela/padl/api/privilege"
 	"github.com/adrianosela/padl/lib/keys"
 )
 
 // Key represents a key managed by padl
 type Key struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Users       map[string]int `json:"users"`
-	PEM         string         `json:"pem"`
+	ID          string                     `json:"id"`
+	Name        string                     `json:"name"`
+	Description string                     `json:"description"`
+	Users       map[string]privilege.Level `json:"users"`
+	PEM         string                     `json:"pem"`
 }
 
 // NewKey is the constructor for the padl Key object
@@ -28,8 +28,8 @@ func NewKey(bits int, creator, name, descr string) (*Key, error) {
 		Name:        name,
 		Description: descr,
 		PEM:         string(keys.EncodePrivKeyPEM(priv)),
-		Users: map[string]int{
-			creator: project.PrivilegeLvlOwner,
+		Users: map[string]privilege.Level{
+			creator: privilege.PrivilegeLvlOwner,
 		},
 	}, nil
 }

@@ -4,16 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/adrianosela/padl/api/privilege"
 	"github.com/google/uuid"
-)
-
-const (
-	// PrivilegeLvlReader TODO
-	PrivilegeLvlReader = 0
-	// PrivilegeLvlEditor TODO
-	PrivilegeLvlEditor = 1
-	// PrivilegeLvlOwner TODO
-	PrivilegeLvlOwner = 2
 )
 
 // Project represents a project in Padl
@@ -39,13 +31,13 @@ func NewProject(name, creator string) *Project {
 }
 
 // AddUser adds a user to the project with the specified priv level
-func (p *Project) AddUser(email string, priv int) error {
+func (p *Project) AddUser(email string, priv privilege.Level) error {
 	switch priv {
-	case PrivilegeLvlOwner:
+	case privilege.PrivilegeLvlOwner:
 		p.Owners = addToSet(p.Owners, email)
-	case PrivilegeLvlEditor:
+	case privilege.PrivilegeLvlEditor:
 		p.Editors = addToSet(p.Editors, email)
-	case PrivilegeLvlReader:
+	case privilege.PrivilegeLvlReader:
 		p.Readers = addToSet(p.Readers, email)
 	default:
 		return fmt.Errorf("invalid privilege level %d", priv)
@@ -54,13 +46,13 @@ func (p *Project) AddUser(email string, priv int) error {
 }
 
 // HasUser checks whether a project has a user with a given priv level
-func (p *Project) HasUser(email string, priv int) bool {
+func (p *Project) HasUser(email string, priv privilege.Level) bool {
 	switch priv {
-	case PrivilegeLvlOwner:
+	case privilege.PrivilegeLvlOwner:
 		return setContains(p.Owners, email)
-	case PrivilegeLvlEditor:
+	case privilege.PrivilegeLvlEditor:
 		return setContains(p.Editors, email)
-	case PrivilegeLvlReader:
+	case privilege.PrivilegeLvlReader:
 		return setContains(p.Readers, email)
 	}
 	return false
