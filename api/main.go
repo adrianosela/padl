@@ -19,7 +19,7 @@ func main() {
 
 	svc := service.NewPadlService(c)
 
-	if err := http.ListenAndServe(svc.Config.Port, svc.Router); err != nil {
+	if err := http.ListenAndServe(c.Port, svc.Router); err != nil {
 		log.Fatal(err)
 	}
 }

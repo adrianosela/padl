@@ -40,7 +40,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// create project object and save it
 	project := project.NewProject(projPl.Name, claims.Subject)
-	if err := s.Database.PutProject(project); err != nil {
+	if err := s.database.PutProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))
 		return
@@ -64,7 +64,7 @@ func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("no project ID in request URL"))
 		return
 	}
-	p, err := s.Database.GetProject(id)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
@@ -110,7 +110,7 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fetch project from database
-	p, err := s.Database.GetProject(id)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
@@ -126,7 +126,7 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// update project
-	if err := s.Database.UpdateProject(p); err != nil {
+	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
@@ -158,7 +158,7 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fetch project from database
-	p, err := s.Database.GetProject(id)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
@@ -176,7 +176,7 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// update project
 	p.RemoveUser(rmUserPl.Email)
-	if err := s.Database.UpdateProject(p); err != nil {
+	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
@@ -208,7 +208,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// fetch project from database
-	p, err := s.Database.GetProject(id)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
@@ -225,7 +225,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// update project
-	if err := s.Database.UpdateProject(p); err != nil {
+	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
@@ -267,7 +267,7 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// fetch project from database
-	p, err := s.Database.GetProject(id)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
@@ -279,7 +279,7 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	fmt.Println(claims.Subject) // REMOVE
 	// update project
 	p.RemoveDeployKey(deleteKeyPl.DeployKeyName)
-	if err := s.Database.UpdateProject(p); err != nil {
+	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
