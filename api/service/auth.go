@@ -36,7 +36,7 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// save new user in db
-	if err := s.Database.PutUser(usr); err != nil {
+	if err := s.database.PutUser(usr); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new user: %s", err)))
 		return
@@ -60,13 +60,13 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	if err := s.Authenticator.Basic(loginPl.Email, loginPl.Password); err != nil {
+	if err := s.authenticator.Basic(loginPl.Email, loginPl.Password); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("invalid username or password")) // do not expose reason
 		return
 	}
 
-	token, err := s.Authenticator.GenerateJWTForUser(loginPl.Email, []string{"padl"}) // FIXME
+	token, err := s.authenticator.GenerateJWTForUser(loginPl.Email, []string{"padl"}) // FIXME
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error())) // fixme: if this happens we want to know

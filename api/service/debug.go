@@ -9,7 +9,7 @@ import (
 
 func (s *Service) addDebugEndpoints() {
 	// we conditionally add debug endpoints
-	if !s.Config.Debug {
+	if !s.config.Debug {
 		return
 	}
 
@@ -18,8 +18,8 @@ func (s *Service) addDebugEndpoints() {
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			byt, _ := json.Marshal(&payloads.HealthcheckResponse{
-				Version:    s.Config.Version,
-				DeployTime: s.Config.DeployTime.String(),
+				Version:    s.config.Version,
+				DeployTime: s.config.DeployTime.String(),
 			})
 			w.Write(byt)
 			return

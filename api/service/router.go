@@ -14,11 +14,12 @@ import (
 // Service holds the service configuration
 // necessary for endpoints to respond to requests
 type Service struct {
-	Config        *config.Config
-	Router        *mux.Router
-	Database      store.Database
-	Keystore      keystore.Keystore
-	Authenticator *auth.Authenticator
+	Router *mux.Router
+
+	config        *config.Config
+	database      store.Database
+	keystore      keystore.Keystore
+	authenticator *auth.Authenticator
 }
 
 // NewPadlService returns an HTTP router multiplexer with
@@ -42,11 +43,11 @@ func NewPadlService(c *config.Config) *Service {
 	}
 
 	svc := &Service{
-		Config:        c,
 		Router:        mux.NewRouter(),
-		Database:      db,
-		Keystore:      ks,
-		Authenticator: auth.NewAuthenticator(db, priv, "api.padl.com", "api"),
+		config:        c,
+		database:      db,
+		keystore:      ks,
+		authenticator: auth.NewAuthenticator(db, priv, "api.padl.com", "api"),
 	}
 
 	svc.addDebugEndpoints()
