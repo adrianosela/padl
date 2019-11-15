@@ -95,7 +95,7 @@ func (p *Padl) GetPublicKey(kid string) (*kms.PublicKey, error) {
 		return nil, fmt.Errorf("could not read http response body: %s", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return nil, fmt.Errorf("non 200 status code received: %d - %s", resp.StatusCode, string(respByt))
 	}
 	var pub kms.PublicKey
 	if err := json.Unmarshal(respByt, &pub); err != nil {
