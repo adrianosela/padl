@@ -20,6 +20,7 @@ func NewMockDatabase() *MockDatabase {
 	mdb := &MockDatabase{
 		users:    make(map[string]*user.User),
 		projects: make(map[string]*project.Project),
+		keys:     make(map[string]*kms.Key),
 	}
 	return mdb
 }
