@@ -29,6 +29,10 @@ var (
 		Name:  "email, e",
 		Usage: "user email for authentication",
 	}
+	idFlag = cli.StringFlag{
+		Name:  "id",
+		Usage: "resource id",
+	}
 	passwordFlag = cli.StringFlag{
 		Name:  "password",
 		Usage: "user password for authentication",
