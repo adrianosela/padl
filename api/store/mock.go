@@ -3,7 +3,6 @@ package store
 import (
 	"errors"
 
-	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/project"
 	"github.com/adrianosela/padl/api/user"
 )
@@ -12,7 +11,6 @@ import (
 type MockDatabase struct {
 	users    map[string]*user.User
 	projects map[string]*project.Project
-	keys     map[string]*kms.Key
 }
 
 // NewMockDatabase is the constructor for MockDatabase
@@ -20,7 +18,6 @@ func NewMockDatabase() *MockDatabase {
 	mdb := &MockDatabase{
 		users:    make(map[string]*user.User),
 		projects: make(map[string]*project.Project),
-		keys:     make(map[string]*kms.Key),
 	}
 	return mdb
 }

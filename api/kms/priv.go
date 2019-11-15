@@ -8,8 +8,8 @@ import (
 	"github.com/adrianosela/padl/lib/keys"
 )
 
-// Key represents a key managed by padl
-type Key struct {
+// PrivateKey represents a private key managed by padl
+type PrivateKey struct {
 	ID          string                     `json:"id"`
 	Name        string                     `json:"name"`
 	Description string                     `json:"description"`
@@ -17,13 +17,13 @@ type Key struct {
 	PEM         string                     `json:"pem"`
 }
 
-// NewKey is the constructor for the padl Key object
-func NewKey(bits int, creator, name, descr string) (*Key, error) {
+// NewPrivateKey is the constructor for the padl PrivateKey object
+func NewPrivateKey(bits int, creator, name, descr string) (*PrivateKey, error) {
 	priv, pub, err := keys.GenerateRSAKeyPair(bits)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate RSA key: %s", err)
 	}
-	return &Key{
+	return &PrivateKey{
 		ID:          keys.GetFingerprint(pub),
 		Name:        name,
 		Description: descr,
@@ -34,31 +34,44 @@ func NewKey(bits int, creator, name, descr string) (*Key, error) {
 	}, nil
 }
 
-// Priv returns the materialized RSA private key corresponding
+// PrivRSA returns the materialized RSA private key corresponding
 // to the padl-managed Key object
-func (k *Key) Priv() (*rsa.PrivateKey, error) {
+func (k *PrivateKey) PrivRSA() (*rsa.PrivateKey, error) {
 	return keys.DecodePrivKeyPEM([]byte(k.PEM))
 }
 
-// Pub returns the materialized RSA public key corresponding
+// PubRSA returns the materialized RSA public key corresponding
 // to the padl-managed Key object
-func (k *Key) Pub() (*rsa.PublicKey, error) {
+func (k *PrivateKey) PubRSA() (*rsa.PublicKey, error) {
 	priv, err := keys.DecodePrivKeyPEM([]byte(k.PEM))
 	if err != nil {
-		return &priv.PublicKey, nil
+		return nil, fmt.Errorf("could not decode key PEM: %s", err)
 	}
-	return nil, fmt.Errorf("could not decode key PEM: %s", err)
+	return &priv.PublicKey, nil
+}
+
+// Pub returns the materialized padl-managed
+// Public Key object corresponding to this privatekey
+func (k *PrivateKey) Pub() (*PublicKey, error) {
+	priv, err := keys.DecodePrivKeyPEM([]byte(k.PEM))
+	if err != nil {
+		return nil, fmt.Errorf("could not decode key PEM: %s", err)
+	}
+	return &PublicKey{
+		ID:  k.ID,
+		PEM: string(keys.EncodePubKeyPEM(&priv.PublicKey)),
+	}, nil
 }
 
 // AddUser adds a user to a key with the specified privilege level.
 // Note that this operation is stateless. No error is returned if the
 // user is already part of the key's users.
-func (k *Key) AddUser(email string, priv privilege.Level) {
+func (k *PrivateKey) AddUser(email string, priv privilege.Level) {
 	k.Users[email] = priv
 }
 
 // RemoveUser removes a user from the key
-func (k *Key) RemoveUser(email string) error {
+func (k *PrivateKey) RemoveUser(email string) error {
 	if _, ok := k.Users[email]; !ok {
 		return fmt.Errorf("user not in key")
 	}
@@ -69,7 +82,7 @@ func (k *Key) RemoveUser(email string) error {
 // IsVisibleTo returns true if a given user (email) has the minimum
 // required privilege level on a key, i.e. to check if a user has
 // privilege to perform a subsequent action
-func (k *Key) IsVisibleTo(required privilege.Level, email string) bool {
+func (k *PrivateKey) IsVisibleTo(required privilege.Level, email string) bool {
 	if priv, ok := k.Users[email]; ok {
 		return priv >= required
 	}
@@ -78,6 +91,6 @@ func (k *Key) IsVisibleTo(required privilege.Level, email string) bool {
 
 // HideSecret simply changes the Key object such that
 // the (secret) private key is no longer visible
-func (k *Key) HideSecret() {
+func (k *PrivateKey) HideSecret() {
 	k.PEM = "RSA PRIVATE KEY HIDDEN"
 }

@@ -22,8 +22,12 @@ var (
 // Keystore represents all the necessary operations
 // to build a key storage solution
 type Keystore interface {
-	PutKey(*kms.Key) error
-	GetKey(string) (*kms.Key, error)
-	UpdateKey(*kms.Key) error
-	DeleteKey(string) error
+	PutPrivKey(*kms.PrivateKey) error
+	GetPrivKey(string) (*kms.PrivateKey, error)
+	UpdatePrivKey(*kms.PrivateKey) error
+	DeletePrivKey(string) error
+
+	PutPubKey(*kms.PublicKey) error
+	GetPubKey(string) (*kms.PublicKey, error)
+	DeletePubKey(string) error
 }
