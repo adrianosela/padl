@@ -29,15 +29,20 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// create padl pub key object
+	// create padl pub key object and store it publically
 	pub, err := kms.NewPublicKey(regPl.PubKey)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
+	if err := s.keystore.PutPubKey(pub); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not store user's public key: %s", err)))
+		return
+	}
 	// create new user object
-	usr, err := user.NewUser(regPl.Email, regPl.Password, regPl.PubKey)
+	usr, err := user.NewUser(regPl.Email, regPl.Password, pub.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create user: %s", err)))
@@ -47,12 +52,6 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 	if err := s.database.PutUser(usr); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not create new user: %s", err)))
-		return
-	}
-	// sore user's pub key publically
-	if err := s.keystore.PutPubKey(pub); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("could not store user's public key: %s", err)))
 		return
 	}
 	// return success
