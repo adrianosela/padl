@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 
+	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/project"
 	"github.com/adrianosela/padl/api/user"
 )
@@ -11,6 +12,7 @@ import (
 type MockDatabase struct {
 	users    map[string]*user.User
 	projects map[string]*project.Project
+	keys     map[string]*kms.Key
 }
 
 // NewMockDatabase is the constructor for MockDatabase
@@ -49,26 +51,39 @@ func (db *MockDatabase) PutProject(p *project.Project) error {
 }
 
 func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
-
 	if p, ok := db.projects[projectId]; ok {
 		return p, nil
-	} else {
-		return nil, errors.New("project not found")
 	}
+	return nil, errors.New("project not found")
 }
 
 func (db *MockDatabase) UpdateProject(p *project.Project) error {
-
-	oldP, ok := db.projects[p.ID]
-	if !ok {
+	if _, ok := db.projects[p.ID]; !ok {
 		return errors.New("project not found")
 	}
-
-	if oldP.ID != p.ID {
-		delete(db.projects, oldP.ID)
-	}
-
 	db.projects[p.ID] = p
+	return nil
+}
 
+func (db *MockDatabase) PutKey(k *kms.Key) error {
+	if _, ok := db.keys[k.ID]; ok {
+		return errors.New("key already in store")
+	}
+	db.keys[k.ID] = k
+	return nil
+}
+
+func (db *MockDatabase) GetKey(id string) (*kms.Key, error) {
+	if k, ok := db.keys[id]; ok {
+		return k, nil
+	}
+	return nil, errors.New("key not found")
+}
+
+func (db *MockDatabase) UpdateKey(k *kms.Key) error {
+	if _, ok := db.keys[k.ID]; !ok {
+		return errors.New("key not found")
+	}
+	db.keys[k.ID] = k
 	return nil
 }
