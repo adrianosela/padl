@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/adrianosela/padl/api/payloads"
+	"github.com/adrianosela/padl/api/privilege"
 	"github.com/adrianosela/padl/api/project"
 	"github.com/gorilla/mux"
 )
@@ -119,7 +120,7 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	   TODO: check user has privs for project or else return 403
 	*/
 	fmt.Println(claims.Subject) // REMOVE
-	if err = p.AddUser(addUserPl.Email, addUserPl.PrivilegeLvl); err != nil {
+	if err = p.AddUser(addUserPl.Email, privilege.Level(addUserPl.PrivilegeLvl)); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could add user to project: %s", err)))
 		return
@@ -167,7 +168,7 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	   TODO: check user has privs for project or else return 403
 	*/
 	if rmUserPl.Email == claims.Subject {
-		if p.HasUser(claims.Subject, project.PrivilegeLvlOwner) {
+		if p.HasUser(claims.Subject, privilege.PrivilegeLvlOwner) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("owners cannot remove themselves from projects"))
 			return
