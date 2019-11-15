@@ -49,6 +49,10 @@ var (
 		Name:  "bits",
 		Usage: "key bit size - one of { 512, 1024, 2048, 4096 }",
 	}
+	privFlag = cli.IntFlag{
+		Name:  "privilege",
+		Usage: "privilege level to assign - { Reader: 0, Editor:1, Owner:2 }",
+	}
 
 	// option flags
 	jsonFlag = cli.BoolFlag{
