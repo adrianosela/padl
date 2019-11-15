@@ -2,7 +2,6 @@ package project
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/adrianosela/padl/api/privilege"
 	"github.com/google/uuid"
@@ -12,57 +11,51 @@ import (
 type Project struct {
 	ID         string
 	Name       string
-	Owners     []string
-	Editors    []string
-	Readers    []string
+	Members    map[string]privilege.Level
 	DeployKeys map[string]string
 }
 
 // NewProject is the project object constructor
 func NewProject(name, creator string) *Project {
 	return &Project{
-		ID:         uuid.Must(uuid.NewRandom()).String(),
-		Name:       name,
-		Owners:     []string{creator},
-		Editors:    []string{},
-		Readers:    []string{},
+		ID:   uuid.Must(uuid.NewRandom()).String(),
+		Name: name,
+		Members: map[string]privilege.Level{
+			creator: privilege.PrivilegeLvlOwner,
+		},
 		DeployKeys: make(map[string]string),
 	}
 }
 
 // AddUser adds a user to the project with the specified priv level
 func (p *Project) AddUser(email string, priv privilege.Level) error {
-	switch priv {
-	case privilege.PrivilegeLvlOwner:
-		p.Owners = addToSet(p.Owners, email)
-	case privilege.PrivilegeLvlEditor:
-		p.Editors = addToSet(p.Editors, email)
-	case privilege.PrivilegeLvlReader:
-		p.Readers = addToSet(p.Readers, email)
-	default:
-		return fmt.Errorf("invalid privilege level %d", priv)
+	if p.HasUser(email) {
+		return errors.New("user already in project")
 	}
+	p.Members[email] = priv
 	return nil
 }
 
-// HasUser checks whether a project has a user with a given priv level
-func (p *Project) HasUser(email string, priv privilege.Level) bool {
-	switch priv {
-	case privilege.PrivilegeLvlOwner:
-		return setContains(p.Owners, email)
-	case privilege.PrivilegeLvlEditor:
-		return setContains(p.Editors, email)
-	case privilege.PrivilegeLvlReader:
-		return setContains(p.Readers, email)
+// ChangeUserPrivilege changes a user's level of privilege on the project
+func (p *Project) ChangeUserPrivilege(email string, priv privilege.Level) error {
+	if _, ok := p.Members[email]; !ok {
+		return errors.New("user not in project")
 	}
-	return false
+	p.Members[email] = priv
+	return nil
+}
+
+// HasUser checks whether a project has a user as a member
+func (p *Project) HasUser(email string) bool {
+	_, ok := p.Members[email]
+	return ok
 }
 
 // RemoveUser removes a user from the project
 func (p *Project) RemoveUser(email string) {
-	p.Owners = removeFromSet(p.Owners, email)
-	p.Editors = removeFromSet(p.Editors, email)
-	p.Readers = removeFromSet(p.Readers, email)
+	if _, ok := p.Members[email]; ok {
+		delete(p.Members, email)
+	}
 }
 
 // SetDeployKey sets a deploy key on a project
@@ -79,31 +72,4 @@ func (p *Project) RemoveDeployKey(name string) {
 	if _, ok := p.DeployKeys[name]; ok {
 		delete(p.DeployKeys, name)
 	}
-}
-
-func setContains(slice []string, elem string) bool {
-	for _, e := range slice {
-		if e == elem {
-			return true
-		}
-	}
-	return false
-}
-
-func addToSet(slice []string, elem string) []string {
-	if setContains(slice, elem) {
-		return slice
-	}
-	return append(slice, elem)
-}
-
-func removeFromSet(slice []string, elem string) []string {
-	for i, e := range slice {
-		if e == elem {
-			// move element to the back and pop it off
-			slice[i] = slice[len(slice)-1]
-			return slice[:len(slice)-1]
-		}
-	}
-	return slice
 }
