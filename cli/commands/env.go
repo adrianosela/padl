@@ -21,7 +21,7 @@ var RunCmds = cli.Command{
 }
 
 func runHandler(ctx *cli.Context) error {
-	c, err := getClient(ctx)
+	_, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
@@ -35,21 +35,21 @@ func runHandler(ctx *cli.Context) error {
 		return fmt.Errorf("no command provided")
 	}
 
-	// get secrets for project
-	secrets, err := c.GetSecrets( /*FIXME*/ )
-	if err != nil {
-		return fmt.Errorf("could not get secrets from server: %s", err)
-	}
-
-	decrypted, err := secrets.Decrypt( /*FIXME*/ )
-	if err != nil {
-		return fmt.Errorf("could not decrypt secrets: %s", err)
-	}
+	// // get secrets for project
+	// secrets, err := c.GetSecrets( /*FIXME*/ )
+	// if err != nil {
+	// 	return fmt.Errorf("could not get secrets from server: %s", err)
+	// }
+	//
+	// decrypted, err := secrets.Decrypt( /*FIXME*/ )
+	// if err != nil {
+	// 	return fmt.Errorf("could not decrypt secrets: %s", err)
+	// }
 
 	// copy parent environment
 	cmd.Env = os.Environ()
 	// attach decrypted secret to the cmd's environment
-	for _, s := range decrypted {
+	for _, s := range []string{"MOCK_SECRET_A=mock_value_a", "MOCK_SECRET_B=mock_value_b"} {
 		cmd.Env = append(cmd.Env, s)
 	}
 

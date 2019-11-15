@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/payloads"
-	"github.com/aidoraide/wrdup/api/auth"
 )
 
 // Register registers a new user with email and a public PGP key
