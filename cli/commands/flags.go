@@ -29,13 +29,25 @@ var (
 		Name:  "email, e",
 		Usage: "user email for authentication",
 	}
+	passwordFlag = cli.StringFlag{
+		Name:  "password",
+		Usage: "user password for authentication",
+	}
 	idFlag = cli.StringFlag{
 		Name:  "id",
 		Usage: "resource id",
 	}
-	passwordFlag = cli.StringFlag{
-		Name:  "password",
-		Usage: "user password for authentication",
+	nameFlag = cli.StringFlag{
+		Name:  "name",
+		Usage: "resource name",
+	}
+	descriptionFlag = cli.StringFlag{
+		Name:  "description",
+		Usage: "resource description",
+	}
+	bitsFlag = cli.IntFlag{
+		Name:  "bits",
+		Usage: "key bit size - one of { 512, 1024, 2048, 4096 }",
 	}
 
 	// option flags
