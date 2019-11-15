@@ -13,7 +13,7 @@ type User struct {
 	KeyID      string
 }
 
-// NewUser takes in user email, password, and public key
+// NewUser takes in user email, password, and public key id
 // and returns a populated User with the hashed password
 func NewUser(email, pass, keyID string) (*User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.MinCost)
