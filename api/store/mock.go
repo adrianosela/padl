@@ -65,26 +65,3 @@ func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	db.projects[p.ID] = p
 	return nil
 }
-
-func (db *MockDatabase) PutKey(k *kms.Key) error {
-	if _, ok := db.keys[k.ID]; ok {
-		return errors.New("key already in store")
-	}
-	db.keys[k.ID] = k
-	return nil
-}
-
-func (db *MockDatabase) GetKey(id string) (*kms.Key, error) {
-	if k, ok := db.keys[id]; ok {
-		return k, nil
-	}
-	return nil, errors.New("key not found")
-}
-
-func (db *MockDatabase) UpdateKey(k *kms.Key) error {
-	if _, ok := db.keys[k.ID]; !ok {
-		return errors.New("key not found")
-	}
-	db.keys[k.ID] = k
-	return nil
-}

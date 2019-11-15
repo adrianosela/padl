@@ -5,6 +5,7 @@ import (
 
 	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/config"
+	"github.com/adrianosela/padl/api/keystore"
 	"github.com/adrianosela/padl/api/store"
 	"github.com/adrianosela/padl/lib/keys"
 	"github.com/gorilla/mux"
@@ -16,6 +17,7 @@ type Service struct {
 	Config        *config.Config
 	Router        *mux.Router
 	Database      store.Database
+	Keystore      keystore.Keystore
 	Authenticator *auth.Authenticator
 }
 
@@ -32,6 +34,7 @@ func NewPadlService(c *config.Config) *Service {
 	// 	log.Fatalf("could not initialize mongodb: %s", err)
 	// }
 	db := store.NewMockDatabase()
+	ks := keystore.NewMockKeystore()
 
 	priv, err := keys.DecodePrivKeyPEM([]byte(c.Auth.SigningKey))
 	if err != nil {
@@ -42,6 +45,7 @@ func NewPadlService(c *config.Config) *Service {
 		Config:        c,
 		Router:        mux.NewRouter(),
 		Database:      db,
+		Keystore:      ks,
 		Authenticator: auth.NewAuthenticator(db, priv, "api.padl.com", "api"),
 	}
 
