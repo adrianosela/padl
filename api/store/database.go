@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/project"
 	"github.com/adrianosela/padl/api/user"
 )
@@ -15,8 +14,4 @@ type Database interface {
 	PutProject(*project.Project) error
 	GetProject(string) (*project.Project, error)
 	UpdateProject(*project.Project) error
-
-	PutKey(*kms.Key) error
-	GetKey(string) (*kms.Key, error)
-	UpdateKey(*kms.Key) error
 }

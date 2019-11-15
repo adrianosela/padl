@@ -49,3 +49,29 @@ func (k *Key) Pub() (*rsa.PublicKey, error) {
 	}
 	return nil, fmt.Errorf("could not decode key PEM: %s", err)
 }
+
+// AddUser adds a user to a key with the specified privilege level.
+// Note that this operation is stateless. No error is returned if the
+// user is already part of the key's users.
+func (k *Key) AddUser(email string, priv privilege.Level) {
+	k.Users[email] = priv
+}
+
+// RemoveUser removes a user from the key
+func (k *Key) RemoveUser(email string) error {
+	if _, ok := k.Users[email]; !ok {
+		return fmt.Errorf("user not in key")
+	}
+	delete(k.Users, email)
+	return nil
+}
+
+// IsVisibleTo returns true if a given user (email) has the minimum
+// required privilege level on a key, i.e. to check if a user has
+// privilege to perform a subsequent action
+func (k *Key) IsVisibleTo(required privilege.Level, email string) bool {
+	if priv, ok := k.Users[email]; ok {
+		return priv >= required
+	}
+	return false
+}
