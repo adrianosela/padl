@@ -75,3 +75,9 @@ func (k *Key) IsVisibleTo(required privilege.Level, email string) bool {
 	}
 	return false
 }
+
+// HideSecret simply changes the Key object such that
+// the (secret) private key is no longer visible
+func (k *Key) HideSecret() {
+	k.PEM = "RSA PRIVATE KEY HIDDEN"
+}

@@ -170,6 +170,7 @@ func (s *Service) addUserToKeyHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("error attempting to modify key: %s", err)))
 		return
 	}
+	key.HideSecret()
 	// return success
 	keybyt, err := json.Marshal(&key)
 	if err != nil {
@@ -224,6 +225,7 @@ func (s *Service) removeUserFromKeyHandler(w http.ResponseWriter, r *http.Reques
 		w.Write([]byte(fmt.Sprintf("error attempting to modify key: %s", err)))
 		return
 	}
+	key.HideSecret()
 	// return success
 	keybyt, err := json.Marshal(&key)
 	if err != nil {
