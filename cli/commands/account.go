@@ -97,7 +97,7 @@ func createAccountHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not establish key manager: %s", err)
 	}
 
-	fName := fmt.Sprintf("%s.priv", strings.ReplaceAll(keys.GetFingerprint(pub), ":", ""))
+	fName := fmt.Sprintf("%s.priv", keys.GetFingerprint(pub))
 	if err = keyMgr.PutKey(fName, string(keys.EncodePrivKeyPEM(priv))); err != nil {
 		return fmt.Errorf("could not save private key: %s", err)
 	}
