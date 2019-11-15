@@ -16,6 +16,9 @@ dockerbuild: decrypt-conf-dev
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=$(HASH)" -o $(NAME)
 	docker build -t $(NAME) .
 
+run: build
+	./$(NAME)
+
 build: decrypt-conf-dev
 	go build -ldflags "-X main.version=$(HASH)" -o $(NAME)
 
