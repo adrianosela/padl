@@ -10,12 +10,12 @@ import (
 type User struct {
 	Email      string
 	HashedPass string
-	Key        string
+	KeyID      string
 }
 
-// NewUser takes in user email, password, and public key
+// NewUser takes in user email, password, and public key id
 // and returns a populated User with the hashed password
-func NewUser(email, pass, key string) (*User, error) {
+func NewUser(email, pass, keyID string) (*User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.MinCost)
 	if err != nil {
 		return nil, fmt.Errorf("could not hash password: %s", err)
@@ -23,7 +23,7 @@ func NewUser(email, pass, key string) (*User, error) {
 	return &User{
 		Email:      email,
 		HashedPass: string(hash),
-		Key:        key,
+		KeyID:      keyID,
 	}, nil
 }
 
