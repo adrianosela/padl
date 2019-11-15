@@ -165,7 +165,7 @@ func (s *Service) addUserToKeyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// add user to key's users and save
 	key.AddUser(addUserPl.Email, privilege.Level(addUserPl.PrivilegeLvl))
-	if err = s.Keystore.PutKey(key); err != nil {
+	if err = s.Keystore.UpdateKey(key); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("error attempting to modify key: %s", err)))
 		return
@@ -219,7 +219,7 @@ func (s *Service) removeUserFromKeyHandler(w http.ResponseWriter, r *http.Reques
 	}
 	// rm user from key's users and save
 	key.RemoveUser(rmUserPl.Email)
-	if err = s.Keystore.PutKey(key); err != nil {
+	if err = s.Keystore.UpdateKey(key); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("error attempting to modify key: %s", err)))
 		return
