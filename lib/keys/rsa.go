@@ -29,7 +29,7 @@ func GetFingerprint(pub *rsa.PublicKey) string {
 	for i, c := range md5sum {
 		hexarray[i] = hex.EncodeToString([]byte{c})
 	}
-	return strings.Join(hexarray, ":")
+	return strings.Join(hexarray, "")
 }
 
 // EncodePrivKeyPEM encodes an *rsa.PrivateKey onto a PEM block

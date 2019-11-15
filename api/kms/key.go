@@ -2,7 +2,6 @@ package kms
 
 import (
 	"crypto/rsa"
-	"errors"
 	"fmt"
 
 	"github.com/adrianosela/padl/api/project"
@@ -11,21 +10,24 @@ import (
 
 // Key represents a key managed by padl
 type Key struct {
-	ID    string         `json:"id"`
-	Name  string         `json:"name"`
-	Users map[string]int `json:"users"`
-	PEM   string         `json:"pem"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Users       map[string]int `json:"users"`
+	PEM         string         `json:"pem"`
 }
 
 // NewKey is the constructor for the padl Key object
-func NewKey(key *rsa.PrivateKey, creator, name string) (*Key, error) {
-	if key == nil {
-		return nil, errors.New("key cannot be nil")
+func NewKey(bits int, creator, name, descr string) (*Key, error) {
+	priv, pub, err := keys.GenerateRSAKeyPair(bits)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate RSA key: %s", err)
 	}
 	return &Key{
-		ID:   keys.GetFingerprint(&key.PublicKey),
-		Name: name,
-		PEM:  string(keys.EncodePrivKeyPEM(key)),
+		ID:          keys.GetFingerprint(pub),
+		Name:        name,
+		Description: descr,
+		PEM:         string(keys.EncodePrivKeyPEM(priv)),
 		Users: map[string]int{
 			creator: project.PrivilegeLvlOwner,
 		},
