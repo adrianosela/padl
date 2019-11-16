@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/project"
+
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/lib/padlfile"
 )
@@ -51,4 +53,29 @@ func (p *Padl) CreateProject(name, description string) (*padlfile.File, error) {
 	}
 
 	return &pf, nil
+}
+
+func (p *Padl) GetProject(pid string) (*project.Project, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, pid), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not build http request: %s", err)
+	}
+	p.setAuth(req)
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send http request: %s", err)
+	}
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("could not read http response body: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non 200 status code received: %d - %s", resp.StatusCode, string(respByt))
+	}
+	var project project.Project
+	if err := json.Unmarshal(respByt, &project); err != nil {
+		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+	return &project, nil
 }
