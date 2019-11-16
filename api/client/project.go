@@ -45,10 +45,10 @@ func (p *Padl) CreateProject(name, description string) (*padlfile.File, error) {
 		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
 
-	var r payloads.NewProjectResponse
-	if err := json.Unmarshal(respByt, &r); err != nil {
+	var pf padlfile.File
+	if err := json.Unmarshal(respByt, &pf); err != nil {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
 	}
 
-	return r.Padfile, nil
+	return &pf, nil
 }

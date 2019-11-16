@@ -69,7 +69,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	byt, err := json.Marshal(&payloads.NewProjectResponse{Padfile: pf})
+	byt, err := json.Marshal(&pf)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
