@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/adrianosela/padl)](https://goreportcard.com/report/github.com/adrianosela/padl)
 [![Documentation](https://godoc.org/github.com/adrianosela/padl?status.svg)](https://godoc.org/github.com/adrianosela/padl)
-[![Generic badge](https://img.shields.io/badge/UBC-CPEN 412-RED.svg)](https://blogs.ubc.ca/cpen442/about/)
+[![Generic badge](https://img.shields.io/badge/UBC-CPEN412-RED.svg)](https://blogs.ubc.ca/cpen442/about/)
 
 padl is an attempt at simplyfing secrets management for inexperienced developers and teams looking to quickly prototype solutions while spending very little time at securing secrets. The goal is to create a secrets management tool with great usability.
 
