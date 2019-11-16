@@ -1,6 +1,8 @@
 package payloads
 
-import "errors"
+import (
+	"errors"
+)
 
 // NewProjectRequest TODO
 type NewProjectRequest struct {
@@ -28,11 +30,6 @@ type CreateDeployKeyRequest struct {
 // DeleteDeployKeyRequest TODO
 type DeleteDeployKeyRequest struct {
 	DeployKeyName string `json:"deployKey"`
-}
-
-// NewProjectResponse TODO
-type NewProjectResponse struct {
-	ID string `json:"id"`
 }
 
 // CreateDeployKeyResponse TODO
