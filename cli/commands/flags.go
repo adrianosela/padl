@@ -59,6 +59,10 @@ var (
 		Name:  "json, j",
 		Usage: "print raw json -- don't pretty print",
 	}
+	fmtFlag = cli.StringFlag{
+		Name:  "fmt",
+		Usage: "format of padlfile - one of { \".yaml\", \".json\" }",
+	}
 )
 
 // name returns the long name of a flag

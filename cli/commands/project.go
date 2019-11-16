@@ -22,13 +22,14 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
-			Name: "create",
+			Name:  "create",
+			Usage: "create a new project",
 			Flags: []cli.Flag{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
 				pathFlag,
 				// Defaulting to yml
-				jsonFlag,
+				withDefault(fmtFlag, ".yaml"),
 			},
 			Before: createProjectValidator,
 			Action: createProjectHandler,
@@ -53,13 +54,13 @@ func createProjectHandler(ctx *cli.Context) error {
 	path := ctx.String(name(pathFlag))
 	pname := ctx.String(name(nameFlag))
 	descr := ctx.String(name(descriptionFlag))
-	json := ctx.Bool(name(jsonFlag))
+	format := ctx.String(name(fmtFlag))
 
 	if path == "" {
-		if json {
-			path = "./padlfile.json"
+		if format == ".json" {
+			path = "./.padlfile.json"
 		} else {
-			path = "./padlfile.yaml"
+			path = "./.padlfile.yaml"
 		}
 	}
 
@@ -76,5 +77,6 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("unable to write padl file: %s", err)
 	}
+	fmt.Printf("project %s initialized successfully!", pname)
 	return nil
 }
