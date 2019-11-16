@@ -62,3 +62,8 @@ func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	db.projects[p.ID] = p
 	return nil
 }
+
+func (db *MockDatabase) ListProjects(pids []string) ([]*project.Project, error) {
+	prjs := []*project.Project{}
+	return prjs, nil
+}

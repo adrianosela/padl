@@ -2,6 +2,8 @@ package payloads
 
 import (
 	"errors"
+
+	"github.com/adrianosela/padl/api/project"
 )
 
 // NewProjectRequest TODO
@@ -35,6 +37,11 @@ type DeleteDeployKeyRequest struct {
 // CreateDeployKeyResponse TODO
 type CreateDeployKeyResponse struct {
 	DeployKey string `json:"deployKey"`
+}
+
+// ListProjectsResponse TODO
+type ListProjectsResponse struct {
+	Projects []*project.Summary `json:"projects"`
 }
 
 // Validate TODO
