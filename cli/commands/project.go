@@ -26,7 +26,7 @@ var ProjectCmds = cli.Command{
 			Flags: []cli.Flag{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
-				path,
+				pathFlag,
 				// Defaulting to yml
 				jsonFlag,
 			},
@@ -50,20 +50,20 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
-	p := ctx.String(name(path))
+	path := ctx.String(name(pathFlag))
 	pname := ctx.String(name(nameFlag))
 	descr := ctx.String(name(descriptionFlag))
 	json := ctx.Bool(name(jsonFlag))
 
-	if p == "" {
+	if path == "" {
 		if json {
-			p = "./padlfile.json"
+			path = "./padlfile.json"
 		} else {
-			p = "./padlfile.yaml"
+			path = "./padlfile.yaml"
 		}
 	}
 
-	if !strings.HasSuffix(p, ".json") && !strings.HasSuffix(p, ".yaml") {
+	if !strings.HasSuffix(path, ".json") && !strings.HasSuffix(path, ".yaml") {
 		return fmt.Errorf("invalid file extension, must be one of { \".yaml\", \".json\" }")
 	}
 
@@ -72,7 +72,7 @@ func createProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("error creating project: %s", err)
 	}
 
-	err = pf.Write(p)
+	err = pf.Write(path)
 	if err != nil {
 		return fmt.Errorf("unable to write padl file: %s", err)
 	}

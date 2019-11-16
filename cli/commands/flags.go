@@ -59,10 +59,6 @@ var (
 		Name:  "json, j",
 		Usage: "print raw json -- don't pretty print",
 	}
-	path = cli.StringFlag{
-		Name:  "path, p",
-		Usage: "override default .padlfile path",
-	}
 )
 
 // name returns the long name of a flag
