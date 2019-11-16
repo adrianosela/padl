@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -42,8 +43,27 @@ func projectListHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
+	jf := ctx.Bool(name(jsonFlag))
+
 	projects, err := c.ListProjects()
-	// Check json flag, if json flag do not pretty print
+	if err != nil {
+		return fmt.Errorf("error fetching projects: %s", err)
+	}
+
+	if jf {
+		byt, err := json.Marshal(&projects)
+		if err != nil {
+			return fmt.Errorf("error printing json: %s", err)
+		}
+		fmt.Println(string(byt))
+	} else {
+		prettyJSON, err := json.MarshalIndent(projects, "", "    ")
+		if err != nil {
+			return fmt.Errorf("error pretty printing json: %s", err)
+		}
+		fmt.Printf("%s\n", string(prettyJSON))
+	}
+
 	return nil
 }
 

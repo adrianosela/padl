@@ -16,6 +16,7 @@ func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project").Handler(s.Auth(s.createProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/project/{pid}").Handler(s.Auth(s.getProjectHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{pid}").Handler(s.Auth(s.deleteProjectHandler))
+	s.Router.Methods(http.MethodGet).Path("/projects").Handler(s.Auth(s.listProjectsHandler))
 
 	s.Router.Methods(http.MethodPost).Path("/project/{pid}/user").Handler(s.Auth(s.addUserHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{pid}/user").Handler(s.Auth(s.removeUserHandler))
@@ -345,6 +346,4 @@ func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	// send resp
 	w.WriteHeader(http.StatusOK)
 	w.Write(byt)
-	return
-
 }
