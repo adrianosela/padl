@@ -37,7 +37,13 @@ var ProjectCmds = cli.Command{
 }
 
 func projectListHandler(ctx *cli.Context) error {
-	// TODO
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projects, err := c.ListProjects()
+	// Check json flag, if json flag do not pretty print
 	return nil
 }
 

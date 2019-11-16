@@ -40,7 +40,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// create project object and save it
-	project := project.NewProject(projPl.Name, claims.Subject)
+	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject)
 
 	// create padlfile
 	// TODO: Remove mocked variables
@@ -310,4 +310,41 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf("successfully removed deploy key from project %s", p.Name)))
 	return
+}
+
+func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	claims := GetClaims(r)
+	// get user projects from jwt
+	pids := claims.Projects
+
+	projects, err := s.database.ListProjects(pids)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not find projects: %s", err)))
+		return
+	}
+
+	ps := []*project.Summary{}
+	for _, p := range projects {
+		ps = append(ps,
+			&project.Summary{
+				ID:          p.ID,
+				Name:        p.Name,
+				Description: p.Description,
+			},
+		)
+	}
+
+	// marshall response
+	byt, err := json.Marshal(&ps)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not marshal projects summary json: %s", err)))
+		return
+	}
+	// send resp
+	w.WriteHeader(http.StatusOK)
+	w.Write(byt)
+	return
+
 }

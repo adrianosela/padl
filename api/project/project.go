@@ -11,16 +11,25 @@ import (
 type Project struct {
 	ID           string
 	Name         string
+	Description  string
 	Members      map[string]privilege.Level
 	DeployKeys   map[string]string
 	PadlfileHash string
 }
 
+// Summary TODO
+type Summary struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 // NewProject is the project object constructor
-func NewProject(name, creator string) *Project {
+func NewProject(name, description, creator string) *Project {
 	return &Project{
-		ID:   uuid.Must(uuid.NewRandom()).String(),
-		Name: name,
+		ID:          uuid.Must(uuid.NewRandom()).String(),
+		Name:        name,
+		Description: description,
 		Members: map[string]privilege.Level{
 			creator: privilege.PrivilegeLvlOwner,
 		},

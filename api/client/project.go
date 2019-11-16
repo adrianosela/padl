@@ -52,3 +52,7 @@ func (p *Padl) CreateProject(name, description string) (*padlfile.File, error) {
 
 	return &pf, nil
 }
+
+func (p *Padl) ListProjects(name, description string) (*padlfile.File, error) {
+
+}
