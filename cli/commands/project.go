@@ -56,6 +56,10 @@ func createProjectValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, descriptionFlag)
 }
 
+func getProjectValidator(ctx *cli.Context) error {
+	return assertSet(ctx, idFlag)
+}
+
 func createProjectHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
@@ -110,8 +114,4 @@ func getProjectHandler(ctx *cli.Context) error {
 	}
 	fmt.Printf("%s\n", string(prettyJSON))
 	return nil
-}
-
-func getProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, idFlag)
 }
