@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	cli "gopkg.in/urfave/cli.v1"
@@ -33,6 +35,14 @@ var ProjectCmds = cli.Command{
 			},
 			Before: createProjectValidator,
 			Action: createProjectHandler,
+		},
+		{
+			Name:  "get",
+			Usage: "finds an existing project user is a memeber of",
+			Flags: []cli.Flag{
+				asMandatory(idFlag),
+			},
+			Action: getProjectHandler,
 		},
 	},
 }
@@ -77,6 +87,27 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("unable to write padl file: %s", err)
 	}
-	fmt.Printf("project %s initialized successfully!", pname)
+	fmt.Printf("project %s:%s initialized successfully!\n", pname, pf.Data.Project)
+	return nil
+}
+
+func getProjectHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	id := ctx.String(name(idFlag))
+
+	project, err := c.GetProject(id)
+	if err != nil {
+		return fmt.Errorf("error finding project: %s", err)
+	}
+
+	prettyJSON, err := json.MarshalIndent(project, "", "    ")
+	if err != nil {
+		log.Fatal("Failed to generate json", err)
+	}
+	fmt.Printf("%s\n", string(prettyJSON))
 	return nil
 }
