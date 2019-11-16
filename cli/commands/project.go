@@ -23,16 +23,26 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
-			Name: "create",
+			Name:  "create",
+			Usage: "create a new project",
 			Flags: []cli.Flag{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
 				pathFlag,
 				// Defaulting to yml
-				jsonFlag,
+				withDefault(fmtFlag, ".yaml"),
 			},
 			Before: createProjectValidator,
 			Action: createProjectHandler,
+		},
+		{
+			Name:  "get",
+			Usage: "finds an existing project user is a memeber of",
+			Flags: []cli.Flag{
+				asMandatory(idFlag),
+			},
+			Before: getProjectValidator,
+			Action: getProjectHandler,
 		},
 	},
 }
@@ -71,6 +81,10 @@ func createProjectValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, descriptionFlag)
 }
 
+func getProjectValidator(ctx *cli.Context) error {
+	return assertSet(ctx, idFlag)
+}
+
 func createProjectHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
@@ -79,13 +93,13 @@ func createProjectHandler(ctx *cli.Context) error {
 	path := ctx.String(name(pathFlag))
 	pname := ctx.String(name(nameFlag))
 	descr := ctx.String(name(descriptionFlag))
-	json := ctx.Bool(name(jsonFlag))
+	format := ctx.String(name(fmtFlag))
 
 	if path == "" {
-		if json {
-			path = "./padlfile.json"
+		if format == ".json" {
+			path = "./.padlfile.json"
 		} else {
-			path = "./padlfile.yaml"
+			path = "./.padlfile.yaml"
 		}
 	}
 
@@ -102,5 +116,27 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("unable to write padl file: %s", err)
 	}
+	fmt.Printf("project %s:%s initialized successfully!\n", pname, pf.Data.Project)
+	return nil
+}
+
+func getProjectHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	id := ctx.String(name(idFlag))
+
+	project, err := c.GetProject(id)
+	if err != nil {
+		return fmt.Errorf("error finding project: %s", err)
+	}
+
+	prettyJSON, err := json.MarshalIndent(project, "", "    ")
+	if err != nil {
+		return fmt.Errorf("Failed to generate json: %s", err)
+	}
+	fmt.Printf("%s\n", string(prettyJSON))
 	return nil
 }
