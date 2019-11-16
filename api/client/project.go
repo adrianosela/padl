@@ -82,7 +82,7 @@ func (p *Padl) GetProject(pid string) (*project.Project, error) {
 }
 
 // ListProjects TODO
-func (p *Padl) ListProjects() ([]*project.Summary, error) {
+func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/projects", p.HostURL), nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not build http requests: %s", err)
@@ -103,10 +103,10 @@ func (p *Padl) ListProjects() ([]*project.Summary, error) {
 		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
 
-	var ps []*project.Summary
-	if err := json.Unmarshal(respByt, &ps); err != nil {
+	var listProjResp payloads.ListProjectsResponse
+	if err := json.Unmarshal(respByt, &listProjResp); err != nil {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
 	}
 
-	return ps, nil
+	return &listProjResp, nil
 }

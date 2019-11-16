@@ -336,8 +336,11 @@ func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 
+	listProjResp := payloads.ListProjectsResponse{
+		Projects: ps,
+	}
 	// marshall response
-	byt, err := json.Marshal(&ps)
+	byt, err := json.Marshal(&listProjResp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal projects summary json: %s", err)))
