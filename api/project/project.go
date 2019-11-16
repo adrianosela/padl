@@ -9,10 +9,11 @@ import (
 
 // Project represents a project in Padl
 type Project struct {
-	ID         string
-	Name       string
-	Members    map[string]privilege.Level
-	DeployKeys map[string]string
+	ID           string
+	Name         string
+	Members      map[string]privilege.Level
+	DeployKeys   map[string]string
+	PadlfileHash string
 }
 
 // NewProject is the project object constructor

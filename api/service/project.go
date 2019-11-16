@@ -8,6 +8,7 @@ import (
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/privilege"
 	"github.com/adrianosela/padl/api/project"
+	"github.com/adrianosela/padl/lib/padlfile"
 	"github.com/gorilla/mux"
 )
 
@@ -40,13 +41,35 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// create project object and save it
 	project := project.NewProject(projPl.Name, claims.Subject)
+
+	// create padlfile
+	// TODO: Remove mocked variables
+	variables := make(map[string]string)
+	variables["var1"] = "_var1_"
+	memberKeys := []string{"key1"}
+	body := &padlfile.Body{
+		Project:    project.ID,
+		Variables:  variables,
+		MemberKeys: memberKeys,
+		SharedKey:  "mockSharedKey",
+	}
+	pf, err := body.HashAndSign([]byte("Some crazy secret"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to sign padlfile: %s", err)))
+		return
+	}
+	// Add paflfile hash to project object
+	project.PadlfileHash = pf.HMAC
+
+	// Store project in db
 	if err := s.database.PutProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))
 		return
 	}
-	// marshal response
-	byt, err := json.Marshal(&payloads.NewProjectResponse{ID: project.ID})
+
+	byt, err := json.Marshal(&payloads.NewProjectResponse{Padfile: pf})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))

@@ -1,6 +1,10 @@
 package payloads
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/adrianosela/padl/lib/padlfile"
+)
 
 // NewProjectRequest TODO
 type NewProjectRequest struct {
@@ -32,7 +36,7 @@ type DeleteDeployKeyRequest struct {
 
 // NewProjectResponse TODO
 type NewProjectResponse struct {
-	ID string `json:"id"`
+	Padfile *padlfile.File `json:"id"`
 }
 
 // CreateDeployKeyResponse TODO
