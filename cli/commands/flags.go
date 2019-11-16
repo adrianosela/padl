@@ -18,7 +18,7 @@ var (
 	// config flags
 	pathFlag = cli.StringFlag{
 		Name:  "path, p",
-		Usage: "override default config file path",
+		Usage: "override default path",
 	}
 	urlFlag = cli.StringFlag{
 		Name:  "url, u",
