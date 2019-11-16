@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	cli "gopkg.in/urfave/cli.v1"
@@ -107,7 +106,7 @@ func getProjectHandler(ctx *cli.Context) error {
 
 	prettyJSON, err := json.MarshalIndent(project, "", "    ")
 	if err != nil {
-		log.Fatal("Failed to generate json", err)
+		return fmt.Errorf("Failed to generate json: %s", err)
 	}
 	fmt.Printf("%s\n", string(prettyJSON))
 	return nil
