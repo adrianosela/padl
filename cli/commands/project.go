@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/adrianosela/padl/api/project"
+
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -127,15 +129,15 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	name := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(nameFlag))
 	id := ctx.String(name(idFlag))
 
-	var project Project
+	var project *project.Project
 
-	if name != "" {
-		project, err := c.GetProject(name)
+	if projectName != "" {
+		project, err = c.GetProjectByName(projectName)
 	} else {
-		project, err := c.GetProject(id)
+		project, err = c.GetProject(id)
 	}
 
 	if err != nil {

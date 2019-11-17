@@ -15,7 +15,7 @@ import (
 func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project").Handler(s.Auth(s.createProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/project/{pid}").Handler(s.Auth(s.getProjectHandler))
-	s.Router.Methods(http.MethodGet).Path("/project/{name}").Handler(s.Auth(s.getProjectByNameHandler))
+	s.Router.Methods(http.MethodGet).Path("/project/find/{name}").Handler(s.Auth(s.getProjectByNameHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{pid}").Handler(s.Auth(s.deleteProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/projects").Handler(s.Auth(s.listProjectsHandler))
 

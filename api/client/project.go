@@ -83,7 +83,7 @@ func (p *Padl) GetProject(pid string) (*project.Project, error) {
 
 // GetProjectByName TODO
 func (p *Padl) GetProjectByName(name string) (*project.Project, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, name), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s/%s", p.HostURL, "find", name), nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not build http request: %s", err)
 	}
