@@ -65,7 +65,7 @@ func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
 	return nil, errors.New("project not found")
 }
 
-func (db *MockDatabase) ProjectExists(projectId string) bool {
+func (db *MockDatabase) ProjectNameExists(projectId string) bool {
 	if _, ok := db.projects[projectId]; ok {
 		return true
 	}
