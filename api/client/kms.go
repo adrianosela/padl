@@ -53,7 +53,6 @@ func (p *Padl) CreateKey(name, description string, bits int) (*kms.PrivateKey, e
 }
 
 // GetPrivateKey gets a padl-managed private key from the server
-// TODO: Remove this
 func (p *Padl) GetPrivateKey(kid string) (*kms.PrivateKey, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/key/%s", p.HostURL, kid), nil)
 	if err != nil {
