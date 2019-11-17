@@ -16,5 +16,5 @@ type Database interface {
 	ProjectNameExists(string) bool
 	GetProject(string) (*project.Project, error)
 	UpdateProject(*project.Project) error
-	ListProjects([]string) ([]*project.Project, error)
+	ListProjects([]string) ([]*project.Project, []string, error)
 }

@@ -375,10 +375,10 @@ func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	// get user projects from jwt
 	names := claims.Projects
 
-	projects, err := s.database.ListProjects(names)
+	projects, _, err := s.database.ListProjects(names)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not find projects: %s", err)))
+		w.Write([]byte(fmt.Sprintf("could not get list of projects: %s", err)))
 		return
 	}
 
