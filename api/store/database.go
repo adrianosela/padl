@@ -15,7 +15,6 @@ type Database interface {
 	PutProject(*project.Project) error
 	ProjectNameExists(string) bool
 	GetProject(string) (*project.Project, error)
-	GetProjectByName(string) (*project.Project, error)
 	UpdateProject(*project.Project) error
 	ListProjects([]string) ([]*project.Project, error)
 }

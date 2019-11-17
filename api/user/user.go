@@ -36,16 +36,16 @@ func (u *User) CheckPassword(pw string) error {
 }
 
 // Adds a Project to the user
-func (u *User) AddProject(projectID string) {
-	if !setContains(u.Projects, projectID) {
-		u.Projects = append(u.Projects, projectID)
+func (u *User) AddProject(name string) {
+	if !setContains(u.Projects, name) {
+		u.Projects = append(u.Projects, name)
 	}
 }
 
 //Removes project from the user
-func (u *User) RemoveProject(projectID string) {
+func (u *User) RemoveProject(name string) {
 	for i, e := range u.Projects {
-		if projectID == e {
+		if name == e {
 			u.Projects[i] = u.Projects[len(u.Projects[i])-1]
 			return
 		}

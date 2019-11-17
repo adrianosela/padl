@@ -373,9 +373,9 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	// get user projects from jwt
-	pids := claims.Projects
+	names := claims.Projects
 
-	projects, err := s.database.ListProjects(pids)
+	projects, err := s.database.ListProjects(names)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find projects: %s", err)))

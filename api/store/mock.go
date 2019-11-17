@@ -57,31 +57,18 @@ func (db *MockDatabase) PutProject(p *project.Project) error {
 	return nil
 }
 
-func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
-	if p, ok := db.projects[projectId]; ok {
+func (db *MockDatabase) GetProject(name string) (*project.Project, error) {
+	if p, ok := db.projects[name]; ok {
 		return p, nil
 	}
-	print(projectId)
 	return nil, errors.New("project not found")
 }
 
-func (db *MockDatabase) ProjectNameExists(projectId string) bool {
-	if _, ok := db.projects[projectId]; ok {
+func (db *MockDatabase) ProjectNameExists(name string) bool {
+	if _, ok := db.projects[name]; ok {
 		return true
 	}
 	return false
-}
-
-//Gets a project by name
-func (db *MockDatabase) GetProjectByName(projectName string) (*project.Project, error) {
-
-	for k := range db.projects {
-		if db.projects[k].Name == projectName {
-			return db.projects[k], nil
-		}
-	}
-
-	return nil, errors.New("project not found")
 }
 
 func (db *MockDatabase) UpdateProject(p *project.Project) error {
@@ -92,7 +79,7 @@ func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	return nil
 }
 
-func (db *MockDatabase) ListProjects(pids []string) ([]*project.Project, error) {
+func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, error) {
 	prjs := []*project.Project{}
 	return prjs, nil
 }
