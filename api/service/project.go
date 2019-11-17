@@ -59,6 +59,17 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not save project key: %s", err)))
 		return
 	}
+	pub, err := pKey.Pub()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not extract public key: %s", err)))
+		return
+	}
+	if err = s.keystore.PutPubKey(pub); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not save project pub key: %s", err)))
+		return
+	}
 	// create project object
 	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject, pKey.ID)
 	// add project to user claims
