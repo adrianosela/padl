@@ -35,18 +35,19 @@ func (u *User) CheckPassword(pw string) error {
 	return bcrypt.CompareHashAndPassword([]byte(u.HashedPass), []byte(pw))
 }
 
-// Adds a Project to the user
+// AddProject adds to the user
 func (u *User) AddProject(name string) {
 	if !setContains(u.Projects, name) {
 		u.Projects = append(u.Projects, name)
 	}
 }
 
-//Removes project from the user
+// RemoveProject removes a project from the user
 func (u *User) RemoveProject(name string) {
 	for i, e := range u.Projects {
 		if name == e {
-			u.Projects[i] = u.Projects[len(u.Projects[i])-1]
+			u.Projects[i] = u.Projects[len(u.Projects)-1]
+			u.Projects = u.Projects[:len(u.Projects)-1]
 			return
 		}
 	}
