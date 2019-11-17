@@ -10,8 +10,10 @@ import (
 type Database interface {
 	PutUser(*user.User) error
 	GetUser(string) (*user.User, error)
+	UpdateUser(*user.User) error
 
 	PutProject(*project.Project) error
+	ProjectNameExists(string) bool
 	GetProject(string) (*project.Project, error)
 	UpdateProject(*project.Project) error
 	ListProjects([]string) ([]*project.Project, error)

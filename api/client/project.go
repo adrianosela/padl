@@ -56,8 +56,8 @@ func (p *Padl) CreateProject(name, description string) (*padlfile.File, error) {
 }
 
 // GetProject TODO
-func (p *Padl) GetProject(pid string) (*project.Project, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, pid), nil)
+func (p *Padl) GetProject(name string) (*project.Project, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, name), nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not build http request: %s", err)
 	}

@@ -40,6 +40,7 @@ var ProjectCmds = cli.Command{
 			Usage: "finds an existing project user is a memeber of",
 			Flags: []cli.Flag{
 				asMandatory(idFlag),
+				asMandatory(nameFlag),
 			},
 			Before: getProjectValidator,
 			Action: getProjectHandler,
@@ -82,7 +83,7 @@ func createProjectValidator(ctx *cli.Context) error {
 }
 
 func getProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, idFlag)
+	return assertSet(ctx, nameFlag)
 }
 
 func createProjectHandler(ctx *cli.Context) error {
@@ -126,9 +127,10 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	id := ctx.String(name(idFlag))
+	projectName := ctx.String(name(nameFlag))
 
-	project, err := c.GetProject(id)
+	project, err := c.GetProject(projectName)
+
 	if err != nil {
 		return fmt.Errorf("error finding project: %s", err)
 	}
