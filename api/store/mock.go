@@ -49,6 +49,7 @@ func (db *MockDatabase) GetUser(email string) (*user.User, error) {
 	return u, nil
 }
 
+// PutProject puts a project in the database
 func (db *MockDatabase) PutProject(p *project.Project) error {
 	if _, ok := db.projects[p.Name]; ok {
 		return errors.New("project already exists in the DB")
@@ -57,6 +58,7 @@ func (db *MockDatabase) PutProject(p *project.Project) error {
 	return nil
 }
 
+// GetProject gets a project from the database
 func (db *MockDatabase) GetProject(name string) (*project.Project, error) {
 	if p, ok := db.projects[name]; ok {
 		return p, nil
@@ -64,6 +66,8 @@ func (db *MockDatabase) GetProject(name string) (*project.Project, error) {
 	return nil, errors.New("project not found")
 }
 
+// ProjectNameExists returns true if a name exists in the
+// padl global namespace for projects
 func (db *MockDatabase) ProjectNameExists(name string) bool {
 	if _, ok := db.projects[name]; ok {
 		return true
@@ -71,6 +75,7 @@ func (db *MockDatabase) ProjectNameExists(name string) bool {
 	return false
 }
 
+// UpdateProject updates a project in the database
 func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	if _, ok := db.projects[p.Name]; !ok {
 		return errors.New("project not found")
@@ -79,7 +84,16 @@ func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	return nil
 }
 
-func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, error) {
+// ListProjects returns a list of requested (by name) projects
+func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, []string, error) {
 	prjs := []*project.Project{}
-	return prjs, nil
+	notFound := []string{}
+	for _, n := range names {
+		if p, ok := db.projects[n]; ok {
+			prjs = append(prjs, p)
+		} else {
+			notFound = append(notFound, n)
+		}
+	}
+	return prjs, notFound, nil
 }

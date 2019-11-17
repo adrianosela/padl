@@ -16,7 +16,7 @@ var ProjectCmds = cli.Command{
 	Subcommands: []cli.Command{
 		{
 			Name:  "list",
-			Usage: "list all projects user is a member of",
+			Usage: "list projects you are a member of",
 			Flags: []cli.Flag{
 				jsonFlag,
 			},
@@ -24,7 +24,7 @@ var ProjectCmds = cli.Command{
 		},
 		{
 			Name:  "create",
-			Usage: "create a new project",
+			Usage: "create a new padl project",
 			Flags: []cli.Flag{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
@@ -37,7 +37,7 @@ var ProjectCmds = cli.Command{
 		},
 		{
 			Name:  "get",
-			Usage: "finds an existing project user is a memeber of",
+			Usage: "get a padl project",
 			Flags: []cli.Flag{
 				asMandatory(idFlag),
 				asMandatory(nameFlag),
