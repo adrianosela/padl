@@ -53,6 +53,10 @@ var (
 		Name:  "privilege",
 		Usage: "privilege level to assign - { Reader: 0, Editor:1, Owner:2 }",
 	}
+	secretFlag = cli.StringFlag{
+		Name:  "secret",
+		Usage: "secret to decrypt",
+	}
 
 	// option flags
 	jsonFlag = cli.BoolFlag{
