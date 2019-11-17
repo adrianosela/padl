@@ -13,6 +13,7 @@ type Database interface {
 
 	PutProject(*project.Project) error
 	GetProject(string) (*project.Project, error)
+	GetProjectByName(string) (*project.Project, error)
 	UpdateProject(*project.Project) error
 	ListProjects([]string) ([]*project.Project, error)
 }

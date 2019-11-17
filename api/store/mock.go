@@ -55,6 +55,18 @@ func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
 	return nil, errors.New("project not found")
 }
 
+//Gets a project by name
+func (db *MockDatabase) GetProjectByName(projectName string) (*project.Project, error) {
+
+	for k := range db.projects {
+		if db.projects[k].Name == projectName {
+			return db.projects[k], nil
+		}
+	}
+
+	return nil, errors.New("project not found")
+}
+
 func (db *MockDatabase) UpdateProject(p *project.Project) error {
 	if _, ok := db.projects[p.ID]; !ok {
 		return errors.New("project not found")

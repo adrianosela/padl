@@ -81,6 +81,32 @@ func (p *Padl) GetProject(pid string) (*project.Project, error) {
 	return &project, nil
 }
 
+// GetProjectByName TODO
+func (p *Padl) GetProjectByName(name string) (*project.Project, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, name), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not build http request: %s", err)
+	}
+	p.setAuth(req)
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send http request: %s", err)
+	}
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("could not read http response body: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non 200 status code received: %d - %s", resp.StatusCode, string(respByt))
+	}
+	var project project.Project
+	if err := json.Unmarshal(respByt, &project); err != nil {
+		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+	return &project, nil
+}
+
 // ListProjects TODO
 func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/projects", p.HostURL), nil)

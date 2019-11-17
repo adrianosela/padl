@@ -15,6 +15,7 @@ import (
 func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project").Handler(s.Auth(s.createProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/project/{pid}").Handler(s.Auth(s.getProjectHandler))
+	s.Router.Methods(http.MethodGet).Path("/project/{name}").Handler(s.Auth(s.getProjectByNameHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{pid}").Handler(s.Auth(s.deleteProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/projects").Handler(s.Auth(s.listProjectsHandler))
 
@@ -40,6 +41,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not validate new project request: %s", err)))
 		return
 	}
+
 	// create project object and save it
 	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject)
 
@@ -89,6 +91,33 @@ func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p, err := s.database.GetProject(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
+		return
+	}
+	/*
+	 TODO: check user is in project or else return 401
+	*/
+	byt, err := json.Marshal(&p)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(byt)
+	return
+}
+
+func (s *Service) getProjectByNameHandler(w http.ResponseWriter, r *http.Request) {
+	var name string
+	if name = mux.Vars(r)["name"]; name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no project Name in request URL"))
+		return
+	}
+	p, err := s.database.GetProjectByName(name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
