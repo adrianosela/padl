@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,7 +16,6 @@ import (
 func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project").Handler(s.Auth(s.createProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/project/{pid}").Handler(s.Auth(s.getProjectHandler))
-	s.Router.Methods(http.MethodGet).Path("/project/find/{name}").Handler(s.Auth(s.getProjectByNameHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{pid}").Handler(s.Auth(s.deleteProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/projects").Handler(s.Auth(s.listProjectsHandler))
 
@@ -42,8 +42,31 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if s.database.ProjectExists(projPl.Name) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not create new project request: %s", errors.New("Project with globably unique name already exists"))))
+		return
+	}
+
 	// create project object and save it
 	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject)
+
+	user, err := s.database.GetUser(claims.Subject)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
+		return
+	}
+
+	user.AddProject(project.Name)
+
+	if err := s.database.UpdateUser(user); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
+		return
+	}
 
 	// create padlfile
 	// TODO: Remove mocked variables
@@ -51,7 +74,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	variables["var1"] = "_var1_"
 	memberKeys := []string{"key1"}
 	body := &padlfile.Body{
-		Project:    project.ID,
+		Project:    project.Name,
 		Variables:  variables,
 		MemberKeys: memberKeys,
 		SharedKey:  "mockSharedKey",
@@ -87,37 +110,10 @@ func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var id string
 	if id = mux.Vars(r)["pid"]; id == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no project ID in request URL"))
-		return
-	}
-	p, err := s.database.GetProject(id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
-		return
-	}
-	/*
-	 TODO: check user is in project or else return 401
-	*/
-	byt, err := json.Marshal(&p)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(byt)
-	return
-}
-
-func (s *Service) getProjectByNameHandler(w http.ResponseWriter, r *http.Request) {
-	var name string
-	if name = mux.Vars(r)["name"]; name == "" {
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no project Name in request URL"))
 		return
 	}
-	p, err := s.database.GetProjectByName(name)
+	p, err := s.database.GetProject(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
@@ -169,6 +165,22 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
 		return
 	}
+
+	user, err := s.database.GetUser(addUserPl.Email)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
+		return
+	}
+
+	user.AddProject(p.Name)
+
+	if err := s.database.UpdateUser(user); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
+		return
+	}
 	/*
 	   TODO: check user has privs for project or else return 403
 	*/
@@ -215,6 +227,22 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
+		return
+	}
+
+	user, err := s.database.GetUser(rmUserPl.Email)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
+		return
+	}
+
+	user.RemoveProject(p.Name)
+
+	if err := s.database.UpdateUser(user); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
 		return
 	}
 	/*
@@ -358,7 +386,6 @@ func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	for _, p := range projects {
 		ps = append(ps,
 			&project.Summary{
-				ID:          p.ID,
 				Name:        p.Name,
 				Description: p.Description,
 			},

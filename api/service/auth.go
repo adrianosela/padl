@@ -23,6 +23,7 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("could not unmarshal request body"))
 		return
 	}
+
 	// validate payload
 	if err := regPl.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)

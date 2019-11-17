@@ -22,6 +22,15 @@ func NewMockDatabase() *MockDatabase {
 	return mdb
 }
 
+// UpdateUser updates a user in the database
+func (db *MockDatabase) UpdateUser(usr *user.User) error {
+	if _, ok := db.users[usr.Email]; !ok {
+		return errors.New("User doesn't exist")
+	}
+	db.users[usr.Email] = usr
+	return nil
+}
+
 // PutUser adds a new user to the database
 func (db *MockDatabase) PutUser(usr *user.User) error {
 	if _, ok := db.users[usr.Email]; ok {
@@ -41,10 +50,10 @@ func (db *MockDatabase) GetUser(email string) (*user.User, error) {
 }
 
 func (db *MockDatabase) PutProject(p *project.Project) error {
-	if _, ok := db.projects[p.ID]; ok {
+	if _, ok := db.projects[p.Name]; ok {
 		return errors.New("project already exists in the DB")
 	}
-	db.projects[p.ID] = p
+	db.projects[p.Name] = p
 	return nil
 }
 
@@ -54,6 +63,13 @@ func (db *MockDatabase) GetProject(projectId string) (*project.Project, error) {
 	}
 	print(projectId)
 	return nil, errors.New("project not found")
+}
+
+func (db *MockDatabase) ProjectExists(projectId string) bool {
+	if _, ok := db.projects[projectId]; ok {
+		return true
+	}
+	return false
 }
 
 //Gets a project by name
@@ -69,10 +85,10 @@ func (db *MockDatabase) GetProjectByName(projectName string) (*project.Project, 
 }
 
 func (db *MockDatabase) UpdateProject(p *project.Project) error {
-	if _, ok := db.projects[p.ID]; !ok {
+	if _, ok := db.projects[p.Name]; !ok {
 		return errors.New("project not found")
 	}
-	db.projects[p.ID] = p
+	db.projects[p.Name] = p
 	return nil
 }
 

@@ -4,12 +4,10 @@ import (
 	"errors"
 
 	"github.com/adrianosela/padl/api/privilege"
-	"github.com/google/uuid"
 )
 
 // Project represents a project in Padl
 type Project struct {
-	ID           string
 	Name         string
 	Description  string
 	Members      map[string]privilege.Level
@@ -19,7 +17,6 @@ type Project struct {
 
 // Summary TODO
 type Summary struct {
-	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
@@ -27,7 +24,6 @@ type Summary struct {
 // NewProject is the project object constructor
 func NewProject(name, description, creator string) *Project {
 	return &Project{
-		ID:          uuid.Must(uuid.NewRandom()).String(),
 		Name:        name,
 		Description: description,
 		Members: map[string]privilege.Level{

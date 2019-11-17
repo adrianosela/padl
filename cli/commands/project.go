@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/adrianosela/padl/api/project"
-
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -85,7 +83,7 @@ func createProjectValidator(ctx *cli.Context) error {
 }
 
 func getProjectValidator(ctx *cli.Context) error {
-	return assertSetIf(ctx, func() bool { return !ctx.IsSet(name(idFlag)) && !ctx.IsSet(name(nameFlag)) }, nameFlag, idFlag)
+	return assertSet(ctx, nameFlag)
 }
 
 func createProjectHandler(ctx *cli.Context) error {
@@ -130,15 +128,8 @@ func getProjectHandler(ctx *cli.Context) error {
 	}
 
 	projectName := ctx.String(name(nameFlag))
-	id := ctx.String(name(idFlag))
 
-	var project *project.Project
-
-	if projectName != "" {
-		project, err = c.GetProjectByName(projectName)
-	} else {
-		project, err = c.GetProject(id)
-	}
+	project, err := c.GetProject(projectName)
 
 	if err != nil {
 		return fmt.Errorf("error finding project: %s", err)
