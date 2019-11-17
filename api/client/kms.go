@@ -201,7 +201,7 @@ func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s/decrypt/%s", p.HostURL, kid),
+		fmt.Sprintf("%s/key/%s/decrypt", p.HostURL, kid),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return "", fmt.Errorf("could not build http request: %s", err)

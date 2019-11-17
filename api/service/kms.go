@@ -22,7 +22,7 @@ func (s *Service) addKeyEndpoints() {
 	// public key operations
 	s.Router.Methods(http.MethodGet).Path("/key/public/{kid}").Handler(s.Auth(s.getPubKeyHandler))
 	// decryption operations
-	s.Router.Methods(http.MethodGet).Path("/decrypt/{kid}").Handler(s.Auth(s.decryptSecretHandler))
+	s.Router.Methods(http.MethodGet).Path("/key/{kid}/decrypt").Handler(s.Auth(s.decryptSecretHandler))
 }
 
 func (s *Service) createKeyHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,6 +98,8 @@ func (s *Service) getKeyHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("key not found"))
 		return
 	}
+	// hide secret
+	key.HideSecret()
 	// return success
 	keybyt, err := json.Marshal(&key)
 	if err != nil {
