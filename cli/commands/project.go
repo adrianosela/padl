@@ -116,7 +116,7 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("unable to write padl file: %s", err)
 	}
-	fmt.Printf("project %s:%s initialized successfully!\n", pname, pf.Data.Project)
+	fmt.Printf("project %s initialized successfully!\n", pname)
 	return nil
 }
 
