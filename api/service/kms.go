@@ -65,6 +65,7 @@ func (s *Service) createKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// return success
+	key.HideSecret()
 	keybyt, err := json.Marshal(&key)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
