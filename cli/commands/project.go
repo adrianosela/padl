@@ -15,19 +15,12 @@ var ProjectCmds = cli.Command{
 	Usage:   "manage projects",
 	Subcommands: []cli.Command{
 		{
-			Name:  "list",
-			Usage: "list projects you are a member of",
-			Flags: []cli.Flag{
-				jsonFlag,
-			},
-			Action: projectListHandler,
-		},
-		{
 			Name:  "create",
 			Usage: "create a new padl project",
 			Flags: []cli.Flag{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
+				withDefaultInt(bitsFlag, 2048),
 				pathFlag,
 				withDefault(fmtFlag, "yaml"),
 			},
@@ -36,7 +29,7 @@ var ProjectCmds = cli.Command{
 		},
 		{
 			Name:  "get",
-			Usage: "get a padl project",
+			Usage: "get a padl project by name",
 			Flags: []cli.Flag{
 				asMandatory(idFlag),
 				asMandatory(nameFlag),
@@ -44,37 +37,15 @@ var ProjectCmds = cli.Command{
 			Before: getProjectValidator,
 			Action: getProjectHandler,
 		},
+		{
+			Name:  "list",
+			Usage: "get all your padl projects",
+			Flags: []cli.Flag{
+				jsonFlag,
+			},
+			Action: projectListHandler,
+		},
 	},
-}
-
-func projectListHandler(ctx *cli.Context) error {
-	c, err := getClient(ctx)
-	if err != nil {
-		return fmt.Errorf("could not initialize client: %s", err)
-	}
-
-	jf := ctx.Bool(name(jsonFlag))
-
-	projects, err := c.ListProjects()
-	if err != nil {
-		return fmt.Errorf("error fetching projects: %s", err)
-	}
-
-	if jf {
-		byt, err := json.Marshal(&projects)
-		if err != nil {
-			return fmt.Errorf("error printing json: %s", err)
-		}
-		fmt.Println(string(byt))
-	} else {
-		prettyJSON, err := json.MarshalIndent(projects, "", "    ")
-		if err != nil {
-			return fmt.Errorf("error pretty printing json: %s", err)
-		}
-		fmt.Printf("%s\n", string(prettyJSON))
-	}
-
-	return nil
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -90,8 +61,10 @@ func createProjectHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
+
 	path := ctx.String(name(pathFlag))
 	pname := ctx.String(name(nameFlag))
+	bits := ctx.Int(name(bitsFlag))
 	descr := ctx.String(name(descriptionFlag))
 	format := ctx.String(name(fmtFlag))
 
@@ -107,7 +80,7 @@ func createProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("invalid file extension, must be one of { \".yaml\", \".json\" }")
 	}
 
-	pf, err := c.CreateProject(pname, descr)
+	pf, err := c.CreateProject(pname, descr, bits)
 	if err != nil {
 		return fmt.Errorf("error creating project: %s", err)
 	}
@@ -139,5 +112,35 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("Failed to generate json: %s", err)
 	}
 	fmt.Printf("%s\n", string(prettyJSON))
+	return nil
+}
+
+func projectListHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	jf := ctx.Bool(name(jsonFlag))
+
+	projects, err := c.ListProjects()
+	if err != nil {
+		return fmt.Errorf("error fetching projects: %s", err)
+	}
+
+	if jf {
+		byt, err := json.Marshal(&projects)
+		if err != nil {
+			return fmt.Errorf("error printing json: %s", err)
+		}
+		fmt.Println(string(byt))
+	} else {
+		prettyJSON, err := json.MarshalIndent(projects, "", "    ")
+		if err != nil {
+			return fmt.Errorf("error pretty printing json: %s", err)
+		}
+		fmt.Printf("%s\n", string(prettyJSON))
+	}
+
 	return nil
 }

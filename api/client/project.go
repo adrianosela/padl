@@ -14,11 +14,11 @@ import (
 )
 
 // CreateProject creates a new project and returns a signed padlfile
-func (p *Padl) CreateProject(name, description string) (*padlfile.File, error) {
-
+func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File, error) {
 	pl := &payloads.NewProjectRequest{
 		Name:        name,
 		Description: description,
+		KeyBits:     bits,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {

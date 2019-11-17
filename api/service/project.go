@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/privilege"
 	"github.com/adrianosela/padl/api/project"
@@ -40,16 +41,27 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not validate new project request: %s", err)))
 		return
 	}
-
+	// check name is unique before doing anything
 	if s.database.ProjectNameExists(projPl.Name) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("provided project name is taken")))
 		return
 	}
-
+	// create shared team key for project and save it
+	pKey, err := kms.NewPrivateKey(projPl.KeyBits, projPl.Name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not create project key: %s", err)))
+		return
+	}
+	if err = s.keystore.PutPrivKey(pKey); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not save project key: %s", err)))
+		return
+	}
 	// create project object
-	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject)
-
+	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject, pKey.ID)
+	// add project to user claims
 	user, err := s.database.GetUser(claims.Subject)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +81,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Project:    project.Name,
 		Variables:  make(map[string]string),
 		MemberKeys: []string{user.KeyID},
-		SharedKey:  "MOCK SHARED KEY (GET THIS FROM REQ BODY)",
+		SharedKey:  pKey.ID,
 	}
 	pf, err := body.HashAndSign([]byte("Some crazy secret"))
 	if err != nil {
@@ -80,6 +92,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// Add paflfile hash to project object
 	project.PadlfileHash = pf.HMAC
 
+	// update project in store
 	if err := s.database.PutProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))

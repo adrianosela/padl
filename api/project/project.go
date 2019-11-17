@@ -11,6 +11,7 @@ type Project struct {
 	Name         string
 	Description  string
 	Members      map[string]privilege.Level
+	ProjectKey   string
 	DeployKeys   map[string]string
 	PadlfileHash string
 }
@@ -22,10 +23,11 @@ type Summary struct {
 }
 
 // NewProject is the project object constructor
-func NewProject(name, description, creator string) *Project {
+func NewProject(name, description, creator, projectKey string) *Project {
 	return &Project{
 		Name:        name,
 		Description: description,
+		ProjectKey:  projectKey,
 		Members: map[string]privilege.Level{
 			creator: privilege.PrivilegeLvlOwner,
 		},
@@ -78,4 +80,10 @@ func (p *Project) RemoveDeployKey(name string) {
 	if _, ok := p.DeployKeys[name]; ok {
 		delete(p.DeployKeys, name)
 	}
+}
+
+// RotateProjectKey rotates the private key for a project
+func (p *Project) RotateProjectKey() error {
+	// TODO
+	return nil
 }

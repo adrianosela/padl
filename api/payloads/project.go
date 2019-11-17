@@ -10,6 +10,7 @@ import (
 type NewProjectRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	KeyBits     int    `json:"bits"`
 }
 
 // AddUserToProjectRequest TODO
@@ -82,13 +83,19 @@ func (r *DeleteDeployKeyRequest) Validate() error {
 	return nil
 }
 
-// Validate TODO
+// Validate validates a NewProjectRequest
 func (p *NewProjectRequest) Validate() error {
 	if p.Name == "" {
 		return errors.New("no project name provided")
 	}
 	if p.Description == "" {
 		return errors.New("no project description provided")
+	}
+	if p.KeyBits != 512 &&
+		p.KeyBits != 1024 &&
+		p.KeyBits != 2048 &&
+		p.KeyBits != 4096 {
+		return errors.New("invalid bits, must be one of { 512, 1024, 2048, 4096 }")
 	}
 	return nil
 }
