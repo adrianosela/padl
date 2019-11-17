@@ -29,8 +29,7 @@ var ProjectCmds = cli.Command{
 				asMandatory(nameFlag),
 				asMandatory(descriptionFlag),
 				pathFlag,
-				// Defaulting to yml
-				withDefault(fmtFlag, ".yaml"),
+				withDefault(fmtFlag, "yaml"),
 			},
 			Before: createProjectValidator,
 			Action: createProjectHandler,
@@ -97,10 +96,10 @@ func createProjectHandler(ctx *cli.Context) error {
 	format := ctx.String(name(fmtFlag))
 
 	if path == "" {
-		if format == ".json" {
-			path = "./.padlfile.json"
-		} else {
+		if format == "yaml" {
 			path = "./.padlfile.yaml"
+		} else {
+			path = "./.padlfile.json"
 		}
 	}
 

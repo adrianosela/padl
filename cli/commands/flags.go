@@ -65,7 +65,7 @@ var (
 	}
 	fmtFlag = cli.StringFlag{
 		Name:  "fmt",
-		Usage: "format of padlfile - one of { \".yaml\", \".json\" }",
+		Usage: "preferred padlfile format - one of { \"yaml\", \"json\" }",
 	}
 )
 
