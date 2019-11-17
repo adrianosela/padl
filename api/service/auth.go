@@ -80,7 +80,14 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.authenticator.GenerateJWTForUser(loginPl.Email, []string{"padl"}) // FIXME
+	user, err := s.database.GetUser(loginPl.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
+		return
+	}
+
+	token, err := s.authenticator.GenerateJWTForUser(loginPl.Email, user.Projects)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error())) // fixme: if this happens we want to know

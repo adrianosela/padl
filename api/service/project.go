@@ -44,24 +44,21 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	if s.database.ProjectNameExists(projPl.Name) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not create new project request: %s", errors.New("Project with globably unique name already exists"))))
+		w.Write([]byte(fmt.Sprintf("provided project name is taken")))
 		return
 	}
 
-	// create project object and save it
+	// create project object
 	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject)
 
 	user, err := s.database.GetUser(claims.Subject)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 
 		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
 		return
 	}
-
 	user.AddProject(project.Name)
-
 	if err := s.database.UpdateUser(user); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
@@ -69,15 +66,11 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create padlfile
-	// TODO: Remove mocked variables
-	variables := make(map[string]string)
-	variables["var1"] = "_var1_"
-	memberKeys := []string{"key1"}
 	body := &padlfile.Body{
 		Project:    project.Name,
-		Variables:  variables,
-		MemberKeys: memberKeys,
-		SharedKey:  "mockSharedKey",
+		Variables:  make(map[string]string),
+		MemberKeys: []string{user.KeyID},
+		SharedKey:  "MOCK SHARED KEY (GET THIS FROM REQ BODY)",
 	}
 	pf, err := body.HashAndSign([]byte("Some crazy secret"))
 	if err != nil {
@@ -88,7 +81,6 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// Add paflfile hash to project object
 	project.PadlfileHash = pf.HMAC
 
-	// Store project in db
 	if err := s.database.PutProject(project); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))
@@ -175,7 +167,6 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.AddProject(p.Name)
-
 	if err := s.database.UpdateUser(user); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
@@ -239,7 +230,6 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.RemoveProject(p.Name)
-
 	if err := s.database.UpdateUser(user); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
@@ -372,7 +362,6 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 
 func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
-	// get user projects from jwt
 	names := claims.Projects
 
 	projects, _, err := s.database.ListProjects(names)
