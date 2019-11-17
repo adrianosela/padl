@@ -68,6 +68,16 @@ var KMSCmds = cli.Command{
 			Before: rmUserToKeyValidator,
 			Action: rmUserToKeyHandler,
 		},
+		{
+			Name:  "decrypt",
+			Usage: "decrypt secret with given private key id",
+			Flags: []cli.Flag{
+				asMandatory(idFlag),
+				asMandatory(secretFlag),
+			},
+			Before: decryptSecretValidator,
+			Action: decryptSecretHandler,
+		},
 	},
 }
 
@@ -89,6 +99,10 @@ func addUserToKeyValidator(ctx *cli.Context) error {
 
 func rmUserToKeyValidator(ctx *cli.Context) error {
 	return assertSet(ctx, idFlag, emailFlag)
+}
+
+func decryptSecretValidator(ctx *cli.Context) error {
+	return assertSet(ctx, idFlag, secretFlag)
 }
 
 func createKeyHandler(ctx *cli.Context) error {
@@ -219,5 +233,24 @@ func rmUserToKeyHandler(ctx *cli.Context) error {
 	}
 
 	fmt.Println(k.ID)
+	return nil
+}
+
+func decryptSecretHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	kid := ctx.String(name(idFlag))
+	secret := ctx.String(name(secretFlag))
+
+	message, err := c.DecryptSecret(secret, kid)
+	if err != nil {
+		return fmt.Errorf("could not decrypt secret: %s", err)
+	}
+
+	fmt.Println(message)
+
 	return nil
 }

@@ -188,3 +188,44 @@ func (p *Padl) RemoveUserFromPrivateKey(kid, email string) (*kms.PrivateKey, err
 	}
 	return &pk, nil
 }
+
+// DecryptSecret TODO
+func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
+	pl := &payloads.DecryptSecretRequest{Secret: secret}
+
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s/key/%s/decrypt", p.HostURL, kid),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http request: %s", err)
+	}
+
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+
+	var res payloads.DecryptSecretResponse
+	if err := json.Unmarshal(respByt, &res); err != nil {
+		return "", fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+	return res.Message, nil
+}
