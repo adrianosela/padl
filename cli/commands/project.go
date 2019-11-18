@@ -142,21 +142,8 @@ func getProjectHandler(ctx *cli.Context) error {
 	table.Append([]string{"DESCRIPTION", project.Description})
 	table.Append([]string{"KEY", project.ProjectKey})
 
-	membersSet := false
-	for k, v := range project.Members {
-		if !membersSet {
-			table.Append([]string{"MEMBERS", fmt.Sprintf("%s : %d", k, v)})
-		}
-		table.Append([]string{"", fmt.Sprintf("%s : %d", k, v)})
-	}
-
-	dpKeysSet := false
-	for k, v := range project.DeployKeys {
-		if !dpKeysSet {
-			table.Append([]string{"DEPLOY KEYS", fmt.Sprintf("%s : %s", k, v)})
-		}
-		table.Append([]string{"", fmt.Sprintf("%s : %s", k, v)})
-	}
+	tablePrivsMap(table, "MEMBERS", project.Members)
+	tableStringsMap(table, "DEPLOY KEYS", project.DeployKeys)
 
 	table.Render()
 	return nil
@@ -177,12 +164,16 @@ func projectListHandler(ctx *cli.Context) error {
 		return printJSON(&projects)
 	}
 
+	if len(projects.Projects) == 0 {
+		fmt.Println("no projects to show :(")
+		return nil
+	}
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
 	table.SetHeader([]string{"NAME", "DESCRIPTION"})
 	for _, proj := range projects.Projects {
 		table.Append([]string{proj.Name, proj.Description})
-
 	}
 	table.Render()
 
