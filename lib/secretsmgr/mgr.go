@@ -1,4 +1,4 @@
-package decryptor
+package secretsmgr
 
 import (
 	"fmt"
