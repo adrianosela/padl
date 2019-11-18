@@ -50,6 +50,7 @@ var ProjectCmds = cli.Command{
 			Name:  "add-secret",
 			Usage: "add a secret to a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
 			Before: checkCanModifyPadlFile,
@@ -59,6 +60,7 @@ var ProjectCmds = cli.Command{
 			Name:  "update-secret",
 			Usage: "update a secret in a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
 			Before: checkCanModifyPadlFile,
@@ -68,6 +70,7 @@ var ProjectCmds = cli.Command{
 			Name:  "remove-secret",
 			Usage: "delete a secret to a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
 			Before: checkCanModifyPadlFile,
