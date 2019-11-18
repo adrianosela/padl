@@ -68,8 +68,8 @@ func Split(secret []byte, parts, threshold int) ([][]byte, error) {
 // once a `threshold` number of parts are available.
 func Combine(parts [][]byte) ([]byte, error) {
 	// Verify enough parts provided
-	if len(parts) < 1 {
-		return nil, fmt.Errorf("less than one parts cannot be used to reconstruct the secret")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("less than two parts cannot be used to reconstruct the secret")
 	}
 	// Verify the parts are all the same length
 	firstPartLen := len(parts[0])
