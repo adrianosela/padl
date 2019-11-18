@@ -70,8 +70,13 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not save project pub key: %s", err)))
 		return
 	}
-	// create project object
+	// create project object and save it
 	project := project.NewProject(projPl.Name, projPl.Description, claims.Subject, pKey.ID)
+	if err := s.database.PutProject(project); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))
+		return
+	}
 	// add project to user claims
 	user, err := s.database.GetUser(claims.Subject)
 	if err != nil {
@@ -98,15 +103,6 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to sign padlfile: %s", err)))
-		return
-	}
-	// Add paflfile hash to project object
-	project.PadlfileHash = pf.HMAC
-
-	// update project in store
-	if err := s.database.PutProject(project); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not save new project: %s", err)))
 		return
 	}
 

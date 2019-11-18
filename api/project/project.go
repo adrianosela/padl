@@ -8,12 +8,11 @@ import (
 
 // Project represents a project in Padl
 type Project struct {
-	Name         string
-	Description  string
-	Members      map[string]privilege.Level
-	ProjectKey   string
-	DeployKeys   map[string]string
-	PadlfileHash string
+	Name        string
+	Description string
+	Members     map[string]privilege.Level
+	ProjectKey  string
+	DeployKeys  map[string]string
 }
 
 // Summary TODO
