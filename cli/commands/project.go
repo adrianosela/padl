@@ -52,6 +52,7 @@ var ProjectCmds = cli.Command{
 			Flags: []cli.Flag{
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectAddSecretHandler,
 		},
 		{
@@ -60,6 +61,7 @@ var ProjectCmds = cli.Command{
 			Flags: []cli.Flag{
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectUpdateSecretHandler,
 		},
 		{
@@ -68,6 +70,7 @@ var ProjectCmds = cli.Command{
 			Flags: []cli.Flag{
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectRemoveSecretHandler,
 		},
 	},
@@ -127,7 +130,6 @@ func getProjectHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 
 	project, err := c.GetProject(projectName)
-
 	if err != nil {
 		return fmt.Errorf("error finding project: %s", err)
 	}
@@ -181,7 +183,6 @@ func projectListHandler(ctx *cli.Context) error {
 }
 
 func projectAddSecretHandler(ctx *cli.Context) error {
-	// TODO
 	return nil
 }
 

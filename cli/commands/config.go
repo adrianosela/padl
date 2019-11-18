@@ -20,7 +20,7 @@ var ConfigCmd = cli.Command{
 			Usage: "create configuration file with given options",
 			Flags: []cli.Flag{
 				asMandatory(urlFlag),
-				pathFlag,
+				configFlag,
 			},
 			Before: configSetValidator,
 			Action: configSetHandler,
@@ -29,7 +29,7 @@ var ConfigCmd = cli.Command{
 			Name:  "show",
 			Usage: "show contents of set configuration file",
 			Flags: []cli.Flag{
-				pathFlag,
+				configFlag,
 			},
 			Action: configShowHandler,
 		},

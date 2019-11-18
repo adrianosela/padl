@@ -15,16 +15,18 @@ const (
 )
 
 var (
-	// config flags
-	pathFlag = cli.StringFlag{
-		Name:  "path, p",
-		Usage: "override default path",
+	configFlag = cli.StringFlag{
+		Name:  "config, c",
+		Usage: "override default config file path",
 	}
 	urlFlag = cli.StringFlag{
 		Name:  "url, u",
 		Usage: "host URL to use",
 	}
-
+	pathFlag = cli.StringFlag{
+		Name:  "path, p",
+		Usage: "override default path",
+	}
 	emailFlag = cli.StringFlag{
 		Name:  "email, e",
 		Usage: "user email for authentication",
@@ -57,8 +59,6 @@ var (
 		Name:  "secret",
 		Usage: "secret to decrypt",
 	}
-
-	// option flags
 	jsonFlag = cli.BoolFlag{
 		Name:  "json, j",
 		Usage: "print raw json -- don't pretty print",

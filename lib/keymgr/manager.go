@@ -2,6 +2,8 @@ package keymgr
 
 // Manager represents key management operations
 type Manager interface {
-	PutKey(string, string) error
-	GetKey(string) error
+	PutPriv(string, string) error
+	GetPriv(string) error
+	PutPub(string, string) error
+	GetPub(string) error
 }
