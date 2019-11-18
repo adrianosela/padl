@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 
 	cli "gopkg.in/urfave/cli.v1"
@@ -56,12 +55,7 @@ func publicKeyHandler(ctx *cli.Context) error {
 	}
 
 	if ctx.Bool(name(jsonFlag)) {
-		byt, err := json.Marshal(&k)
-		if err != nil {
-			return fmt.Errorf("could not marshal response: %s", err)
-		}
-		fmt.Println(string(byt))
-		return nil
+		return printJSON(&k)
 	}
 
 	fmt.Println(k.PEM)

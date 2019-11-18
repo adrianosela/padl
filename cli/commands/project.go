@@ -3,8 +3,10 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -31,8 +33,8 @@ var ProjectCmds = cli.Command{
 			Name:  "get",
 			Usage: "get a padl project by name",
 			Flags: []cli.Flag{
-				asMandatory(idFlag),
 				asMandatory(nameFlag),
+				jsonFlag,
 			},
 			Before: getProjectValidator,
 			Action: getProjectHandler,
@@ -44,6 +46,30 @@ var ProjectCmds = cli.Command{
 				jsonFlag,
 			},
 			Action: projectListHandler,
+		},
+		{
+			Name:  "add-secret",
+			Usage: "add a secret to a project",
+			Flags: []cli.Flag{
+				jsonFlag,
+			},
+			Action: projectAddSecretHandler,
+		},
+		{
+			Name:  "update-secret",
+			Usage: "delete a secret to a project",
+			Flags: []cli.Flag{
+				jsonFlag,
+			},
+			Action: projectUpdateSecretHandler,
+		},
+		{
+			Name:  "remove-secret",
+			Usage: "delete a secret to a project",
+			Flags: []cli.Flag{
+				jsonFlag,
+			},
+			Action: projectRemoveSecretHandler,
 		},
 	},
 }
@@ -107,11 +133,33 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("error finding project: %s", err)
 	}
 
-	prettyJSON, err := json.MarshalIndent(project, "", "    ")
-	if err != nil {
-		return fmt.Errorf("Failed to generate json: %s", err)
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(&project)
 	}
-	fmt.Printf("%s\n", string(prettyJSON))
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAlignment(tablewriter.ALIGN_CENTER)
+	table.Append([]string{"NAME", project.Name})
+	table.Append([]string{"DESCRIPTION", project.Description})
+	table.Append([]string{"KEY", project.ProjectKey})
+
+	membersSet := false
+	for k, v := range project.Members {
+		if !membersSet {
+			table.Append([]string{"MEMBERS", fmt.Sprintf("%s : %d", k, v)})
+		}
+		table.Append([]string{"", fmt.Sprintf("%s : %d", k, v)})
+	}
+
+	dpKeysSet := false
+	for k, v := range project.DeployKeys {
+		if !dpKeysSet {
+			table.Append([]string{"DEPLOY KEYS", fmt.Sprintf("%s : %s", k, v)})
+		}
+		table.Append([]string{"", fmt.Sprintf("%s : %s", k, v)})
+	}
+
+	table.Render()
 	return nil
 }
 
@@ -134,13 +182,32 @@ func projectListHandler(ctx *cli.Context) error {
 			return fmt.Errorf("error printing json: %s", err)
 		}
 		fmt.Println(string(byt))
-	} else {
-		prettyJSON, err := json.MarshalIndent(projects, "", "    ")
-		if err != nil {
-			return fmt.Errorf("error pretty printing json: %s", err)
-		}
-		fmt.Printf("%s\n", string(prettyJSON))
+		return nil
 	}
 
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAlignment(tablewriter.ALIGN_CENTER)
+	table.SetHeader([]string{"NAME", "DESCRIPTION"})
+	for _, proj := range projects.Projects {
+		table.Append([]string{proj.Name, proj.Description})
+
+	}
+	table.Render()
+
+	return nil
+}
+
+func projectAddSecretHandler(ctx *cli.Context) error {
+	// TODO
+	return nil
+}
+
+func projectUpdateSecretHandler(ctx *cli.Context) error {
+	// TODO
+	return nil
+}
+
+func projectRemoveSecretHandler(ctx *cli.Context) error {
+	// TODO
 	return nil
 }
