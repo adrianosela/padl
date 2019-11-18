@@ -28,11 +28,11 @@ func TestNewShard(t *testing.T) {
 			shardValue:  []byte{},
 			shardsTotal: 5,
 			expectErr:   true,
-			expectedErr: errMsgEmptyValue,
+			expectedErr: ErrMsgEmptyValue,
 		},
 	}
 	for _, test := range tests {
-		s, err := newShard(test.shardValue)
+		s, err := NewShard(test.shardValue)
 		if test.expectErr {
 			assert.Nil(t, s, test.testName)
 			assert.EqualError(t, err, test.expectedErr, test.testName)
@@ -54,14 +54,14 @@ func TestEncrypt(t *testing.T) {
 
 	tests := []struct {
 		testName    string
-		shard       *shard
+		shard       *Shard
 		key         *rsa.PublicKey
 		expectErr   bool
 		expectedErr string
 	}{
 		{
 			testName: "positive test",
-			shard: &shard{
+			shard: &Shard{
 				Value: []byte{0x80, 0x80, 0x80, 0x80},
 			},
 			key:       goodKey,
@@ -69,26 +69,26 @@ func TestEncrypt(t *testing.T) {
 		},
 		{
 			testName: "empty value test",
-			shard: &shard{
+			shard: &Shard{
 				Value: []byte{},
 			},
 			key:         goodKey,
 			expectErr:   true,
-			expectedErr: errMsgEmptyValue,
+			expectedErr: ErrMsgEmptyValue,
 		},
 		{
 			testName: "bad key test",
-			shard: &shard{
+			shard: &Shard{
 				Value: []byte{0x80, 0x80, 0x80, 0x80},
 			},
 			key:         badKey,
 			expectErr:   true,
-			expectedErr: fmt.Sprintf("%s: %s: %s", errMsgCouldNotEncrypt, "crypto/rsa", "missing public modulus"),
+			expectedErr: fmt.Sprintf("%s: %s: %s", ErrMsgCouldNotEncrypt, "crypto/rsa", "missing public modulus"),
 		},
 	}
 
 	for _, test := range tests {
-		es, err := test.shard.encrypt(test.key)
+		es, err := test.shard.Encrypt(test.key)
 		if test.expectErr {
 			assert.Nil(t, es, test.testName)
 			assert.EqualError(t, err, test.expectedErr, test.testName)
@@ -118,18 +118,18 @@ func TestDecrypt(t *testing.T) {
 
 	mockSecret := "this is a secret"
 
-	goodShard := &shard{
+	goodShard := &Shard{
 		Value: []byte(mockSecret),
 	}
 
-	goodEncryptedShard, err := goodShard.encrypt(goodPub)
+	goodEncryptedShard, err := goodShard.Encrypt(goodPub)
 	if err != nil {
 		assert.FailNow(t, "could not encrypt mock shard")
 	}
 
 	tests := []struct {
 		testName    string
-		encShard    *encryptedShard
+		encShard    *EncryptedShard
 		key         *rsa.PrivateKey
 		expectErr   bool
 		expectedErr string
@@ -145,34 +145,34 @@ func TestDecrypt(t *testing.T) {
 			encShard:    goodEncryptedShard,
 			key:         differentPriv,
 			expectErr:   true,
-			expectedErr: errMsgIncorrectDecryptionKey,
+			expectedErr: ErrMsgIncorrectDecryptionKey,
 		},
 		{
 			testName:    "bad key test",
 			encShard:    goodEncryptedShard,
 			key:         badPriv,
 			expectErr:   true,
-			expectedErr: errMsgIncorrectDecryptionKey,
+			expectedErr: ErrMsgIncorrectDecryptionKey,
 		},
 		{
 			testName: "bad encoding test",
-			encShard: &encryptedShard{
+			encShard: &EncryptedShard{
 				Value: "thisisnotbase64",
 				KeyID: keys.GetFingerprint(goodPub),
 			},
 			key:         goodPriv,
 			expectErr:   true,
-			expectedErr: fmt.Sprintf("%s: %s", errMsgCouldNotDecode, "illegal base64 data at input byte 12"),
+			expectedErr: fmt.Sprintf("%s: %s", ErrMsgCouldNotDecode, "illegal base64 data at input byte 12"),
 		},
 		{
 			testName: "not encrypted test",
-			encShard: &encryptedShard{
+			encShard: &EncryptedShard{
 				Value: "dGhpc2lzYmFzZTY0", // "thisisbase64" in b64
 				KeyID: keys.GetFingerprint(goodPub),
 			},
 			key:         goodPriv,
 			expectErr:   true,
-			expectedErr: fmt.Sprintf("%s: %s: %s", errMsgCouldNotDecrypt, "crypto/rsa", "decryption error"),
+			expectedErr: fmt.Sprintf("%s: %s: %s", ErrMsgCouldNotDecrypt, "crypto/rsa", "decryption error"),
 		},
 	}
 

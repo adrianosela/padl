@@ -22,14 +22,14 @@ func TestDecodeSimpleSecret(t *testing.T) {
 	tests := []struct {
 		testName     string
 		toParse      string
-		expectShards []*encryptedShard
+		expectShards []*EncryptedShard
 		expectErr    bool
 		expectedErr  string
 	}{
 		{
 			testName: "positive test",
 			toParse:  "SOMEKEYID(SOMEVALUE)",
-			expectShards: []*encryptedShard{
+			expectShards: []*EncryptedShard{
 				{
 					KeyID: "SOMEKEYID",
 					Value: "SOMEVALUE",
@@ -41,29 +41,29 @@ func TestDecodeSimpleSecret(t *testing.T) {
 			testName:    "negative test - bad format 1",
 			toParse:     "SOMEKEYIDSOMEVALUE)",
 			expectErr:   true,
-			expectedErr: errMsgInvalidSimpleFmt,
+			expectedErr: ErrMsgInvalidSimpleFmt,
 		},
 		{
 			testName:    "negative test - bad format 2",
 			toParse:     "",
 			expectErr:   true,
-			expectedErr: errMsgInvalidSimpleFmt,
+			expectedErr: ErrMsgInvalidSimpleFmt,
 		},
 		{
 			testName:    "negative test - bad format 3",
 			toParse:     "SOMEKEY(",
 			expectErr:   true,
-			expectedErr: errMsgInvalidSimpleFmt,
+			expectedErr: ErrMsgInvalidSimpleFmt,
 		},
 	}
 
 	for _, test := range tests {
-		sec, err := decodeSimpleSecret(test.toParse)
+		sec, err := DecodeSimpleSecret(test.toParse)
 		if test.expectErr {
 			assert.Nil(t, sec, test.testName)
 			assert.EqualError(t, err, test.expectedErr, test.testName)
 		} else {
-			assert.EqualValues(t, sec.shards, test.expectShards, test.testName)
+			assert.EqualValues(t, sec.Shards, test.expectShards, test.testName)
 		}
 	}
 }
@@ -71,14 +71,14 @@ func TestDecodeSimpleSecret(t *testing.T) {
 func TestEncodeDecodePEM(t *testing.T) {
 	tests := []struct {
 		testName      string
-		testSecret    *secret
+		testSecret    *Secret
 		expectErr     bool
 		expectedError string
 	}{
 		{
 			testName: "positive test",
-			testSecret: &secret{
-				shards: []*encryptedShard{
+			testSecret: &Secret{
+				Shards: []*EncryptedShard{
 					{
 						KeyID: "some key id",
 						Value: "asdfghjkl",
@@ -94,12 +94,12 @@ func TestEncodeDecodePEM(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		enc, err := test.testSecret.encodePEM()
+		enc, err := test.testSecret.EncodePEM()
 		if test.expectErr {
 			assert.EqualError(t, err, test.expectedError, test.testName)
 			continue
 		}
-		dec, err := decodePEM(enc)
+		dec, err := DecodePEM(enc)
 		if test.expectErr {
 			assert.EqualError(t, err, test.expectedError, test.testName)
 			continue
