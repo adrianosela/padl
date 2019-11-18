@@ -8,22 +8,31 @@ import (
 	"github.com/adrianosela/padl/lib/keys"
 	"github.com/adrianosela/padl/lib/padlfile"
 	"github.com/adrianosela/padl/lib/secret"
-	"go.mozilla.org/sops/shamir"
+	"github.com/adrianosela/padl/lib/shamir"
 )
 
-// Decryptor decrypts padlfile secrets
-type Decryptor struct {
-	client *client.Padl
-	keyMgr keymgr.Manager
-	pf     *padlfile.File
+// SecretsMgr encrypts/decrypts padlfile secrets
+type SecretsMgr struct {
+	client     *client.Padl
+	keyManager keymgr.Manager
+	padlFile   *padlfile.File
+}
+
+// NewSecretsMgr is the constructor for the SecretsMgr
+func NewSecretsMgr(client *client.Padl, keyMgr keymgr.Manager, pf *padlfile.File) *SecretsMgr {
+	return &SecretsMgr{
+		client:     client,
+		keyManager: keyMgr,
+		padlFile:   pf,
+	}
 }
 
 // DecryptPadlFileSecrets uses the network and the file system to decrypt
 // the contents of a padlfile
-func (d *Decryptor) DecryptPadlFileSecrets(filesystemKeyID string) (map[string]string, error) {
+func (smgr *SecretsMgr) DecryptPadlFileSecrets(filesystemKeyID string) (map[string]string, error) {
 	decrypted := make(map[string]string)
 
-	for varName, encrypted := range d.pf.Data.Variables {
+	for varName, encrypted := range smgr.padlFile.Data.Variables {
 		sec, err := secret.DecodePEM(encrypted)
 		if err != nil {
 			return nil, fmt.Errorf("could not decode padlfile var: %s, body %s. %s", varName, encrypted, err)
@@ -32,14 +41,14 @@ func (d *Decryptor) DecryptPadlFileSecrets(filesystemKeyID string) (map[string]s
 		parts := [][]byte{}
 
 		for _, sh := range sec.Shards {
-			if sh.KeyID == d.pf.Data.SharedKey {
-				decryptedSharedShard, err := d.client.DecryptSecret(sh.Value, sh.KeyID)
+			if sh.KeyID == smgr.padlFile.Data.SharedKey {
+				decryptedSharedShard, err := smgr.client.DecryptSecret(sh.Value, sh.KeyID)
 				if err != nil {
 					return nil, fmt.Errorf("could not decrypt shared shard for var: %s. %s", varName, err)
 				}
 				parts = append(parts, []byte(decryptedSharedShard))
 			} else if sh.KeyID == filesystemKeyID {
-				priv, err := d.keyMgr.GetPriv(filesystemKeyID)
+				priv, err := smgr.keyManager.GetPriv(filesystemKeyID)
 				if err != nil {
 					return nil, fmt.Errorf("could not get private key from filesystem: %s", err)
 				}
@@ -62,9 +71,22 @@ func (d *Decryptor) DecryptPadlFileSecrets(filesystemKeyID string) (map[string]s
 		if err != nil {
 			return nil, fmt.Errorf("could not shamir.Combine decrypted parts for var: %s. %s", varName, err)
 		}
-
 		decrypted[varName] = string(plain)
 	}
 
 	return decrypted, nil
+}
+
+// EncryptPadlfileSecrets uses the network and the file system to encrypt
+// the contents of a padlfile
+func (smgr *SecretsMgr) EncryptPadlfileSecrets() (map[string]string, error) {
+	encrypted := make(map[string]string)
+
+	// FIXME: actually encrypt
+	for varName, plain := range smgr.padlFile.Data.Variables {
+		// NOP
+		encrypted[varName] = plain
+	}
+
+	return encrypted, nil
 }
