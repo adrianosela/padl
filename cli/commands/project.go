@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -57,7 +56,7 @@ var ProjectCmds = cli.Command{
 		},
 		{
 			Name:  "update-secret",
-			Usage: "delete a secret to a project",
+			Usage: "update a secret in a project",
 			Flags: []cli.Flag{
 				jsonFlag,
 			},
@@ -169,20 +168,13 @@ func projectListHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	jf := ctx.Bool(name(jsonFlag))
-
 	projects, err := c.ListProjects()
 	if err != nil {
 		return fmt.Errorf("error fetching projects: %s", err)
 	}
 
-	if jf {
-		byt, err := json.Marshal(&projects)
-		if err != nil {
-			return fmt.Errorf("error printing json: %s", err)
-		}
-		fmt.Println(string(byt))
-		return nil
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(&projects)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
