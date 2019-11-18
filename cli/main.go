@@ -11,10 +11,8 @@ import (
 var version string // injected at build-time
 
 var appflags = []cli.Flag{
-	cli.StringFlag{
-		Name:  "config, c",
-		Usage: "override default config file path",
-	},
+	commands.ConfigFlag,
+	commands.VerboseFlag,
 }
 
 var appcmds = []cli.Command{

@@ -5,9 +5,11 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -59,6 +61,17 @@ func (f *File) VerifySignature(secret []byte) (bool, error) {
 
 // ReadPadlfile reads a padlfile from the given path
 func ReadPadlfile(path string) (*File, error) {
+	if path == "" {
+		padlfiles, err := filepath.Glob("./.padlfile.*")
+		if err != nil {
+			return nil, fmt.Errorf("error looking for padlfile: %s", err)
+
+		}
+		if len(padlfiles) == 0 {
+			return nil, errors.New("no padlfile found in current directory")
+		}
+		path = padlfiles[0]
+	}
 	dat, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not read padlfile file %s: %s", path, err)

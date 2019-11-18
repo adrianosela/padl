@@ -50,24 +50,30 @@ var ProjectCmds = cli.Command{
 			Name:  "add-secret",
 			Usage: "add a secret to a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectAddSecretHandler,
 		},
 		{
 			Name:  "update-secret",
 			Usage: "update a secret in a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectUpdateSecretHandler,
 		},
 		{
 			Name:  "remove-secret",
 			Usage: "delete a secret to a project",
 			Flags: []cli.Flag{
+				privateKeyFlag,
 				jsonFlag,
 			},
+			Before: checkCanModifyPadlFile,
 			Action: projectRemoveSecretHandler,
 		},
 	},
@@ -127,7 +133,6 @@ func getProjectHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 
 	project, err := c.GetProject(projectName)
-
 	if err != nil {
 		return fmt.Errorf("error finding project: %s", err)
 	}
@@ -181,7 +186,6 @@ func projectListHandler(ctx *cli.Context) error {
 }
 
 func projectAddSecretHandler(ctx *cli.Context) error {
-	// TODO
 	return nil
 }
 

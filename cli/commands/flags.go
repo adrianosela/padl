@@ -15,16 +15,24 @@ const (
 )
 
 var (
-	// config flags
-	pathFlag = cli.StringFlag{
-		Name:  "path, p",
-		Usage: "override default path",
+	// ConfigFlag is the flag for the padl config file path
+	ConfigFlag = cli.StringFlag{
+		Name:  "config, c",
+		Usage: "override default config file path",
+	}
+	// VerboseFlag enables/disables process logs
+	VerboseFlag = cli.BoolFlag{
+		Name:  "verbose, vv",
+		Usage: "print process logs",
 	}
 	urlFlag = cli.StringFlag{
 		Name:  "url, u",
 		Usage: "host URL to use",
 	}
-
+	pathFlag = cli.StringFlag{
+		Name:  "path, p",
+		Usage: "override default path",
+	}
 	emailFlag = cli.StringFlag{
 		Name:  "email, e",
 		Usage: "user email for authentication",
@@ -57,8 +65,6 @@ var (
 		Name:  "secret",
 		Usage: "secret to decrypt",
 	}
-
-	// option flags
 	jsonFlag = cli.BoolFlag{
 		Name:  "json, j",
 		Usage: "print raw json -- don't pretty print",
@@ -66,6 +72,10 @@ var (
 	fmtFlag = cli.StringFlag{
 		Name:  "fmt",
 		Usage: "preferred padlfile format - one of { \"yaml\", \"json\" }",
+	}
+	privateKeyFlag = cli.StringFlag{
+		Name:  "private-key, k",
+		Usage: "provide a (user's) private key to decrypt",
 	}
 )
 
