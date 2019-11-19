@@ -111,18 +111,18 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	return &listProjResp, nil
 }
 
-// AddUser TODO
-func (p *Padl) AddUser(name string, email string, level int) (string, error) {
+// AddUserToProject TODO
+func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl int) (string, error) {
 	pl := &payloads.AddUserToProjectRequest{
 		Email:        email,
-		PrivilegeLvl: level,
+		PrivilegeLvl: privilegeLvl,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
 		return "", fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(http.MethodPost,
-		fmt.Sprintf("%s/project/%s/user", p.HostURL, name),
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return "", fmt.Errorf("could not build http requests: %s", err)
@@ -141,13 +141,13 @@ func (p *Padl) AddUser(name string, email string, level int) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %s", string(respByt))
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
 	return string(respByt), nil
 }
 
-// RemoveUser TODO
-func (p *Padl) RemoveUser(name string, email string) (string, error) {
+// RemoveUserFromProject TODO
+func (p *Padl) RemoveUserFromProject(projectName string, email string) (string, error) {
 	pl := &payloads.RemoveUserFromProjectRequest{
 		Email: email,
 	}
@@ -156,7 +156,7 @@ func (p *Padl) RemoveUser(name string, email string) (string, error) {
 		return "", fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(http.MethodDelete,
-		fmt.Sprintf("%s/project/%s/user", p.HostURL, name),
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return "", fmt.Errorf("could not build http requests: %s", err)
