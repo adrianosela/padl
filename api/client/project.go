@@ -179,3 +179,27 @@ func (p *Padl) RemoveUserFromProject(projectName string, email string) (string, 
 	}
 	return string(respByt), nil
 }
+
+// DeleteProject TODO
+func (p *Padl) DeleteProject(projectName string) (string, error) {
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/project/%s", p.HostURL, projectName), nil)
+	if err != nil {
+		return "", fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+	return string(respByt), nil
+}

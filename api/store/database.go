@@ -13,6 +13,7 @@ type Database interface {
 	UpdateUser(*user.User) error
 
 	PutProject(*project.Project) error
+	DeleteProject(string) error
 	ProjectNameExists(string) bool
 	GetProject(string) (*project.Project, error)
 	UpdateProject(*project.Project) error

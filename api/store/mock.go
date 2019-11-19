@@ -97,3 +97,12 @@ func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, []stri
 	}
 	return prjs, notFound, nil
 }
+
+// DeleteProject TODO
+func (db *MockDatabase) DeleteProject(projectName string) error {
+	if _, ok := db.projects[projectName]; !ok {
+		return errors.New("project not found")
+	}
+	delete(db.projects, projectName)
+	return nil
+}
