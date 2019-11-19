@@ -168,7 +168,7 @@ func (s *Service) deleteProjectHandler(w http.ResponseWriter, r *http.Request) {
 	err = s.keystore.DeletePubKey(p.ProjectKey)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
+		w.Write([]byte(fmt.Sprintf("unable to delete project's public key: %s", err)))
 	}
 	// delete project's private key
 	err = s.keystore.DeletePrivKey(p.ProjectKey)
