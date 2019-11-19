@@ -110,3 +110,72 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 
 	return &listProjResp, nil
 }
+
+// AddUserToProject TODO
+func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl int) (string, error) {
+	pl := &payloads.AddUserToProjectRequest{
+		Email:        email,
+		PrivilegeLvl: privilegeLvl,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodPost,
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, projectName),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+	return string(respByt), nil
+}
+
+// RemoveUserFromProject TODO
+func (p *Padl) RemoveUserFromProject(projectName string, email string) (string, error) {
+	pl := &payloads.RemoveUserFromProjectRequest{
+		Email: email,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodDelete,
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, projectName),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+	return string(respByt), nil
+}

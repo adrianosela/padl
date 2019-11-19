@@ -185,15 +185,19 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("only owners can add users to a project")))
+		return
+	}
+
 	user.AddProject(p.Name)
 	if err := s.database.UpdateUser(user); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
 		return
 	}
-	/*
-	   TODO: check user has privs for project or else return 403
-	*/
+
 	fmt.Println(claims.Subject) // REMOVE
 	if err = p.AddUser(addUserPl.Email, privilege.Level(addUserPl.PrivilegeLvl)); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -248,15 +252,19 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("only owners can remove users from a project")))
+		return
+	}
+
 	user.RemoveProject(p.Name)
 	if err := s.database.UpdateUser(user); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not update user: %s", err)))
 		return
 	}
-	/*
-	   TODO: check user has privs for project or else return 403
-	*/
+
 	if rmUserPl.Email == claims.Subject {
 		if p.HasUser(claims.Subject) && p.Members[claims.Subject] == privilege.PrivilegeLvlOwner {
 			w.WriteHeader(http.StatusBadRequest)
