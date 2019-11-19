@@ -29,6 +29,15 @@ var ProjectCmds = cli.Command{
 			Action: createProjectHandler,
 		},
 		{
+			Name:  "delete",
+			Usage: "delete a padl project",
+			Flags: []cli.Flag{
+				asMandatory(nameFlag),
+			},
+			Before: deleteProjectValidator,
+			Action: deleteProjectHandler,
+		},
+		{
 			Name:  "get",
 			Usage: "get a padl project by name",
 			Flags: []cli.Flag{
@@ -68,7 +77,7 @@ var ProjectCmds = cli.Command{
 		},
 		{
 			Name:  "remove-secret",
-			Usage: "delete a secret to a project",
+			Usage: "delete a secret from a project",
 			Flags: []cli.Flag{
 				privateKeyFlag,
 				jsonFlag,
@@ -106,6 +115,10 @@ func addUserValidator(ctx *cli.Context) error {
 
 func createProjectValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, descriptionFlag)
+}
+
+func deleteProjectValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag)
 }
 
 func getProjectValidator(ctx *cli.Context) error {
@@ -238,7 +251,7 @@ func addUserHandler(ctx *cli.Context) error {
 	email := ctx.String(name(emailFlag))
 	privLevel := ctx.Int(name(privFlag))
 
-	ok, err := c.AddUser(projectName, email, privLevel)
+	ok, err := c.AddUserToProject(projectName, email, privLevel)
 	if err != nil {
 		return fmt.Errorf("error adding user: %s", err)
 	}
@@ -255,9 +268,24 @@ func removeUserHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	email := ctx.String(name(emailFlag))
 
-	ok, err := c.RemoveUser(projectName, email)
+	ok, err := c.RemoveUserFromProject(projectName, email)
 	if err != nil {
 		return fmt.Errorf("error removing user: %s", err)
+	}
+	fmt.Println(ok)
+	return nil
+}
+
+func deleteProjectHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	ok, err := c.DeleteProject(projectName)
+	if err != nil {
+		return fmt.Errorf("error deleting project: %s", err)
 	}
 	fmt.Println(ok)
 	return nil

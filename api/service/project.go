@@ -145,7 +145,46 @@ func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) deleteProjectHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented) // TODO
+	claims := GetClaims(r)
+	var name string
+	if name = mux.Vars(r)["name"]; name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no project Name in request URL"))
+		return
+	}
+	p, err := s.database.GetProject(name)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
+		return
+	}
+
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("only owners can delete a project")))
+		return
+	}
+	// delete project's public key
+	err = s.keystore.DeletePubKey(p.ProjectKey)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
+	}
+	// delete project's private key
+	err = s.keystore.DeletePrivKey(p.ProjectKey)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
+	}
+	// delete project
+	err = s.database.DeleteProject(name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to delete project: %s", err)))
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("project %s deleted successfully!", name)))
 }
 
 func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
