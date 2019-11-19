@@ -7,7 +7,7 @@ import (
 
 	"github.com/adrianosela/padl/lib/keys"
 	jwt "github.com/dgrijalva/jwt-go"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 // CustomClaims represents claims we wish to make and verify with JWTs
@@ -32,7 +32,7 @@ func NewCustomClaims(sub, aud, iss string, lifetime time.Duration, projects []st
 		StandardClaims: jwt.StandardClaims{
 			Audience:  aud,
 			ExpiresAt: time.Now().Add(lifetime).Unix(),
-			Id:        uuid.Must(uuid.NewV4()).String(),
+			Id:        uuid.New().String(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    iss,
 			Subject:   sub,
