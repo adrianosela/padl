@@ -110,3 +110,72 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 
 	return &listProjResp, nil
 }
+
+// AddUser TODO
+func (p *Padl) AddUser(name string, email string, level int) (string, error) {
+	pl := &payloads.AddUserToProjectRequest{
+		Email:        email,
+		PrivilegeLvl: level,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodPost,
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, name),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %s", string(respByt))
+	}
+	return string(respByt), nil
+}
+
+// RemoveUser TODO
+func (p *Padl) RemoveUser(name string, email string) (string, error) {
+	pl := &payloads.RemoveUserFromProjectRequest{
+		Email: email,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return "", fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodDelete,
+		fmt.Sprintf("%s/project/%s/user", p.HostURL, name),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return "", fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+	return string(respByt), nil
+}

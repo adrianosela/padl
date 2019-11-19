@@ -76,7 +76,32 @@ var ProjectCmds = cli.Command{
 			Before: checkCanModifyPadlFile,
 			Action: projectRemoveSecretHandler,
 		},
+		{
+			Name:  "add-user",
+			Usage: "add a user to a project",
+			Flags: []cli.Flag{
+				asMandatory(nameFlag),
+				asMandatory(emailFlag),
+				asMandatoryInt(privFlag),
+			},
+			Before: addUserValidator,
+			Action: addUserHandler,
+		},
+		{
+			Name:  "remove-user",
+			Usage: "remove a user from a project",
+			Flags: []cli.Flag{
+				asMandatory(nameFlag),
+				asMandatory(emailFlag),
+			},
+			Before: removeUserValidator,
+			Action: removeUserHandler,
+		},
 	},
+}
+
+func addUserValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag, emailFlag, privFlag)
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -85,6 +110,10 @@ func createProjectValidator(ctx *cli.Context) error {
 
 func getProjectValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag)
+}
+
+func removeUserValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag, emailFlag)
 }
 
 func createProjectHandler(ctx *cli.Context) error {
@@ -196,5 +225,40 @@ func projectUpdateSecretHandler(ctx *cli.Context) error {
 
 func projectRemoveSecretHandler(ctx *cli.Context) error {
 	// TODO
+	return nil
+}
+
+func addUserHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	email := ctx.String(name(emailFlag))
+	privLevel := ctx.Int(name(privFlag))
+
+	ok, err := c.AddUser(projectName, email, privLevel)
+	if err != nil {
+		return fmt.Errorf("error adding user: %s", err)
+	}
+	fmt.Println(ok)
+	return nil
+}
+
+func removeUserHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	email := ctx.String(name(emailFlag))
+
+	ok, err := c.RemoveUser(projectName, email)
+	if err != nil {
+		return fmt.Errorf("error removing user: %s", err)
+	}
+	fmt.Println(ok)
 	return nil
 }
