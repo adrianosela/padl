@@ -56,55 +56,67 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
-			Name:  "add-secret",
-			Usage: "add a secret to a project",
-			Flags: []cli.Flag{
-				privateKeyFlag,
-				jsonFlag,
+			Name:  "secret",
+			Usage: "manage secrets for project",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a secret to a project",
+					Flags: []cli.Flag{
+						privateKeyFlag,
+						jsonFlag,
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectAddSecretHandler,
+				},
+				{
+					Name:  "update",
+					Usage: "update a secret in a project",
+					Flags: []cli.Flag{
+						privateKeyFlag,
+						jsonFlag,
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectUpdateSecretHandler,
+				},
+				{
+					Name:  "remove",
+					Usage: "delete a secret from a project",
+					Flags: []cli.Flag{
+						privateKeyFlag,
+						jsonFlag,
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectRemoveSecretHandler,
+				},
 			},
-			Before: checkCanModifyPadlFile,
-			Action: projectAddSecretHandler,
 		},
 		{
-			Name:  "update-secret",
-			Usage: "update a secret in a project",
-			Flags: []cli.Flag{
-				privateKeyFlag,
-				jsonFlag,
+			Name:  "user",
+			Usage: "manage users for project",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a user to a project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(emailFlag),
+						asMandatoryInt(privFlag),
+					},
+					Before: addUserValidator,
+					Action: addUserHandler,
+				},
+				{
+					Name:  "remove",
+					Usage: "remove a user from a project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(emailFlag),
+					},
+					Before: removeUserValidator,
+					Action: removeUserHandler,
+				},
 			},
-			Before: checkCanModifyPadlFile,
-			Action: projectUpdateSecretHandler,
-		},
-		{
-			Name:  "remove-secret",
-			Usage: "delete a secret from a project",
-			Flags: []cli.Flag{
-				privateKeyFlag,
-				jsonFlag,
-			},
-			Before: checkCanModifyPadlFile,
-			Action: projectRemoveSecretHandler,
-		},
-		{
-			Name:  "add-user",
-			Usage: "add a user to a project",
-			Flags: []cli.Flag{
-				asMandatory(nameFlag),
-				asMandatory(emailFlag),
-				asMandatoryInt(privFlag),
-			},
-			Before: addUserValidator,
-			Action: addUserHandler,
-		},
-		{
-			Name:  "remove-user",
-			Usage: "remove a user from a project",
-			Flags: []cli.Flag{
-				asMandatory(nameFlag),
-				asMandatory(emailFlag),
-			},
-			Before: removeUserValidator,
-			Action: removeUserHandler,
 		},
 	},
 }
