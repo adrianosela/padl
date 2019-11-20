@@ -49,6 +49,10 @@ var (
 		Name:  "name",
 		Usage: "resource name",
 	}
+	keyNameFlag = cli.StringFlag{
+		Name:  "keyname",
+		Usage: "deploy key name",
+	}
 	descriptionFlag = cli.StringFlag{
 		Name:  "description",
 		Usage: "resource description",

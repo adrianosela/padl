@@ -105,6 +105,33 @@ var ProjectCmds = cli.Command{
 			},
 		},
 		{
+			Name:  "deploykey",
+			Usage: "manage secrets for project",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a deploy key to the project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(keyNameFlag),
+						descriptionFlag,
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectAddDeployKeyHandler,
+				},
+				{
+					Name:  "remove",
+					Usage: "remove a deploy key from the project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(keyNameFlag),
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectRemoveDeployKeyHandler,
+				},
+			},
+		},
+		{
 			Name:  "user",
 			Usage: "manage users for project",
 			Subcommands: []cli.Command{
@@ -341,6 +368,35 @@ func projectRemoveSecretHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not write padlfile: %s", err)
 	}
 	fmt.Println("padlfile updated!")
+	return nil
+}
+
+func projectAddDeployKeyHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	keyName := ctx.String(name(keyNameFlag))
+	description := ctx.String(name(descriptionFlag))
+
+	resp, err := c.CreateDeployKey(projectName, keyName, description)
+	if err != nil {
+		return fmt.Errorf("error creating a deploy key: %s", err)
+	}
+
+	fmt.Println(resp.Token)
+
+	//TODO Generate a user "deploy" key
+
+	//TODO Generate a file to store token and key
+
+	return nil
+}
+
+func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
+	// TODO
 	return nil
 }
 
