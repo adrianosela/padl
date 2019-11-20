@@ -429,10 +429,19 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
 		return
 	}
-	/*
-	 TODO: check user is in project or else return 401
-	*/
-	fmt.Println(claims.Subject) // REMOVE
+
+	if _, ok := p.Members[claims.Subject]; !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
+		return
+	}
+
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("Only Owners can remove deploy Keys")))
+		return
+	}
+
 	// update project
 	p.RemoveDeployKey(deleteKeyPl.DeployKeyName)
 	if err := s.database.UpdateProject(p); err != nil {
