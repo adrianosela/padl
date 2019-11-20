@@ -55,7 +55,7 @@ func (s *Shard) Encrypt(k *rsa.PublicKey) (*EncryptedShard, error) {
 	}, nil
 }
 
-func (es *EncryptedShard) decrypt(k *rsa.PrivateKey) (*Shard, error) {
+func (es *EncryptedShard) Decrypt(k *rsa.PrivateKey) (*Shard, error) {
 	fp := keys.GetFingerprint(&k.PublicKey)
 	if es.KeyID != fp {
 		return nil, errors.New(ErrMsgIncorrectDecryptionKey)

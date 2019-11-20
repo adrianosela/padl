@@ -261,6 +261,7 @@ func projectSetSecretHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not read padlfile: %s", err)
 	}
+
 	// get key panager
 	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
 	if err != nil {
@@ -296,6 +297,10 @@ func projectShowSecretHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not read padlfile: %s", err)
 	}
+
+	if _, ok := pf.Data.Variables[sName]; !ok {
+		return fmt.Errorf("secret %s not in padlfile", sName)
+	}
 	// get key panager
 	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
 	if err != nil {
@@ -324,6 +329,10 @@ func projectRemoveSecretHandler(ctx *cli.Context) error {
 	pf, err := padlfile.ReadPadlfile(path)
 	if err != nil {
 		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+
+	if _, ok := pf.Data.Variables[sName]; !ok {
+		return fmt.Errorf("secret %s not in padlfile", sName)
 	}
 	// delete var
 	delete(pf.Data.Variables, sName)
