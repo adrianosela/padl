@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 
 func (s *Service) addKeyEndpoints() {
 	s.Router.Methods(http.MethodGet).Path("/key/{kid}").HandlerFunc(s.getPubKeyHandler) // note no auth
-	s.Router.Methods(http.MethodGet).Path("/key/{kid}/decrypt").Handler(s.Auth(s.decryptSecretHandler))
+	s.Router.Methods(http.MethodPost).Path("/key/{kid}/decrypt").Handler(s.Auth(s.decryptSecretHandler))
 }
 
 func (s *Service) getPubKeyHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,14 +58,14 @@ func (s *Service) decryptSecretHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// get payload
-	var decrpytPl *payloads.DecryptSecretRequest
-	if err := unmarshalRequestBody(r, &decrpytPl); err != nil {
+	var decryptPl *payloads.DecryptSecretRequest
+	if err := unmarshalRequestBody(r, &decryptPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
 		return
 	}
 	// validate payload
-	if err := decrpytPl.Validate(); err != nil {
+	if err := decryptPl.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not validate decrypt secret request: %s", err)))
 		return
@@ -92,15 +93,22 @@ func (s *Service) decryptSecretHandler(w http.ResponseWriter, r *http.Request) {
 	// decode pem
 	pkey, err := keys.DecodePrivKeyPEM([]byte(key.PEM))
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("could not decode pem"))
 		return
 	}
-	// decrypt secret
-	message, err := keys.DecryptMessage([]byte(decrpytPl.Secret), pkey)
+	// decode secret
+	raw, err := base64.StdEncoding.DecodeString(decryptPl.Secret)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("could not decrypt secret"))
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("secret is not base64 encoded"))
+		return
+	}
+	// decrypt secret
+	message, err := keys.DecryptMessage(raw, pkey)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not decrypt secret: %s", err)))
 		return
 	}
 	// send success

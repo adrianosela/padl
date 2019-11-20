@@ -43,7 +43,7 @@ func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
 		return "", fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(
-		http.MethodGet,
+		http.MethodPost,
 		fmt.Sprintf("%s/key/%s/decrypt", p.HostURL, kid),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
