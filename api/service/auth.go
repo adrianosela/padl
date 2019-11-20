@@ -87,7 +87,7 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.authenticator.GenerateJWTForUser(loginPl.Email, user.Projects)
+	token, err := s.authenticator.GenerateJWTForUser(user.Email)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error())) // fixme: if this happens we want to know
