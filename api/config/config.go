@@ -19,14 +19,15 @@ type Config struct {
 	Port       string `yaml:"port"`
 	Debug      bool   `yaml:"debug"`
 
-	Database struct {
-		ConnectionString       string `yaml:"connectionString"`
-		Name                   string `yaml:"name"`
+	MongoDB struct {
+		Name             string `yaml:"name"`
+		ConnectionString string `yaml:"connectionString"`
+
 		UsersCollectionName    string `yaml:"usersCollectionName"`
 		ProjectsCollectionName string `yaml:"projectsCollectionName"`
 		PrivKeysCollectionName string `yaml:"privKeysCollectionName"`
 		PubKeysCollectionName  string `yaml:"pubKeysCollectionName"`
-	} `yaml:"database"`
+	} `yaml:"mongodb"`
 
 	Auth struct {
 		SigningKey string `yaml:"signingKey"`
