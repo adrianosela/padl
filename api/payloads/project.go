@@ -2,6 +2,7 @@ package payloads
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/adrianosela/padl/api/project"
 )
@@ -87,6 +88,9 @@ func (r *DeleteDeployKeyRequest) Validate() error {
 func (p *NewProjectRequest) Validate() error {
 	if p.Name == "" {
 		return errors.New("no project name provided")
+	}
+	if strings.Contains(p.Name, " ") {
+		return errors.New("no space characters allowed for project name")
 	}
 	if p.Description == "" {
 		return errors.New("no project description provided")
