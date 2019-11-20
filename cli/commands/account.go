@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -91,7 +90,6 @@ func createAccountHandler(ctx *cli.Context) error {
 	}
 
 	// save private key in filesystem
-	// TODO: password encrypt
 	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
 	if err != nil {
 		return fmt.Errorf("could not establish key manager: %s", err)
@@ -165,12 +163,7 @@ func showAccountHandler(ctx *cli.Context) error {
 	}
 
 	if ctx.Bool(name(jsonFlag)) {
-		byt, err := json.Marshal(claims)
-		if err != nil {
-			return fmt.Errorf("could not marshal claims object: %s", err)
-		}
-		fmt.Println(string(byt))
-		return nil
+		return printJSON(&claims)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
