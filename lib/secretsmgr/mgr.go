@@ -78,46 +78,51 @@ func (smgr *SecretsMgr) DecryptPadlFileSecrets(filesystemKeyID string) (map[stri
 	return decrypted, nil
 }
 
+// EncryptSecret encrypts a single secret
+func (smgr *SecretsMgr) EncryptSecret(plaintext string) (string, error) {
+	pubs, err := smgr.PrecachePubs()
+	if err != nil {
+		return "", fmt.Errorf("could not precache public keys: %s", err)
+	}
+
+	// we need as many parts as we have keys
+	parts, err := shamir.Split([]byte(plaintext), len(smgr.padlFile.Data.MemberKeys)+1, 2)
+	if err != nil {
+		return "", fmt.Errorf("could not split plaintext secret: %s", err)
+	}
+
+	s := secret.Secret{Shards: []*secret.EncryptedShard{}}
+
+	for i, part := range parts {
+		plainShard, err := secret.NewShard(part)
+		if err != nil {
+			return "", fmt.Errorf("could not build shard: %s", err)
+		}
+		encShard, err := plainShard.Encrypt(pubs[i])
+		if err != nil {
+			return "", fmt.Errorf("could not encrypt shard: %s", err)
+		}
+		s.Shards = append(s.Shards, encShard)
+	}
+
+	padlPEMSecret, err := s.EncodePEM()
+	if err != nil {
+		return "", fmt.Errorf("could not PEM encode secret: %s", err)
+	}
+
+	return padlPEMSecret, nil
+}
+
 // EncryptPadlfileSecrets uses the network and the file system to encrypt
 // the contents of a padlfile
 func (smgr *SecretsMgr) EncryptPadlfileSecrets() (map[string]string, error) {
-	pubs, err := smgr.PrecachePubs()
-	if err != nil {
-		return nil, fmt.Errorf("could not precache public keys: %s", err)
-	}
-
+	var err error
 	encrypted := make(map[string]string)
-
 	for varName, plaintext := range smgr.padlFile.Data.Variables {
-		// we need as many parts as we have keys
-		parts, err := shamir.Split([]byte(plaintext), len(smgr.padlFile.Data.MemberKeys)+1, 2)
-		if err != nil {
-			return nil, fmt.Errorf("could not split plaintext secret for %s: %s", varName, err)
+		if encrypted[varName], err = smgr.EncryptSecret(plaintext); err != nil {
+			return nil, fmt.Errorf("could not encrypt var %s: %s", varName, err)
 		}
-
-		s := secret.Secret{Shards: []*secret.EncryptedShard{}}
-
-		for i, part := range parts {
-			plainShard, err := secret.NewShard(part)
-			if err != nil {
-				return nil, fmt.Errorf("could not build shard for %s: %s", varName, err)
-			}
-			encShard, err := plainShard.Encrypt(pubs[i])
-			if err != nil {
-				return nil, fmt.Errorf("could not encrypt shard for %s: %s", varName, err)
-			}
-			s.Shards = append(s.Shards, encShard)
-		}
-
-		padlPEMSecret, err := s.EncodePEM()
-		if err != nil {
-			return nil, fmt.Errorf("could not PEM encode secret for %s: %s", varName, err)
-		}
-
-		// add encrypted/encoded secret to padlfile
-		encrypted[varName] = padlPEMSecret
 	}
-
 	return encrypted, nil
 }
 

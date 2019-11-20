@@ -5,6 +5,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/adrianosela/padl/cli/config"
+	"github.com/adrianosela/padl/lib/keymgr"
+	"github.com/adrianosela/padl/lib/padlfile"
+	"github.com/adrianosela/padl/lib/secretsmgr"
 	"github.com/olekukonko/tablewriter"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -60,31 +64,27 @@ var ProjectCmds = cli.Command{
 			Usage: "manage secrets for project",
 			Subcommands: []cli.Command{
 				{
-					Name:  "add",
-					Usage: "add a secret to a project",
+					Name:  "set",
+					Usage: "set a secret in a project",
 					Flags: []cli.Flag{
-						privateKeyFlag,
-						jsonFlag,
+						asMandatory(nameFlag),
+						asMandatory(secretFlag),
+						withDefault(fmtFlag, "yaml"),
+						privateKeyFlag, // set by BeforeFunc
+						pathFlag,
 					},
 					Before: checkCanModifyPadlFile,
-					Action: projectAddSecretHandler,
-				},
-				{
-					Name:  "update",
-					Usage: "update a secret in a project",
-					Flags: []cli.Flag{
-						privateKeyFlag,
-						jsonFlag,
-					},
-					Before: checkCanModifyPadlFile,
-					Action: projectUpdateSecretHandler,
+					Action: projectSetSecretHandler,
 				},
 				{
 					Name:  "remove",
 					Usage: "delete a secret from a project",
 					Flags: []cli.Flag{
-						privateKeyFlag,
-						jsonFlag,
+						asMandatory(nameFlag),
+						asMandatory(secretFlag),
+						withDefault(fmtFlag, "yaml"),
+						privateKeyFlag, // set by BeforeFunc
+						pathFlag,
 					},
 					Before: checkCanModifyPadlFile,
 					Action: projectRemoveSecretHandler,
@@ -147,19 +147,12 @@ func createProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	path := ctx.String(name(pathFlag))
 	pname := ctx.String(name(nameFlag))
 	bits := ctx.Int(name(bitsFlag))
 	descr := ctx.String(name(descriptionFlag))
 	format := ctx.String(name(fmtFlag))
 
-	if path == "" {
-		if format == "yaml" {
-			path = "./.padlfile.yaml"
-		} else {
-			path = "./.padlfile.json"
-		}
-	}
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
 
 	if !strings.HasSuffix(path, ".json") && !strings.HasSuffix(path, ".yaml") {
 		return fmt.Errorf("invalid file extension, must be one of { \".yaml\", \".json\" }")
@@ -239,17 +232,58 @@ func projectListHandler(ctx *cli.Context) error {
 	return nil
 }
 
-func projectAddSecretHandler(ctx *cli.Context) error {
-	return nil
-}
+func projectSetSecretHandler(ctx *cli.Context) error {
+	sName := ctx.String(name(nameFlag))
+	plaintext := ctx.String(name(secretFlag))
+	format := ctx.String(name(fmtFlag))
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
 
-func projectUpdateSecretHandler(ctx *cli.Context) error {
-	// TODO
+	// get client
+	pc, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not get client: %s", err)
+	}
+	// read padlfile
+	pf, err := padlfile.ReadPadlfile(path)
+	if err != nil {
+		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+	// get key panager
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+	secMgr := secretsmgr.NewSecretsMgr(pc, keyMgr, pf)
+	// encrypt secret and add to padlfile
+	encrypted, err := secMgr.EncryptSecret(plaintext)
+	if err != nil {
+		return fmt.Errorf("could not encrypt secret %s: %s", sName, err)
+	}
+	pf.Data.Variables[sName] = encrypted
+	if err = pf.Write(path); err != nil {
+		return fmt.Errorf("could not write padlfile: %s", err)
+	}
+	fmt.Println("padlfile updated!")
 	return nil
 }
 
 func projectRemoveSecretHandler(ctx *cli.Context) error {
-	// TODO
+	sName := ctx.String(name(nameFlag))
+	format := ctx.String(name(fmtFlag))
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
+
+	// read padlfile
+	pf, err := padlfile.ReadPadlfile(path)
+	if err != nil {
+		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+	// delete var
+	delete(pf.Data.Variables, sName)
+	// write padlfile
+	if err = pf.Write(path); err != nil {
+		return fmt.Errorf("could not write padlfile: %s", err)
+	}
+	fmt.Println("padlfile updated!")
 	return nil
 }
 
@@ -301,4 +335,14 @@ func deleteProjectHandler(ctx *cli.Context) error {
 	}
 	fmt.Println(ok)
 	return nil
+}
+
+func padlfilePath(path, fmt string) string {
+	if path == "" {
+		if fmt == "yaml" {
+			return "./.padlfile.yaml"
+		}
+		return "./.padlfile.json"
+	}
+	return path
 }

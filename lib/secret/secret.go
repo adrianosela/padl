@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	pemBlockType       = "MULTIKEY ENCRYPTED SECRET"
+	pemBlockType       = "PADL ENCRYPTED SECRET"
 	simpleFmtSeparator = "\n"
 
 	ErrMsgInvalidSimpleFmt  = "bad format"
