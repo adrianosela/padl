@@ -42,7 +42,13 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// check name is unique before doing anything
-	if s.database.ProjectNameExists(projPl.Name) {
+	exists, err := s.database.ProjectNameExists(projPl.Name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not check if project exists %s", err)))
+		return
+	}
+	if exists {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("provided project name is taken")))
 		return
@@ -430,7 +436,7 @@ func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	names := claims.Projects
 
-	projects, _, err := s.database.ListProjects(names)
+	projects, err := s.database.ListProjects(names)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get list of projects: %s", err)))
