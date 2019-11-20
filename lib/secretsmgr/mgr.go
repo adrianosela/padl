@@ -30,52 +30,61 @@ func NewSecretsMgr(client *client.Padl, keyMgr keymgr.Manager, pf *padlfile.File
 
 // DecryptPadlFileSecrets uses the network and the file system to decrypt
 // the contents of a padlfile
-func (smgr *SecretsMgr) DecryptPadlFileSecrets(filesystemKeyID string) (map[string]string, error) {
+func (smgr *SecretsMgr) DecryptPadlFileSecrets(fsKeyID string) (map[string]string, error) {
 	decrypted := make(map[string]string)
 
 	for varName, encrypted := range smgr.padlFile.Data.Variables {
-		sec, err := secret.DecodePEM(encrypted)
+		plain, err := smgr.DecryptSecret(encrypted, fsKeyID)
 		if err != nil {
-			return nil, fmt.Errorf("could not decode padlfile var: %s, body %s. %s", varName, encrypted, err)
-		}
-
-		parts := [][]byte{}
-
-		for _, sh := range sec.Shards {
-			if sh.KeyID == smgr.padlFile.Data.SharedKey {
-				decryptedSharedShard, err := smgr.client.DecryptSecret(sh.Value, sh.KeyID)
-				if err != nil {
-					return nil, fmt.Errorf("could not decrypt shared shard for var: %s. %s", varName, err)
-				}
-				parts = append(parts, []byte(decryptedSharedShard))
-			} else if sh.KeyID == filesystemKeyID {
-				priv, err := smgr.keyManager.GetPriv(filesystemKeyID)
-				if err != nil {
-					return nil, fmt.Errorf("could not get private key from filesystem: %s", err)
-				}
-				k, err := keys.DecodePrivKeyPEM([]byte(priv))
-				if err != nil {
-					return nil, fmt.Errorf("could not decode RSA private key: %s", err)
-				}
-				decryptedUserShard, err := keys.DecryptMessage([]byte(sh.Value), k)
-				if err != nil {
-					return nil, fmt.Errorf("could not decrypt user shard for var: %s. %s", varName, err)
-				}
-				parts = append(parts, decryptedUserShard)
-			}
-		}
-
-		if len(parts) < 2 {
-			return nil, fmt.Errorf("could not decrypt necessary parts for var: %s", varName)
-		}
-		plain, err := shamir.Combine(parts)
-		if err != nil {
-			return nil, fmt.Errorf("could not shamir.Combine decrypted parts for var: %s. %s", varName, err)
+			return nil, fmt.Errorf("could not decrypt secret for var %s: %s", varName, err)
 		}
 		decrypted[varName] = string(plain)
 	}
 
 	return decrypted, nil
+}
+
+// DecryptSecret ecrypts a single pem encoded secret
+func (smgr *SecretsMgr) DecryptSecret(ciphertext, fsKeyID string) (string, error) {
+	sec, err := secret.DecodePEM(ciphertext)
+	if err != nil {
+		return "", fmt.Errorf("could not decode PEM secret %s", err)
+	}
+
+	parts := [][]byte{}
+	for _, sh := range sec.Shards {
+		if sh.KeyID == smgr.padlFile.Data.SharedKey {
+			decryptedSharedShard, err := smgr.client.DecryptSecret(sh.Value, sh.KeyID)
+			if err != nil {
+				return "", fmt.Errorf("could not decrypt shared shard: %s", err)
+			}
+			parts = append(parts, []byte(decryptedSharedShard))
+		} else if sh.KeyID == fsKeyID {
+			priv, err := smgr.keyManager.GetPriv(fsKeyID)
+			if err != nil {
+				return "", fmt.Errorf("could not get private key from filesystem: %s", err)
+			}
+			k, err := keys.DecodePrivKeyPEM([]byte(priv))
+			if err != nil {
+				return "", fmt.Errorf("could not decode RSA private key: %s", err)
+			}
+			decryptedUserShard, err := keys.DecryptMessage([]byte(sh.Value), k)
+			if err != nil {
+				return "", fmt.Errorf("could not decrypt user shard: %s", err)
+			}
+			parts = append(parts, decryptedUserShard)
+		}
+	}
+
+	if len(parts) < 2 {
+		return "", fmt.Errorf("could not decrypt necessary parts for var")
+	}
+	plain, err := shamir.Combine(parts)
+	if err != nil {
+		return "", fmt.Errorf("could not shamir.Combine decrypted parts: %s", err)
+	}
+
+	return string(plain), nil
 }
 
 // EncryptSecret encrypts a single secret
