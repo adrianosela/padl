@@ -30,11 +30,11 @@ func NewSecretsMgr(client *client.Padl, keyMgr keymgr.Manager, pf *padlfile.File
 
 // DecryptPadlFileSecrets uses the network and the file system to decrypt
 // the contents of a padlfile
-func (smgr *SecretsMgr) DecryptPadlFileSecrets(fsKeyID string) (map[string]string, error) {
+func (smgr *SecretsMgr) DecryptPadlFileSecrets(userPriv *rsa.PrivateKey) (map[string]string, error) {
 	decrypted := make(map[string]string)
 
 	for varName, encrypted := range smgr.padlFile.Data.Variables {
-		plain, err := smgr.DecryptSecret(encrypted, fsKeyID)
+		plain, err := smgr.DecryptSecret(encrypted, userPriv)
 		if err != nil {
 			return nil, fmt.Errorf("could not decrypt secret for var %s: %s", varName, err)
 		}
@@ -45,7 +45,7 @@ func (smgr *SecretsMgr) DecryptPadlFileSecrets(fsKeyID string) (map[string]strin
 }
 
 // DecryptSecret ecrypts a single pem encoded secret
-func (smgr *SecretsMgr) DecryptSecret(ciphertext, fsKeyID string) (string, error) {
+func (smgr *SecretsMgr) DecryptSecret(ciphertext string, userPriv *rsa.PrivateKey) (string, error) {
 	sec, err := secret.DecodePEM(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf("could not decode PEM secret %s", err)
@@ -59,16 +59,8 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext, fsKeyID string) (string, error
 				return "", fmt.Errorf("could not decrypt shared shard: %s", err)
 			}
 			parts = append(parts, []byte(decryptedSharedShard))
-		} else if sh.KeyID == fsKeyID {
-			priv, err := smgr.keyManager.GetPriv(fsKeyID)
-			if err != nil {
-				return "", fmt.Errorf("could not get private key from filesystem: %s", err)
-			}
-			k, err := keys.DecodePrivKeyPEM([]byte(priv))
-			if err != nil {
-				return "", fmt.Errorf("could not decode RSA private key: %s", err)
-			}
-			decryptedUserShard, err := keys.DecryptMessage([]byte(sh.Value), k)
+		} else if sh.KeyID == keys.GetFingerprint(&userPriv.PublicKey) {
+			decryptedUserShard, err := keys.DecryptMessage([]byte(sh.Value), userPriv)
 			if err != nil {
 				return "", fmt.Errorf("could not decrypt user shard: %s", err)
 			}

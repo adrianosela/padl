@@ -7,6 +7,7 @@ import (
 
 	"github.com/adrianosela/padl/cli/config"
 	"github.com/adrianosela/padl/lib/keymgr"
+	"github.com/adrianosela/padl/lib/keys"
 	"github.com/adrianosela/padl/lib/padlfile"
 	"github.com/adrianosela/padl/lib/secretsmgr"
 	"github.com/olekukonko/tablewriter"
@@ -75,6 +76,18 @@ var ProjectCmds = cli.Command{
 					},
 					Before: checkCanModifyPadlFile,
 					Action: projectSetSecretHandler,
+				},
+				{
+					Name:  "show",
+					Usage: "see a specific secret in a project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						withDefault(fmtFlag, "yaml"),
+						privateKeyFlag, // set by BeforeFunc
+						pathFlag,
+					},
+					Before: checkCanModifyPadlFile,
+					Action: projectShowSecretHandler,
 				},
 				{
 					Name:  "remove",
@@ -264,6 +277,41 @@ func projectSetSecretHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not write padlfile: %s", err)
 	}
 	fmt.Println("padlfile updated!")
+	return nil
+}
+
+func projectShowSecretHandler(ctx *cli.Context) error {
+	sName := ctx.String(name(nameFlag))
+	format := ctx.String(name(fmtFlag))
+	priv := ctx.String(name(privateKeyFlag))
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
+
+	// get client
+	pc, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not get client: %s", err)
+	}
+	// read padlfile
+	pf, err := padlfile.ReadPadlfile(path)
+	if err != nil {
+		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+	// get key panager
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+	secMgr := secretsmgr.NewSecretsMgr(pc, keyMgr, pf)
+	// decrypted secret and print it
+	rsa, err := keys.DecodePrivKeyPEM([]byte(priv))
+	if err != nil {
+		return fmt.Errorf("could not materialize user private key: %s", err)
+	}
+	decrypted, err := secMgr.DecryptSecret(pf.Data.Variables[sName], rsa)
+	if err != nil {
+		return fmt.Errorf("could not decrypt secret %s: %s", sName, err)
+	}
+	fmt.Println(decrypted)
 	return nil
 }
 
