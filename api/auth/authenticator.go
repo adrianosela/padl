@@ -7,8 +7,11 @@ import (
 )
 
 const (
-	defaultPadlIssuer   = "padl.adrianosela.com"
-	defaultPadlAudience = "api"
+	defaultPadlIssuer = "padl.adrianosela.com"
+	//PadlAPIAudience user audience for Padl API
+	PadlAPIAudience = "api"
+	//PadlDeployKeyAudience deployKey audience for Padl API
+	PadlDeployKeyAudience = "DeployKey"
 )
 
 // Authenticator is the module in charge of authentication
@@ -31,7 +34,7 @@ func NewAuthenticator(db store.Database, key *rsa.PrivateKey, iss, aud string) *
 		a.iss = defaultPadlIssuer
 	}
 	if a.aud == "" {
-		a.aud = defaultPadlAudience
+		a.aud = PadlAPIAudience
 	}
 	return a
 }
