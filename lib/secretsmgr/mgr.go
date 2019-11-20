@@ -60,11 +60,11 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext string, userPriv *rsa.PrivateKe
 			}
 			parts = append(parts, []byte(decryptedSharedShard))
 		} else if sh.KeyID == keys.GetFingerprint(&userPriv.PublicKey) {
-			decryptedUserShard, err := keys.DecryptMessage([]byte(sh.Value), userPriv)
+			decryptedUserShard, err := sh.Decrypt(userPriv)
 			if err != nil {
 				return "", fmt.Errorf("could not decrypt user shard: %s", err)
 			}
-			parts = append(parts, decryptedUserShard)
+			parts = append(parts, decryptedUserShard.Value)
 		}
 	}
 

@@ -177,7 +177,7 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		s, err := test.encShard.decrypt(test.key)
+		s, err := test.encShard.Decrypt(test.key)
 		if test.expectErr {
 			assert.Nil(t, s, test.testName)
 			assert.EqualError(t, err, test.expectedErr, test.testName)
