@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -66,5 +67,9 @@ func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
 	if err := json.Unmarshal(respByt, &res); err != nil {
 		return "", fmt.Errorf("could not unmarshal http response body: %s", err)
 	}
-	return res.Message, nil
+	decoded, err := base64.StdEncoding.DecodeString(res.Message)
+	if err != nil {
+		return "", fmt.Errorf("could not decode decrypted message: %s", err)
+	}
+	return string(decoded), nil
 }

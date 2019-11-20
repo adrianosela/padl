@@ -112,7 +112,7 @@ func (s *Service) decryptSecretHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// send success
-	mbyt, err := json.Marshal(&payloads.DecryptSecretResponse{Message: string(message)})
+	mbyt, err := json.Marshal(&payloads.DecryptSecretResponse{Message: base64.StdEncoding.EncodeToString(message)})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could marshal response: %s", err)))
