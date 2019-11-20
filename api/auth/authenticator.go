@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	defaultPadlIssuer   = "api.padl.com"
+	defaultPadlIssuer   = "padl.adrianosela.com"
 	defaultPadlAudience = "api"
 )
 
