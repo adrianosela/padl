@@ -181,14 +181,6 @@ func showAccountHandler(ctx *cli.Context) error {
 	table.Append([]string{"iat", strconv.FormatInt(claims.IssuedAt, 10)})
 	table.Append([]string{"exp", strconv.FormatInt(claims.ExpiresAt, 10)})
 	table.Append([]string{"jti", claims.Id})
-
-	for i, proj := range claims.Projects {
-		if i == 0 {
-			table.Append([]string{"proj", proj})
-		} else {
-			table.Append([]string{"", proj})
-		}
-	}
 	table.Render()
 
 	return nil

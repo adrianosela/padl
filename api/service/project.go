@@ -434,9 +434,15 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 
 func (s *Service) listProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
-	names := claims.Projects
 
-	projects, err := s.database.ListProjects(names)
+	user, err := s.database.GetUser(claims.Subject)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not get user from db: %s", err)))
+		return
+	}
+
+	projects, err := s.database.ListProjects(user.Projects)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get list of projects: %s", err)))

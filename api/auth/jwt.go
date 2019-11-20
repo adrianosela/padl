@@ -23,11 +23,11 @@ type CustomClaims struct {
 	Subject   string `json:"sub,omitempty"`
 	_______________________________________
 	*/
-	Projects []string `json:"projects"`
+	// ADD CUSTOM CLAIMS HERE
 }
 
-//NewCustomClaims returns a new CustomClaims object
-func NewCustomClaims(sub, aud, iss string, lifetime time.Duration, projects []string) *CustomClaims {
+// NewCustomClaims returns a new CustomClaims object
+func NewCustomClaims(sub, aud, iss string, lifetime time.Duration) *CustomClaims {
 	return &CustomClaims{
 		StandardClaims: jwt.StandardClaims{
 			Audience:  aud,
@@ -37,7 +37,6 @@ func NewCustomClaims(sub, aud, iss string, lifetime time.Duration, projects []st
 			Issuer:    iss,
 			Subject:   sub,
 		},
-		Projects: projects,
 	}
 }
 
@@ -100,14 +99,13 @@ func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
 	if !cc.VerifyExpiresAt(now, true) {
 		return nil, fmt.Errorf("token is expired")
 	}
-	// verify projects here
 	return &cc, nil
 }
 
 // GenerateJWTForUser generates and signs a token for a given user
-func (a *Authenticator) GenerateJWTForUser(email string, projects []string) (string, error) {
+func (a *Authenticator) GenerateJWTForUser(email string) (string, error) {
 	lifetime := time.Duration(time.Hour * 12)
-	cc := NewCustomClaims(email, a.aud, a.iss, lifetime, projects)
+	cc := NewCustomClaims(email, a.aud, a.iss, lifetime)
 	tk := newJWT(cc, jwt.SigningMethodRS512)
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
