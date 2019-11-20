@@ -55,6 +55,48 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 	return &pf, nil
 }
 
+//CreateDeployKey Creates a new DeployKey
+func (p *Padl) CreateDeployKey(projectName string, keyName string, description string) (*payloads.CreateDeployKeyResponse, error) {
+	pl := &payloads.CreateDeployKeyRequest{
+		DeployKeyName:        keyName,
+		DeployKeyDescription: description,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodPost,
+		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return nil, fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+
+	var createKeyResp payloads.CreateDeployKeyResponse
+
+	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
+		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+
+	return &createKeyResp, nil
+}
+
 // GetProject gets a project by name if the requesting user has access to it
 func (p *Padl) GetProject(name string) (*project.Project, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, name), nil)
