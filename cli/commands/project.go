@@ -395,6 +395,25 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 	return nil
 }
 
+func projectAddRemoveKeyHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	keyName := ctx.String(name(keyNameFlag))
+
+	ok, err := c.RemoveDeployKey(projectName, keyName)
+	if err != nil {
+		return fmt.Errorf("error reomiving a deploy key: %s", err)
+	}
+
+	fmt.Println(ok)
+
+	return nil
+}
+
 func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
 	// TODO
 	return nil
