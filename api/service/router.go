@@ -35,6 +35,16 @@ func NewPadlService(c *config.Config) *Service {
 	if err != nil {
 		log.Fatalf("could not initialize mongodb: %s", err)
 	}
+	// initialize mongodb
+	// ks, err := keystore.NewMongoDB(
+	// 	c.Database.ConnectionString,
+	// 	c.Database.Name,
+	// 	c.Database.PrivKeysCollectionName,
+	//  c.Database.PubKeysCollectionName,
+	// )
+	// if err != nil {
+	// 	log.Fatalf("could not initialize mongodb: %s", err)
+	// }
 	ks := keystore.NewMockKeystore()
 
 	priv, err := keys.DecodePrivKeyPEM([]byte(c.Auth.SigningKey))

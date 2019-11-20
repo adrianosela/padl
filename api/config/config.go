@@ -24,6 +24,8 @@ type Config struct {
 		Name                   string `yaml:"name"`
 		UsersCollectionName    string `yaml:"usersCollectionName"`
 		ProjectsCollectionName string `yaml:"projectsCollectionName"`
+		PrivKeysCollectionName string `yaml:"privKeysCollectionName"`
+		PubKeysCollectionName  string `yaml:"pubKeysCollectionName"`
 	} `yaml:"database"`
 
 	Auth struct {
