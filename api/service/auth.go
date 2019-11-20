@@ -88,7 +88,7 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.authenticator.GenerateJWT(user.Email, auth.PadlAPIAudience)
+	token, _, err := s.authenticator.GenerateJWT(user.Email, auth.PadlAPIAudience)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error())) // fixme: if this happens we want to know

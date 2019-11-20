@@ -38,7 +38,7 @@ type DeleteDeployKeyRequest struct {
 
 // CreateDeployKeyResponse TODO
 type CreateDeployKeyResponse struct {
-	DeployKey string `json:"deployKey"`
+	Token string `json:"token"`
 }
 
 // ListProjectsResponse TODO
