@@ -26,16 +26,15 @@ type Service struct {
 // attached handler functions
 func NewPadlService(c *config.Config) *Service {
 	// initialize mongodb
-	// db, err := store.NewMongoDB(
-	// 	c.Database.ConnectionString,
-	// 	c.Database.Name,
-	// 	c.Database.UsersCollectionName,
-	//  c.Database.ProjectsCollectionName,
-	// )
-	// if err != nil {
-	// 	log.Fatalf("could not initialize mongodb: %s", err)
-	// }
-	db := store.NewMockDatabase()
+	db, err := store.NewMongoDB(
+		c.Database.ConnectionString,
+		c.Database.Name,
+		c.Database.UsersCollectionName,
+		c.Database.ProjectsCollectionName,
+	)
+	if err != nil {
+		log.Fatalf("could not initialize mongodb: %s", err)
+	}
 	ks := keystore.NewMockKeystore()
 
 	priv, err := keys.DecodePrivKeyPEM([]byte(c.Auth.SigningKey))
