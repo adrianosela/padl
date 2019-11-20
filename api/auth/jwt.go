@@ -105,7 +105,7 @@ func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
 }
 
 // GenerateJWT generates and signs a token for a given user
-func (a *Authenticator) GenerateJWT(email string, aud string) (string, error) {
+func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, error) {
 
 	var lifetime time.Duration
 
@@ -114,15 +114,17 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, error) {
 	} else if aud == PadlDeployKeyAudience {
 		lifetime = time.Duration(math.MaxInt32)
 	} else {
-		return "", errors.New("Audience not regonized")
+		return "", "", errors.New("Audience not regonized")
 	}
 
 	cc := NewCustomClaims(email, aud, a.iss, lifetime)
+
+	id := cc.Id
 	tk := newJWT(cc, jwt.SigningMethodRS512)
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return signedTk, nil
+	return signedTk, id, nil
 }

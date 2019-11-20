@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/privilege"
@@ -357,12 +358,24 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
 		return
 	}
-	/*
-	 TODO: check user is in project or else return 401
-	*/
-	fmt.Println(claims.Subject) // REMOVE
-	newDeployKey := "FIXME:MOCKDEPLOYKEY"
-	if err = p.SetDeployKey("mock", newDeployKey); err != nil {
+
+	if _, ok := p.Members[claims.Subject]; !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
+		return
+	}
+
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("Only Owners can create deploy Keys")))
+		return
+	}
+
+	keyEmail := dkeyPl.DeployKeyName + "." + p.Name + "@padl.adrianosela.com"
+
+	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.PadlDeployKeyAudience)
+
+	if err = p.SetDeployKey(dkeyPl.DeployKeyName, keyID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not set new deploy key: %s", err)))
 		return
@@ -375,7 +388,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	}
 	// marshall response
 	byt, err := json.Marshal(&payloads.CreateDeployKeyResponse{
-		DeployKey: newDeployKey,
+		Token: keyToken,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
