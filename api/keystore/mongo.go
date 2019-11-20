@@ -12,15 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MongoDB holds the MongoDB Collection
-type MongoDB struct {
+// MongoDBKeystore holds the MongoDBKeystore Collection
+type MongoDBKeystore struct {
 	privKeysCollection *mongo.Collection
 	pubKeysCollection  *mongo.Collection
 }
 
-// NewMongoDB initializes MongoDB connection
-// returns MongoDB object
-func NewMongoDB(connStr, dbName, privKeysCollName, pubKeysCollName string) (*MongoDB, error) {
+// NewMongoDBKeystore initializes MongoDBKeystore connection
+// returns MongoDBKeystore object
+func NewMongoDBKeystore(connStr, dbName, privKeysCollName, pubKeysCollName string) (*MongoDBKeystore, error) {
 	clientOptions := options.Client().ApplyURI(connStr)
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -32,9 +32,9 @@ func NewMongoDB(connStr, dbName, privKeysCollName, pubKeysCollName string) (*Mon
 		return nil, err
 	}
 
-	log.Println("[info] successfully connected to MongoDB")
+	log.Println("[info] successfully connected to MongoDBKeystore")
 
-	ds := &MongoDB{
+	ds := &MongoDBKeystore{
 		privKeysCollection: client.Database(dbName).Collection(privKeysCollName),
 		pubKeysCollection:  client.Database(dbName).Collection(pubKeysCollName),
 	}
@@ -42,7 +42,7 @@ func NewMongoDB(connStr, dbName, privKeysCollName, pubKeysCollName string) (*Mon
 }
 
 // PutPrivKey adds a new private key to the database
-func (db *MongoDB) PutPrivKey(key *kms.PrivateKey) error {
+func (db *MongoDBKeystore) PutPrivKey(key *kms.PrivateKey) error {
 	_, err := db.privKeysCollection.InsertOne(context.TODO(), key)
 	if err != nil {
 		if strings.LastIndex(err.Error(), "multiple write errors:") != -1 {
@@ -55,8 +55,8 @@ func (db *MongoDB) PutPrivKey(key *kms.PrivateKey) error {
 }
 
 // GetPrivKey gets a private key from the database
-func (db *MongoDB) GetPrivKey(id string) (*kms.PrivateKey, error) {
-	query := bson.D{{"id", id}}
+func (db *MongoDBKeystore) GetPrivKey(id string) (*kms.PrivateKey, error) {
+	query := bson.D{{Key: "id", Value: id}}
 
 	var key kms.PrivateKey
 	err := db.privKeysCollection.FindOne(context.TODO(), query).Decode(&key)
@@ -72,8 +72,8 @@ func (db *MongoDB) GetPrivKey(id string) (*kms.PrivateKey, error) {
 }
 
 // UpdatePrivKey updates a private key in the database
-func (db *MongoDB) UpdatePrivKey(key *kms.PrivateKey) error {
-	query := bson.D{{"id", key.ID}}
+func (db *MongoDBKeystore) UpdatePrivKey(key *kms.PrivateKey) error {
+	query := bson.D{{Key: "id", Value: key.ID}}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -94,8 +94,8 @@ func (db *MongoDB) UpdatePrivKey(key *kms.PrivateKey) error {
 }
 
 // DeletePrivKey deletes a private key from the database
-func (db *MongoDB) DeletePrivKey(id string) error {
-	query := bson.D{{"id", id}}
+func (db *MongoDBKeystore) DeletePrivKey(id string) error {
+	query := bson.D{{Key: "id", Value: id}}
 	res, err := db.privKeysCollection.DeleteOne(context.TODO(), query)
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (db *MongoDB) DeletePrivKey(id string) error {
 }
 
 // PutPubKey adds a new public key to the database
-func (db *MongoDB) PutPubKey(key *kms.PublicKey) error {
+func (db *MongoDBKeystore) PutPubKey(key *kms.PublicKey) error {
 	_, err := db.pubKeysCollection.InsertOne(context.TODO(), key)
 	if err != nil {
 		if strings.LastIndex(err.Error(), "multiple write errors:") != -1 {
@@ -122,9 +122,9 @@ func (db *MongoDB) PutPubKey(key *kms.PublicKey) error {
 	return nil
 }
 
-//
-func (db *MongoDB) GetPubKey(id string) (*kms.PublicKey, error) {
-	query := bson.D{{"id", id}}
+// GetPubKey returns a public key by id
+func (db *MongoDBKeystore) GetPubKey(id string) (*kms.PublicKey, error) {
+	query := bson.D{{Key: "id", Value: id}}
 
 	var key kms.PublicKey
 	err := db.pubKeysCollection.FindOne(context.TODO(), query).Decode(&key)
@@ -140,8 +140,8 @@ func (db *MongoDB) GetPubKey(id string) (*kms.PublicKey, error) {
 }
 
 // DeletePubKey deletes a public key from the database
-func (db *MongoDB) DeletePubKey(id string) error {
-	query := bson.D{{"id", id}}
+func (db *MongoDBKeystore) DeletePubKey(id string) error {
+	query := bson.D{{Key: "id", Value: id}}
 	res, err := db.pubKeysCollection.DeleteOne(context.TODO(), query)
 	if err != nil {
 		return err

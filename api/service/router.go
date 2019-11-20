@@ -25,27 +25,27 @@ type Service struct {
 // NewPadlService returns an HTTP router multiplexer with
 // attached handler functions
 func NewPadlService(c *config.Config) *Service {
-	// initialize mongodb
+	// initialize mongodb store
 	db, err := store.NewMongoDB(
-		c.Database.ConnectionString,
-		c.Database.Name,
-		c.Database.UsersCollectionName,
-		c.Database.ProjectsCollectionName,
+		c.MongoDB.ConnectionString,
+		c.MongoDB.Name,
+		c.MongoDB.UsersCollectionName,
+		c.MongoDB.ProjectsCollectionName,
 	)
 	if err != nil {
-		log.Fatalf("could not initialize mongodb: %s", err)
+		log.Fatalf("could not initialize mongodb store: %s", err)
 	}
-	// initialize mongodb
-	// ks, err := keystore.NewMongoDB(
-	// 	c.Database.ConnectionString,
-	// 	c.Database.Name,
-	// 	c.Database.PrivKeysCollectionName,
-	//  c.Database.PubKeysCollectionName,
-	// )
-	// if err != nil {
-	// 	log.Fatalf("could not initialize mongodb: %s", err)
-	// }
-	ks := keystore.NewMockKeystore()
+
+	// initialize mongodb keystore
+	ks, err := keystore.NewMongoDBKeystore(
+		c.MongoDB.ConnectionString,
+		c.MongoDB.Name,
+		c.MongoDB.PrivKeysCollectionName,
+		c.MongoDB.PubKeysCollectionName,
+	)
+	if err != nil {
+		log.Fatalf("could not initialize mongodb keystore: %s", err)
+	}
 
 	priv, err := keys.DecodePrivKeyPEM([]byte(c.Auth.SigningKey))
 	if err != nil {
@@ -57,7 +57,7 @@ func NewPadlService(c *config.Config) *Service {
 		config:        c,
 		database:      db,
 		keystore:      ks,
-		authenticator: auth.NewAuthenticator(db, priv, "api.padl.com", "api"),
+		authenticator: auth.NewAuthenticator(db, priv, "padl.adrianosela.com", "api"),
 	}
 
 	svc.addDebugEndpoints()

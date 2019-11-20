@@ -53,7 +53,7 @@ func (db *MongoDB) PutUser(user *user.User) error {
 
 // GetUser gets a user from the database
 func (db *MongoDB) GetUser(email string) (*user.User, error) {
-	query := bson.D{{"email", email}}
+	query := bson.D{{Key: "email", Value: email}}
 
 	var user user.User
 	err := db.usersCollection.FindOne(context.TODO(), query).Decode(&user)
@@ -66,7 +66,7 @@ func (db *MongoDB) GetUser(email string) (*user.User, error) {
 
 // UpdateUser updates a user in the database
 func (db *MongoDB) UpdateUser(user *user.User) error {
-	query := bson.D{{"email", user.Email}}
+	query := bson.D{{Key: "email", Value: user.Email}}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -95,7 +95,7 @@ func (db *MongoDB) PutProject(project *project.Project) error {
 
 // GetProject gets a project from the database
 func (db *MongoDB) GetProject(projectName string) (*project.Project, error) {
-	query := bson.D{{"name", projectName}}
+	query := bson.D{{Key: "name", Value: projectName}}
 
 	var project project.Project
 	err := db.projectsCollection.FindOne(context.TODO(), query).Decode(&project)
@@ -108,7 +108,7 @@ func (db *MongoDB) GetProject(projectName string) (*project.Project, error) {
 
 // UpdateProject updates a project in the database
 func (db *MongoDB) UpdateProject(project *project.Project) error {
-	query := bson.D{{"name", project.Name}}
+	query := bson.D{{Key: "name", Value: project.Name}}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -128,7 +128,7 @@ func (db *MongoDB) UpdateProject(project *project.Project) error {
 
 // DeleteProject deletes a project from the database
 func (db *MongoDB) DeleteProject(projectName string) error {
-	query := bson.D{{"name", projectName}}
+	query := bson.D{{Key: "name", Value: projectName}}
 	_, err := db.projectsCollection.DeleteOne(context.TODO(), query)
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (db *MongoDB) DeleteProject(projectName string) error {
 
 // ProjectNameExists returns true if a project with that name already exists
 func (db *MongoDB) ProjectNameExists(projectName string) (bool, error) {
-	query := bson.D{{"name", projectName}}
+	query := bson.D{{Key: "name", Value: projectName}}
 
 	var project project.Project
 	err := db.projectsCollection.FindOne(context.TODO(), query).Decode(&project)
