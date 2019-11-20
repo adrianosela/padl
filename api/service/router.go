@@ -30,6 +30,7 @@ func NewPadlService(c *config.Config) *Service {
 	// 	c.Database.ConnectionString,
 	// 	c.Database.Name,
 	// 	c.Database.UsersCollectionName,
+	//  c.Database.ProjectsCollectionName,
 	// )
 	// if err != nil {
 	// 	log.Fatalf("could not initialize mongodb: %s", err)

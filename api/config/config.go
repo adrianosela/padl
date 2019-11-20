@@ -20,9 +20,10 @@ type Config struct {
 	Debug      bool   `yaml:"debug"`
 
 	Database struct {
-		ConnectionString    string `yaml:"connectionString"`
-		Name                string `yaml:"name"`
-		UsersCollectionName string `yaml:"usersCollectionName"`
+		ConnectionString       string `yaml:"connectionString"`
+		Name                   string `yaml:"name"`
+		UsersCollectionName    string `yaml:"usersCollectionName"`
+		ProjectsCollectionName string `yaml:"projectsCollectionName"`
 	} `yaml:"database"`
 
 	Auth struct {

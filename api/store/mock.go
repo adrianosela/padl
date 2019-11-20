@@ -68,11 +68,11 @@ func (db *MockDatabase) GetProject(name string) (*project.Project, error) {
 
 // ProjectNameExists returns true if a name exists in the
 // padl global namespace for projects
-func (db *MockDatabase) ProjectNameExists(name string) bool {
+func (db *MockDatabase) ProjectNameExists(name string) (bool, error) {
 	if _, ok := db.projects[name]; ok {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 // UpdateProject updates a project in the database
@@ -85,17 +85,14 @@ func (db *MockDatabase) UpdateProject(p *project.Project) error {
 }
 
 // ListProjects returns a list of requested (by name) projects
-func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, []string, error) {
+func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, error) {
 	prjs := []*project.Project{}
-	notFound := []string{}
 	for _, n := range names {
 		if p, ok := db.projects[n]; ok {
 			prjs = append(prjs, p)
-		} else {
-			notFound = append(notFound, n)
 		}
 	}
-	return prjs, notFound, nil
+	return prjs, nil
 }
 
 // DeleteProject TODO
