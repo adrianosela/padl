@@ -90,7 +90,7 @@ func (p *NewProjectRequest) Validate() error {
 		return errors.New("no project name provided")
 	}
 	if strings.Contains(p.Name, " ") {
-		return errors.New("no spaces characters allowed for project names")
+		return errors.New("no space characters allowed for project name")
 	}
 	if p.Description == "" {
 		return errors.New("no project description provided")
