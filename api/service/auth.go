@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/kms"
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/api/user"
@@ -87,7 +88,7 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.authenticator.GenerateJWTForUser(user.Email)
+	token, _, err := s.authenticator.GenerateJWT(user.Email, auth.PadlAPIAudience)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error())) // fixme: if this happens we want to know

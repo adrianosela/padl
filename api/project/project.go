@@ -66,11 +66,11 @@ func (p *Project) RemoveUser(email string) {
 }
 
 // SetDeployKey sets a deploy key on a project
-func (p *Project) SetDeployKey(name, value string) error {
+func (p *Project) SetDeployKey(name string, tokenID string) error {
 	if _, ok := p.DeployKeys[name]; ok {
 		return errors.New("a deploy key with this name exists")
 	}
-	p.DeployKeys[name] = value
+	p.DeployKeys[name] = tokenID
 	return nil
 }
 

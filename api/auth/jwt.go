@@ -2,7 +2,9 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/adrianosela/padl/lib/keys"
@@ -102,15 +104,27 @@ func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
 	return &cc, nil
 }
 
-// GenerateJWTForUser generates and signs a token for a given user
-func (a *Authenticator) GenerateJWTForUser(email string) (string, error) {
-	lifetime := time.Duration(time.Hour * 12)
-	cc := NewCustomClaims(email, a.aud, a.iss, lifetime)
+// GenerateJWT generates and signs a token for a given user
+func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, error) {
+
+	var lifetime time.Duration
+
+	if aud == PadlAPIAudience {
+		lifetime = time.Duration(time.Hour * 12)
+	} else if aud == PadlDeployKeyAudience {
+		lifetime = time.Duration(math.MaxInt32)
+	} else {
+		return "", "", errors.New("Audience not recognized")
+	}
+
+	cc := NewCustomClaims(email, aud, a.iss, lifetime)
+
+	id := cc.Id
 	tk := newJWT(cc, jwt.SigningMethodRS512)
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
 	if err != nil {
-		return "", err
+		return "", "", fmt.Errorf("could not sign JWT: %s", err)
 	}
-	return signedTk, nil
+	return signedTk, id, nil
 }

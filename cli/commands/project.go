@@ -56,6 +56,32 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
+			Name:  "deploykey",
+			Usage: "manage secrets for project",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a deploy key to the project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(keyNameFlag),
+						jsonFlag,
+					},
+					Action: projectAddDeployKeyHandler,
+				},
+				{
+					Name:  "remove",
+					Usage: "remove a deploy key from the project",
+					Flags: []cli.Flag{
+						asMandatory(nameFlag),
+						asMandatory(keyNameFlag),
+					},
+					Action: projectRemoveDeployKeyHandler,
+				},
+			},
+		},
+		{
+
 			Name:  "user",
 			Usage: "manage users for project",
 			Subcommands: []cli.Command{
@@ -196,6 +222,49 @@ func projectListHandler(ctx *cli.Context) error {
 	return nil
 }
 
+func projectAddDeployKeyHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	keyName := ctx.String(name(keyNameFlag))
+
+	resp, err := c.CreateDeployKey(projectName, keyName)
+	if err != nil {
+		return fmt.Errorf("error creating a deploy key: %s", err)
+	}
+
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(resp)
+	}
+
+	fmt.Println(resp.Token)
+
+	//TODO Generate a user "deploy" key
+
+	//TODO Generate a file to store token and key
+
+	return nil
+}
+
+func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+
+	projectName := ctx.String(name(nameFlag))
+	keyName := ctx.String(name(keyNameFlag))
+
+	err = c.RemoveDeployKey(projectName, keyName)
+	if err != nil {
+		return fmt.Errorf("error reomiving a deploy key: %s", err)
+	}
+	return nil
+}
+
 func addUserHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
@@ -223,11 +292,10 @@ func removeUserHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	email := ctx.String(name(emailFlag))
 
-	ok, err := c.RemoveUserFromProject(projectName, email)
+	err = c.RemoveUserFromProject(projectName, email)
 	if err != nil {
 		return fmt.Errorf("error removing user: %s", err)
 	}
-	fmt.Println(ok)
 	return nil
 }
 

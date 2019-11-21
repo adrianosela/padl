@@ -55,6 +55,77 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 	return &pf, nil
 }
 
+//CreateDeployKey Creates a new DeployKey
+func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.CreateDeployKeyResponse, error) {
+	pl := &payloads.CreateDeployKeyRequest{
+		DeployKeyName: keyName,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return nil, fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send http request: %s", err)
+	}
+
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("could not read http response body: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+
+	var createKeyResp payloads.CreateDeployKeyResponse
+
+	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
+		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+
+	return &createKeyResp, nil
+}
+
+//RemoveDeployKey Creates a new DeployKey
+func (p *Padl) RemoveDeployKey(projectName string, keyName string) error {
+	pl := &payloads.DeleteDeployKeyRequest{
+		DeployKeyName: keyName,
+	}
+	plBytes, err := json.Marshal(&pl)
+	if err != nil {
+		return fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodDelete,
+		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
+		bytes.NewBuffer(plBytes))
+	if err != nil {
+		return fmt.Errorf("could not build http requests: %s", err)
+	}
+	p.setAuth(req)
+
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not send http request: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
 // GetProject gets a project by name if the requesting user has access to it
 func (p *Padl) GetProject(name string) (*project.Project, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s", p.HostURL, name), nil)
@@ -147,37 +218,39 @@ func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl i
 }
 
 // RemoveUserFromProject TODO
-func (p *Padl) RemoveUserFromProject(projectName string, email string) (string, error) {
+func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 	pl := &payloads.RemoveUserFromProjectRequest{
 		Email: email,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
-		return "", fmt.Errorf("could not marshall payload: %s", err)
+		return fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(http.MethodDelete,
 		fmt.Sprintf("%s/project/%s/user", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
+
 	if err != nil {
-		return "", fmt.Errorf("could not build http requests: %s", err)
+		return fmt.Errorf("could not build http requests: %s", err)
 	}
+
 	p.setAuth(req)
 
 	resp, err := p.HTTPClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("could not send http request: %s", err)
+		return fmt.Errorf("could not send http request: %s", err)
 	}
 
-	respByt, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return "", fmt.Errorf("could not read http response body: %s", err)
+		return fmt.Errorf("could not read http response body: %s", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
-	return string(respByt), nil
+	return nil
 }
 
 // DeleteProject TODO
