@@ -85,6 +85,9 @@ func padlfileSetSecretValidator(ctx *cli.Context) error {
 }
 
 func padlfileShowSecretValidator(ctx *cli.Context) error {
+	if err := checkCanModifyPadlFile(ctx); err != nil {
+		return err
+	}
 	return assertSet(ctx, nameFlag)
 }
 
