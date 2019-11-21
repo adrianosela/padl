@@ -49,6 +49,15 @@ func (db *MockDatabase) GetUser(email string) (*user.User, error) {
 	return u, nil
 }
 
+// UserExists returns true if an email exists in the
+// padl global namespace for users
+func (db *MockDatabase) UserExists(email string) (bool, error) {
+	if _, ok := db.users[email]; ok {
+		return true, nil
+	}
+	return false, nil
+}
+
 // PutProject puts a project in the database
 func (db *MockDatabase) PutProject(p *project.Project) error {
 	if _, ok := db.projects[p.Name]; ok {
@@ -66,9 +75,9 @@ func (db *MockDatabase) GetProject(name string) (*project.Project, error) {
 	return nil, errors.New("project not found")
 }
 
-// ProjectNameExists returns true if a name exists in the
+// ProjectExists returns true if a name exists in the
 // padl global namespace for projects
-func (db *MockDatabase) ProjectNameExists(name string) (bool, error) {
+func (db *MockDatabase) ProjectExists(name string) (bool, error) {
 	if _, ok := db.projects[name]; ok {
 		return true, nil
 	}
