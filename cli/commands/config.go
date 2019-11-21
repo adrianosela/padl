@@ -9,8 +9,8 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
-// ConfigCmd is the CLI command object for the config operation
-var ConfigCmd = cli.Command{
+// ConfigCmds is the CLI command object for the config operation
+var ConfigCmds = cli.Command{
 	Name:    "config",
 	Aliases: []string{"c"},
 	Usage:   "configure command line tool",

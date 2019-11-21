@@ -51,3 +51,13 @@ func tablePrivsMap(t *tablewriter.Table, header string, m map[string]privilege.L
 		t.Append([]string{"", fmt.Sprintf("%s : %d", k, v)})
 	}
 }
+
+func padlfilePath(path, fmt string) string {
+	if path == "" {
+		if fmt == "yaml" {
+			return "./.padlfile.yaml"
+		}
+		return "./.padlfile.json"
+	}
+	return path
+}
