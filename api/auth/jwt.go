@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
+	"log"
 	"time"
 
 	"github.com/adrianosela/padl/lib/keys"
@@ -112,8 +112,9 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	if aud == PadlAPIAudience {
 		lifetime = time.Duration(time.Hour * 12)
 	} else if aud == PadlDeployKeyAudience {
-		lifetime = time.Duration(math.MaxInt32)
+		lifetime = time.Duration(time.Hour * 12)
 	} else {
+		log.Println("Erroring here")
 		return "", "", errors.New("Audience not regonized")
 	}
 
@@ -124,6 +125,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
 	if err != nil {
+		log.Println("Erroring here2")
 		return "", "", err
 	}
 	return signedTk, id, nil

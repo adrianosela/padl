@@ -65,7 +65,8 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string, description s
 	if err != nil {
 		return nil, fmt.Errorf("could not marshall payload: %s", err)
 	}
-	req, err := http.NewRequest(http.MethodPost,
+	req, err := http.NewRequest(
+		http.MethodPost,
 		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
@@ -85,6 +86,7 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string, description s
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Println(string(respByt))
 		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
 

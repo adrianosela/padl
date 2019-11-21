@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/adrianosela/padl/api/auth"
@@ -336,6 +337,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	if name = mux.Vars(r)["name"]; name == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no project Name in request URL"))
+		log.Println("Erroring here1")
 		return
 	}
 	// get payload data
@@ -343,12 +345,14 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	if err := unmarshalRequestBody(r, &dkeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
+		log.Println("Erroring here2")
 		return
 	}
 	// validate payload data
 	if err := dkeyPl.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not validate request: %s", err)))
+		log.Println("Erroring here3")
 		return
 	}
 	// fetch project from database
@@ -356,34 +360,45 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
+		log.Println("Erroring here4")
 		return
 	}
 
 	if _, ok := p.Members[claims.Subject]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
+		log.Println("Erroring here5")
 		return
 	}
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Only Owners can create deploy Keys")))
+		log.Println("Erroring here6")
 		return
 	}
 
 	keyEmail := dkeyPl.DeployKeyName + "." + p.Name + "@padl.adrianosela.com"
 
 	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.PadlDeployKeyAudience)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not generate keyToken: %s", err)))
+		log.Println("Erroring here7")
+		return
+	}
 
 	if err = p.SetDeployKey(dkeyPl.DeployKeyName, keyID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not set new deploy key: %s", err)))
+		log.Println("Erroring here8")
 		return
 	}
 	// update project
 	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
+		log.Println("Erroring here9")
 		return
 	}
 	// marshall response
@@ -393,6 +408,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
+		log.Println("Erroring here0")
 		return
 	}
 	// send resp

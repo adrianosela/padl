@@ -116,7 +116,6 @@ var ProjectCmds = cli.Command{
 						asMandatory(keyNameFlag),
 						descriptionFlag,
 					},
-					Before: checkCanModifyPadlFile,
 					Action: projectAddDeployKeyHandler,
 				},
 				{
@@ -126,7 +125,6 @@ var ProjectCmds = cli.Command{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
 					},
-					Before: checkCanModifyPadlFile,
 					Action: projectRemoveDeployKeyHandler,
 				},
 			},
@@ -386,7 +384,7 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 		return fmt.Errorf("error creating a deploy key: %s", err)
 	}
 
-	fmt.Println(resp.Token)
+	fmt.Println(resp)
 
 	//TODO Generate a user "deploy" key
 
