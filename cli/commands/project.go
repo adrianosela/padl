@@ -114,7 +114,6 @@ var ProjectCmds = cli.Command{
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
-						descriptionFlag,
 					},
 					Action: projectAddDeployKeyHandler,
 				},
@@ -377,9 +376,8 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
-	description := ctx.String(name(descriptionFlag))
 
-	resp, err := c.CreateDeployKey(projectName, keyName, description)
+	resp, err := c.CreateDeployKey(projectName, keyName)
 	if err != nil {
 		return fmt.Errorf("error creating a deploy key: %s", err)
 	}
@@ -402,13 +400,10 @@ func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	ok, err := c.RemoveDeployKey(projectName, keyName)
+	err = c.RemoveDeployKey(projectName, keyName)
 	if err != nil {
 		return fmt.Errorf("error reomiving a deploy key: %s", err)
 	}
-
-	fmt.Println(ok)
-
 	return nil
 }
 
@@ -439,11 +434,10 @@ func removeUserHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	email := ctx.String(name(emailFlag))
 
-	ok, err := c.RemoveUserFromProject(projectName, email)
+	_, err = c.RemoveUserFromProject(projectName, email)
 	if err != nil {
 		return fmt.Errorf("error removing user: %s", err)
 	}
-	fmt.Println(ok)
 	return nil
 }
 

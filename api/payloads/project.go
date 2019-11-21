@@ -27,8 +27,7 @@ type RemoveUserFromProjectRequest struct {
 
 // CreateDeployKeyRequest TODO
 type CreateDeployKeyRequest struct {
-	DeployKeyName        string `json:"name"`
-	DeployKeyDescription string `json:"description"`
+	DeployKeyName string `json:"name"`
 }
 
 // DeleteDeployKeyRequest TODO
@@ -69,9 +68,6 @@ func (a *RemoveUserFromProjectRequest) Validate() error {
 func (r *CreateDeployKeyRequest) Validate() error {
 	if r.DeployKeyName == "" {
 		return errors.New("No name provided")
-	}
-	if r.DeployKeyDescription == "" {
-		return errors.New("No description provided")
 	}
 	return nil
 }

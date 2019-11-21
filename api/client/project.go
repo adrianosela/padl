@@ -56,10 +56,9 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 }
 
 //CreateDeployKey Creates a new DeployKey
-func (p *Padl) CreateDeployKey(projectName string, keyName string, description string) (*payloads.CreateDeployKeyResponse, error) {
+func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.CreateDeployKeyResponse, error) {
 	pl := &payloads.CreateDeployKeyRequest{
-		DeployKeyName:        keyName,
-		DeployKeyDescription: description,
+		DeployKeyName: keyName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
@@ -100,44 +99,32 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string, description s
 }
 
 //RemoveDeployKey Creates a new DeployKey
-func (p *Padl) RemoveDeployKey(projectName string, keyName string) (*payloads.CreateDeployKeyResponse, error) {
+func (p *Padl) RemoveDeployKey(projectName string, keyName string) error {
 	pl := &payloads.DeleteDeployKeyRequest{
 		DeployKeyName: keyName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
-		return nil, fmt.Errorf("could not marshall payload: %s", err)
+		return fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(http.MethodDelete,
 		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
-		return nil, fmt.Errorf("could not build http requests: %s", err)
+		return fmt.Errorf("could not build http requests: %s", err)
 	}
 	p.setAuth(req)
 
 	resp, err := p.HTTPClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("could not send http request: %s", err)
-	}
-
-	respByt, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf("could not read http response body: %s", err)
+		return fmt.Errorf("could not send http request: %s", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
 	}
 
-	var createKeyResp payloads.CreateDeployKeyResponse
-
-	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
-		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
-	}
-
-	return &createKeyResp, nil
+	return nil
 }
 
 // GetProject gets a project by name if the requesting user has access to it
