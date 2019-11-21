@@ -32,7 +32,7 @@ func (s *Service) Auth(h http.HandlerFunc) http.Handler {
 		}
 		// validate token
 		verifiedClaims, err := s.authenticator.ValidateJWT(tkStr)
-		
+
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Fprint(w, "invalid access token")

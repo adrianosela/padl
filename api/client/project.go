@@ -158,6 +158,32 @@ func (p *Padl) GetProject(name string) (*project.Project, error) {
 	return &project, nil
 }
 
+// GetProject gets a project by name if the requesting user has access to it
+func (p *Padl) GetProjectKeys(name string) (*payloads.GetProjectKeysReponse, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s/keys", p.HostURL, name), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not build http request: %s", err)
+	}
+	p.setAuth(req)
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send http request: %s", err)
+	}
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("could not read http response body: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error: %s", string(respByt))
+	}
+	var keysResp payloads.GetProjectKeysReponse
+	if err := json.Unmarshal(respByt, &keysResp); err != nil {
+		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
+	}
+	return &keysResp, nil
+}
+
 // ListProjects TODO
 func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/projects", p.HostURL), nil)
