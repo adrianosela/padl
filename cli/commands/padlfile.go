@@ -40,12 +40,7 @@ var PadlfileCmds = cli.Command{
 						privateKeyFlag, // set by BeforeFunc
 						pathFlag,
 					},
-					Before: func(ctx *cli.Context) error {
-						if err := checkCanModifyPadlFile(ctx); err != nil {
-							return err
-						}
-						return padlfileSetSecretValidator(ctx)
-					},
+					Before: padlfileSetSecretValidator,
 					Action: padlfileSetSecretHandler,
 				},
 				{
@@ -83,6 +78,9 @@ var PadlfileCmds = cli.Command{
 }
 
 func padlfileSetSecretValidator(ctx *cli.Context) error {
+	if err := checkCanModifyPadlFile(ctx); err != nil {
+		return err
+	}
 	return assertSet(ctx, nameFlag, secretFlag)
 }
 
