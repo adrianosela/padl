@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/adrianosela/padl/lib/keys"
@@ -111,7 +112,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	if aud == PadlAPIAudience {
 		lifetime = time.Duration(time.Hour * 12)
 	} else if aud == PadlDeployKeyAudience {
-		lifetime = time.Duration(time.Hour * 12)
+		lifetime = time.Duration(math.MaxInt32)
 	} else {
 		return "", "", errors.New("Audience not regonized")
 	}

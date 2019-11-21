@@ -114,6 +114,7 @@ var ProjectCmds = cli.Command{
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
+						jsonFlag,
 					},
 					Action: projectAddDeployKeyHandler,
 				},
@@ -382,7 +383,11 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 		return fmt.Errorf("error creating a deploy key: %s", err)
 	}
 
-	fmt.Println(resp)
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(resp)
+	}
+
+	fmt.Println(resp.Token)
 
 	//TODO Generate a user "deploy" key
 
