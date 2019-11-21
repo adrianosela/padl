@@ -40,7 +40,12 @@ var PadlfileCmds = cli.Command{
 						privateKeyFlag, // set by BeforeFunc
 						pathFlag,
 					},
-					Before: checkCanModifyPadlFile,
+					Before: func(ctx *cli.Context) error {
+						if err := checkCanModifyPadlFile(ctx); err != nil {
+							return err
+						}
+						return padlfileSetSecretValidator(ctx)
+					},
 					Action: padlfileSetSecretHandler,
 				},
 				{
@@ -52,7 +57,7 @@ var PadlfileCmds = cli.Command{
 						privateKeyFlag, // set by BeforeFunc
 						pathFlag,
 					},
-					Before: checkCanModifyPadlFile,
+					Before: padlfileShowSecretValidator,
 					Action: padlfileShowSecretHandler,
 				},
 				{
@@ -60,17 +65,33 @@ var PadlfileCmds = cli.Command{
 					Usage: "delete a secret from a project",
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
-						asMandatory(secretFlag),
 						withDefault(fmtFlag, "yaml"),
 						privateKeyFlag, // set by BeforeFunc
 						pathFlag,
 					},
-					Before: checkCanModifyPadlFile,
+					Before: func(ctx *cli.Context) error {
+						if err := checkCanModifyPadlFile(ctx); err != nil {
+							return err
+						}
+						return padlfileRemoveSecretValidator(ctx)
+					},
 					Action: padlfileRemoveSecretHandler,
 				},
 			},
 		},
 	},
+}
+
+func padlfileSetSecretValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag, secretFlag)
+}
+
+func padlfileShowSecretValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag)
+}
+
+func padlfileRemoveSecretValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag)
 }
 
 func padlfilePullHandler(ctx *cli.Context) error {
