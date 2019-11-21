@@ -78,7 +78,7 @@ func (p *Padl) Login(email, password string) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return "", fmt.Errorf("error: %s", string(respByt))
 	}
 
 	var lr payloads.LoginResponse
@@ -107,7 +107,7 @@ func (p *Padl) Valid() (*auth.CustomClaims, error) {
 		return nil, fmt.Errorf("could not read http response body: %s", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 	var cc auth.CustomClaims
 	if err := json.Unmarshal(respByt, &cc); err != nil {
