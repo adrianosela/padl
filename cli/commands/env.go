@@ -6,6 +6,11 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/adrianosela/padl/cli/config"
+	"github.com/adrianosela/padl/lib/keymgr"
+	"github.com/adrianosela/padl/lib/keys"
+	"github.com/adrianosela/padl/lib/padlfile"
+	"github.com/adrianosela/padl/lib/secretsmgr"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -15,15 +20,44 @@ var RunCmds = cli.Command{
 	Aliases: []string{"r"},
 	Usage:   "run a command with secrets in the environment",
 	Flags: []cli.Flag{
-		jsonFlag,
+		asMandatory(nameFlag),
+		withDefault(fmtFlag, "yaml"),
+		privateKeyFlag, // set by BeforeFunc
+		pathFlag,
 	},
+	Before: checkCanModifyPadlFile,
 	Action: runHandler,
 }
 
 func runHandler(ctx *cli.Context) error {
-	_, err := getClient(ctx)
+	format := ctx.String(name(fmtFlag))
+	priv := ctx.String(name(privateKeyFlag))
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
+	// get client
+	pc, err := getClient(ctx)
 	if err != nil {
-		return fmt.Errorf("could not initialize client: %s", err)
+		return fmt.Errorf("could not get client: %s", err)
+	}
+	// read padlfile
+	pf, err := padlfile.ReadPadlfile(path)
+	if err != nil {
+		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+	// get key panager
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+	secMgr := secretsmgr.NewSecretsMgr(pc, keyMgr, pf)
+	// decrypted secret and print it
+	rsa, err := keys.DecodePrivKeyPEM([]byte(priv))
+	if err != nil {
+		return fmt.Errorf("could not materialize user private key: %s", err)
+	}
+
+	secretsMap, err := secMgr.DecryptPadlFileSecrets(rsa)
+	if err != nil {
+		return fmt.Errorf("could not decrypt padlfile secrets: %s", err)
 	}
 
 	var cmd *exec.Cmd
@@ -35,22 +69,11 @@ func runHandler(ctx *cli.Context) error {
 		return fmt.Errorf("no command provided")
 	}
 
-	// // get secrets for project
-	// secrets, err := c.GetSecrets( /*FIXME*/ )
-	// if err != nil {
-	// 	return fmt.Errorf("could not get secrets from server: %s", err)
-	// }
-	//
-	// decrypted, err := secrets.Decrypt( /*FIXME*/ )
-	// if err != nil {
-	// 	return fmt.Errorf("could not decrypt secrets: %s", err)
-	// }
-
 	// copy parent environment
 	cmd.Env = os.Environ()
 	// attach decrypted secret to the cmd's environment
-	for _, s := range []string{"MOCK_SECRET_A=mock_value_a", "MOCK_SECRET_B=mock_value_b"} {
-		cmd.Env = append(cmd.Env, s)
+	for k, v := range secretsMap {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	return runCmdAndPipeStdout(cmd)
