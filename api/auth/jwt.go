@@ -114,7 +114,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	} else if aud == PadlDeployKeyAudience {
 		lifetime = time.Duration(math.MaxInt32)
 	} else {
-		return "", "", errors.New("Audience not regonized")
+		return "", "", errors.New("Audience not recognized")
 	}
 
 	cc := NewCustomClaims(email, aud, a.iss, lifetime)
@@ -124,7 +124,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("could not sign JWT: %s", err)
 	}
 	return signedTk, id, nil
 }

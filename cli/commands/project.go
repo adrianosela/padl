@@ -292,7 +292,7 @@ func removeUserHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	email := ctx.String(name(emailFlag))
 
-	_, err = c.RemoveUserFromProject(projectName, email)
+	err = c.RemoveUserFromProject(projectName, email)
 	if err != nil {
 		return fmt.Errorf("error removing user: %s", err)
 	}
