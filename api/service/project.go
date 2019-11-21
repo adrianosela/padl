@@ -44,7 +44,7 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// check name is unique before doing anything
-	exists, err := s.database.ProjectNameExists(projPl.Name)
+	exists, err := s.database.ProjectExists(projPl.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not check if project exists %s", err)))
@@ -273,6 +273,17 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err := addUserPl.Validate(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not validate request: %s", err)))
+		return
+	}
+	exists, err := s.database.UserExists(addUserPl.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("problem getting users from db: %s", err)))
+		return
+	}
+	if !exists {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("user %s does not exist", addUserPl.Email)))
 		return
 	}
 	// fetch project from database

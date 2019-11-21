@@ -83,6 +83,23 @@ func (db *MongoDB) UpdateUser(user *user.User) error {
 	return nil
 }
 
+// UserExists returns true if a user with given email exists
+func (db *MongoDB) UserExists(email string) (bool, error) {
+	query := bson.D{{Key: "email", Value: email}}
+
+	var user user.User
+	err := db.usersCollection.FindOne(context.TODO(), query).Decode(&user)
+	if err != nil {
+		if err.Error() == "mongo: no documents in result" {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
 // PutProject adds a new project to the database
 func (db *MongoDB) PutProject(project *project.Project) error {
 	_, err := db.projectsCollection.InsertOne(context.TODO(), project)
@@ -137,8 +154,8 @@ func (db *MongoDB) DeleteProject(projectName string) error {
 	return nil
 }
 
-// ProjectNameExists returns true if a project with that name already exists
-func (db *MongoDB) ProjectNameExists(projectName string) (bool, error) {
+// ProjectExists returns true if a project with that name already exists
+func (db *MongoDB) ProjectExists(projectName string) (bool, error) {
 	query := bson.D{{Key: "name", Value: projectName}}
 
 	var project project.Project
