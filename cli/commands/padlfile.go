@@ -21,9 +21,11 @@ var PadlfileCmds = cli.Command{
 			Name:  "pull",
 			Usage: "update padlfile to match server state",
 			Flags: []cli.Flag{
+				withDefault(fmtFlag, "yaml"),
+				privateKeyFlag, // set by BeforeFunc
 				pathFlag,
 			},
-			// TODO: before?
+			Before: padlfilePullValidator,
 			Action: padlfilePullHandler,
 		},
 		{
@@ -77,6 +79,10 @@ var PadlfileCmds = cli.Command{
 	},
 }
 
+func padlfilePullValidator(ctx *cli.Context) error {
+	return checkCanModifyPadlFile(ctx)
+}
+
 func padlfileSetSecretValidator(ctx *cli.Context) error {
 	if err := checkCanModifyPadlFile(ctx); err != nil {
 		return err
@@ -96,7 +102,58 @@ func padlfileRemoveSecretValidator(ctx *cli.Context) error {
 }
 
 func padlfilePullHandler(ctx *cli.Context) error {
-	// TODO
+	format := ctx.String(name(fmtFlag))
+	path := padlfilePath(ctx.String(name(pathFlag)), format)
+	priv := ctx.String(name(privateKeyFlag))
+
+	// get client
+	pc, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not get client: %s", err)
+	}
+	// read padlfile
+	pf, err := padlfile.ReadPadlfile(path)
+	if err != nil {
+		return fmt.Errorf("could not read padlfile: %s", err)
+	}
+	// get key panager
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+	secMgr := secretsmgr.NewSecretsMgr(pc, keyMgr, pf)
+
+	// decrypted secret and print it
+	rsa, err := keys.DecodePrivKeyPEM([]byte(priv))
+	if err != nil {
+		return fmt.Errorf("could not materialize user private key: %s", err)
+	}
+	decrypted, err := secMgr.DecryptPadlFileSecrets(rsa)
+	if err != nil {
+		return fmt.Errorf("could not decrypt padlfile secrets before pull: %s", err)
+	}
+
+	projKeys, err := pc.GetProjectKeys(pf.Data.Project)
+	if err != nil {
+		return fmt.Errorf("could not get project keys: %s", err)
+	}
+
+	// set new fields in padlfile before encrypting again
+	pf.Data.SharedKey = projKeys.ProjectKey
+	pf.Data.MemberKeys = projKeys.MemberKeys
+	pf.Data.Variables = decrypted
+
+	encrypted, err := secMgr.EncryptPadlfileSecrets()
+	if err != nil {
+		return fmt.Errorf("could not encrypt padlfile secrets after pull: %s", err)
+	}
+
+	pf.Data.Variables = encrypted
+	if err = pf.Write(path); err != nil {
+		return fmt.Errorf("could not write padlfile: %s", err)
+	}
+
+	fmt.Println("padlfile updated!")
 	return nil
 }
 

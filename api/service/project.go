@@ -17,6 +17,7 @@ import (
 func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project").Handler(s.Auth(s.createProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/project/{name}").Handler(s.Auth(s.getProjectHandler))
+	s.Router.Methods(http.MethodGet).Path("/project/{name}/keys").Handler(s.Auth(s.getProjectKeysHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{name}").Handler(s.Auth(s.deleteProjectHandler))
 	s.Router.Methods(http.MethodGet).Path("/projects").Handler(s.Auth(s.listProjectsHandler))
 
@@ -125,6 +126,8 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
+	claims := GetClaims(r)
+	// project name from request URL
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -137,15 +140,72 @@ func (s *Service) getProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
 		return
 	}
-	/*
-	 TODO: check user is in project or else return 401
-	*/
+
+	if _, ok := p.Members[claims.Subject]; !ok {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(fmt.Sprintf("requesting user not in project: %s", err)))
+		return
+	}
+
 	byt, err := json.Marshal(&p)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(byt)
+	return
+}
+
+func (s *Service) getProjectKeysHandler(w http.ResponseWriter, r *http.Request) {
+	claims := GetClaims(r)
+
+	// project name from request URL
+	var name string
+	if name = mux.Vars(r)["name"]; name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no project Name in request URL"))
+		return
+	}
+
+	p, err := s.database.GetProject(name)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
+		return
+	}
+	if _, ok := p.Members[claims.Subject]; !ok {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(fmt.Sprintf("requesting user not in project: %s", err)))
+		return
+	}
+
+	keyIDs := []string{}
+	for member := range p.Members {
+		user, err := s.database.GetUser(member)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("could not get a member user from db: %s", err)))
+			return
+		}
+		keyIDs = append(keyIDs, user.KeyID)
+	}
+
+	getProjectKeysResp := payloads.GetProjectKeysReponse{
+		Name:       p.Name,
+		MemberKeys: keyIDs,
+		ProjectKey: p.ProjectKey,
+	}
+
+	byt, err := json.Marshal(&getProjectKeysResp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not marshal project keys json: %s", err)))
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write(byt)
 	return

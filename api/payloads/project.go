@@ -14,6 +14,15 @@ type NewProjectRequest struct {
 	KeyBits     int    `json:"bits"`
 }
 
+// GetProjectKeysReponse returns all the public
+// key ids associated with a project
+type GetProjectKeysReponse struct {
+	Name       string
+	MemberKeys []string
+	ProjectKey string
+	//	DeployKeys  []string (TODO)
+}
+
 // AddUserToProjectRequest TODO
 type AddUserToProjectRequest struct {
 	Email        string `json:"email"`
