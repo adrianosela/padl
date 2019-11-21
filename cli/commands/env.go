@@ -18,7 +18,7 @@ import (
 var RunCmds = cli.Command{
 	Name:    "run",
 	Aliases: []string{"r"},
-	Usage:   "run a command with secrets in the environment",
+	Usage:   "Run a command with secrets in the environment",
 	Flags: []cli.Flag{
 		asMandatory(nameFlag),
 		withDefault(fmtFlag, "yaml"),

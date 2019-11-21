@@ -13,7 +13,7 @@ import (
 var ConfigCmds = cli.Command{
 	Name:    "config",
 	Aliases: []string{"c"},
-	Usage:   "configure command line tool",
+	Usage:   "Manage configuration and CLI settings",
 	Subcommands: []cli.Command{
 		{
 			Name:  "set",

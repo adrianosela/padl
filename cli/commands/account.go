@@ -20,7 +20,7 @@ import (
 var AccountCmds = cli.Command{
 	Name:    "account",
 	Aliases: []string{"a"},
-	Usage:   "manage accounts and auth flows",
+	Usage:   "Manage accounts and authentication",
 	Subcommands: []cli.Command{
 		{
 			Name:  "create",

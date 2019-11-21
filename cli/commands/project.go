@@ -13,7 +13,7 @@ import (
 var ProjectCmds = cli.Command{
 	Name:    "project",
 	Aliases: []string{"p"},
-	Usage:   "manage projects",
+	Usage:   "Manage projects",
 	Subcommands: []cli.Command{
 		{
 			Name:  "create",

@@ -15,7 +15,7 @@ import (
 var PadlfileCmds = cli.Command{
 	Name:    "file",
 	Aliases: []string{"f"},
-	Usage:   "manage padlfile",
+	Usage:   "Manage padlfile",
 	Subcommands: []cli.Command{
 		{
 			Name:  "pull",
