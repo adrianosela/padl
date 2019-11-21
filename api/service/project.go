@@ -367,35 +367,26 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	if _, ok := p.Members[claims.Subject]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
-<<<<<<< HEAD
 		log.Println("Erroring here5")
-=======
->>>>>>> 897d90ed7cb7a39c09ee4c82b2cd31b191147028
 		return
 	}
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Only Owners can create deploy Keys")))
-<<<<<<< HEAD
 		log.Println("Erroring here6")
-=======
->>>>>>> 897d90ed7cb7a39c09ee4c82b2cd31b191147028
 		return
 	}
 
 	keyEmail := dkeyPl.DeployKeyName + "." + p.Name + "@padl.adrianosela.com"
 
 	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.PadlDeployKeyAudience)
-<<<<<<< HEAD
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not generate keyToken: %s", err)))
 		log.Println("Erroring here7")
 		return
 	}
-=======
->>>>>>> 897d90ed7cb7a39c09ee4c82b2cd31b191147028
 
 	if err = p.SetDeployKey(dkeyPl.DeployKeyName, keyID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
