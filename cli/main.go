@@ -16,9 +16,10 @@ var appflags = []cli.Flag{
 }
 
 var appcmds = []cli.Command{
-	commands.ConfigCmd,
+	commands.ConfigCmds,
 	commands.AccountCmds,
 	commands.ProjectCmds,
+	commands.PadlfileCmds,
 	commands.KMSCmds,
 	commands.RunCmds,
 }
