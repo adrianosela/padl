@@ -28,7 +28,7 @@ func (p *Padl) GetPublicKey(kid string) (*kms.PublicKey, error) {
 		return nil, fmt.Errorf("could not read http response body: %s", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d - %s", resp.StatusCode, string(respByt))
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 	var pub kms.PublicKey
 	if err := json.Unmarshal(respByt, &pub); err != nil {
@@ -61,7 +61,7 @@ func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
 		return "", fmt.Errorf("could not read http response body: %s", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return "", fmt.Errorf("error: %s", string(respByt))
 	}
 	var res payloads.DecryptSecretResponse
 	if err := json.Unmarshal(respByt, &res); err != nil {

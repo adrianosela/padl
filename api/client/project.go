@@ -44,7 +44,7 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 
 	var pf padlfile.File
@@ -85,7 +85,7 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.Cr
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 
 	var createKeyResp payloads.CreateDeployKeyResponse
@@ -119,8 +119,14 @@ func (p *Padl) RemoveDeployKey(projectName string, keyName string) error {
 		return fmt.Errorf("could not send http request: %s", err)
 	}
 
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return fmt.Errorf("could not read http response body: %s", err)
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return fmt.Errorf("error: %s", string(respByt))
 	}
 
 	return nil
@@ -143,7 +149,7 @@ func (p *Padl) GetProject(name string) (*project.Project, error) {
 		return nil, fmt.Errorf("could not read http response body: %s", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d - %s", resp.StatusCode, string(respByt))
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 	var project project.Project
 	if err := json.Unmarshal(respByt, &project); err != nil {
@@ -171,7 +177,7 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 
 	var listProjResp payloads.ListProjectsResponse
@@ -212,7 +218,7 @@ func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl i
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return "", fmt.Errorf("error: %s", string(respByt))
 	}
 	return string(respByt), nil
 }
@@ -241,14 +247,14 @@ func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 		return fmt.Errorf("could not send http request: %s", err)
 	}
 
-	_, err = ioutil.ReadAll(resp.Body)
+	respByt, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("could not read http response body: %s", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return fmt.Errorf("error: %s", string(respByt))
 	}
 	return nil
 }
@@ -270,9 +276,8 @@ func (p *Padl) DeleteProject(projectName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not read http response body: %s", err)
 	}
-
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non 200 status code received: %d", resp.StatusCode)
+		return "", fmt.Errorf("error: %s", string(respByt))
 	}
 	return string(respByt), nil
 }
