@@ -1,18 +1,14 @@
 package commands
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
-	"syscall"
 
 	"github.com/adrianosela/padl/cli/config"
 	"github.com/adrianosela/padl/lib/keymgr"
 	"github.com/adrianosela/padl/lib/keys"
 	"github.com/olekukonko/tablewriter"
-	"golang.org/x/crypto/ssh/terminal"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -60,22 +56,16 @@ func createAccountHandler(ctx *cli.Context) error {
 
 	email := ctx.String(name(emailFlag))
 	if email == "" {
-		fmt.Println("Enter your email:")
-		line, err := bufio.NewReader(os.Stdin).ReadString('\n')
-		if err != nil {
-			return err
+		if email, err = promptText("Enter your email:", false); err != nil {
+			return fmt.Errorf("could not read user email")
 		}
-		email = strings.TrimSpace(line)
 	}
 
 	pass := ctx.String(name(passwordFlag))
 	if pass == "" {
-		fmt.Println("Enter your password:")
-		password, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return err
+		if pass, err = promptText("Enter your password:", true); err != nil {
+			return fmt.Errorf("could not read user password")
 		}
-		pass = strings.TrimSpace(string(password))
 	}
 
 	priv, pub, err := keys.GenerateRSAKeyPair(4096)
@@ -113,22 +103,16 @@ func loginAccountHandler(ctx *cli.Context) error {
 
 	email := ctx.String(name(emailFlag))
 	if email == "" {
-		fmt.Println("Enter your email:")
-		line, err := bufio.NewReader(os.Stdin).ReadString('\n')
-		if err != nil {
-			return err
+		if email, err = promptText("Enter your email:", false); err != nil {
+			return fmt.Errorf("could not read user email")
 		}
-		email = strings.TrimSpace(line)
 	}
 
 	pass := ctx.String(name(passwordFlag))
 	if pass == "" {
-		fmt.Println("Enter your password:")
-		password, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return err
+		if pass, err = promptText("Enter your password:", true); err != nil {
+			return fmt.Errorf("could not read user password")
 		}
-		pass = strings.TrimSpace(string(password))
 	}
 
 	tk, err := c.Login(email, pass)

@@ -275,11 +275,10 @@ func addUserHandler(ctx *cli.Context) error {
 	email := ctx.String(name(emailFlag))
 	privLevel := ctx.Int(name(privFlag))
 
-	ok, err := c.AddUserToProject(projectName, email, privLevel)
-	if err != nil {
+	if err := c.AddUserToProject(projectName, email, privLevel); err != nil {
 		return fmt.Errorf("error adding user: %s", err)
 	}
-	fmt.Println(ok)
+	fmt.Printf("user %s added to project %s successfully!\n", email, projectName)
 	return nil
 }
 
@@ -292,10 +291,10 @@ func removeUserHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	email := ctx.String(name(emailFlag))
 
-	err = c.RemoveUserFromProject(projectName, email)
-	if err != nil {
+	if err = c.RemoveUserFromProject(projectName, email); err != nil {
 		return fmt.Errorf("error removing user: %s", err)
 	}
+	fmt.Printf("user %s removed from project %s successfully!\n", email, projectName)
 	return nil
 }
 
@@ -306,10 +305,9 @@ func deleteProjectHandler(ctx *cli.Context) error {
 	}
 
 	projectName := ctx.String(name(nameFlag))
-	ok, err := c.DeleteProject(projectName)
-	if err != nil {
+	if err := c.DeleteProject(projectName); err != nil {
 		return fmt.Errorf("error deleting project: %s", err)
 	}
-	fmt.Println(ok)
+	fmt.Printf("project %s deleted successfully!\n", projectName)
 	return nil
 }

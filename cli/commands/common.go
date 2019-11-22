@@ -1,13 +1,18 @@
 package commands
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+	"syscall"
 
 	"github.com/adrianosela/padl/api/client"
 	"github.com/adrianosela/padl/api/privilege"
 	"github.com/adrianosela/padl/cli/config"
 	"github.com/olekukonko/tablewriter"
+	"golang.org/x/crypto/ssh/terminal"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -50,6 +55,24 @@ func tablePrivsMap(t *tablewriter.Table, header string, m map[string]privilege.L
 		}
 		t.Append([]string{"", fmt.Sprintf("%s %d", k, v)})
 	}
+}
+
+func promptText(prompt string, secret bool) (string, error) {
+	fmt.Println(prompt)
+
+	if secret {
+		password, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(string(password)), nil
+	}
+
+	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(line), nil
 }
 
 func padlfilePath(path, fmt string) string {
