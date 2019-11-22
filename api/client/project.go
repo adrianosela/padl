@@ -158,7 +158,8 @@ func (p *Padl) GetProject(name string) (*project.Project, error) {
 	return &project, nil
 }
 
-// GetProject gets a project by name if the requesting user has access to it
+// GetProjectKeys gets a project's list of keys by project name, the request will
+// fail if the authorization token in the client is not for a user in the project
 func (p *Padl) GetProjectKeys(name string) (*payloads.GetProjectKeysReponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/project/%s/keys", p.HostURL, name), nil)
 	if err != nil {

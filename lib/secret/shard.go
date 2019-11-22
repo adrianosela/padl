@@ -11,11 +11,25 @@ import (
 )
 
 const (
-	ErrMsgEmptyValue             = "shard can not have empty value"
-	ErrMsgCouldNotEncrypt        = "could not encrypt shard value"
+	// ErrMsgEmptyValue is returned when the user attempts
+	// to create a shard with no data provided
+	ErrMsgEmptyValue = "shard can not have empty value"
+
+	// ErrMsgCouldNotDecrypt is returned when an error occurs
+	// while attempting to encrypt a shard
+	ErrMsgCouldNotEncrypt = "could not encrypt shard value"
+
+	// ErrMsgCouldNotDecrypt is returned when an error occurs
+	// while attempting to decrypt a shard
+	ErrMsgCouldNotDecrypt = "could not decrypt shard value"
+
+	// ErrMsgIncorrectDecryptionKey is returned when the user attempts to
+	// decrypt an EncryptedShard with the wrong key (key id mismatch)
 	ErrMsgIncorrectDecryptionKey = "the provided key does not match the shard's encryption key's fingerprint"
-	ErrMsgCouldNotDecode         = "could not b64 decode shard value"
-	ErrMsgCouldNotDecrypt        = "could not decrypt shard value"
+
+	// ErrMsgCouldNotDecode is returned when a shard value could not
+	// be base64 encoded
+	ErrMsgCouldNotDecode = "could not b64 decode shard value"
 )
 
 // Shard describes a piece of secret that has been split
