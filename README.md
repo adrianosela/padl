@@ -5,7 +5,14 @@
 [![license](https://img.shields.io/github/license/adrianosela/padl.svg)](https://github.com/adrianosela/padl/blob/master/LICENSE)
 [![Generic badge](https://img.shields.io/badge/UBC-CPEN412-RED.svg)](https://blogs.ubc.ca/cpen442/about/)
 
-padl is an attempt at simplyfing secrets management for inexperienced developers and teams looking to quickly prototype solutions while spending very little time at securing secrets. The goal is to create a secrets management tool with great usability.
+Padl is an attempt at simplyfing secrets management for inexperienced developers and teams looking to quickly prototype solutions while spending very little time at securing secrets.
+
+Our design is inspired by two popular secrets management tools:
+
+* Mozilla's [SOPS](https://github.com/mozilla/sops) - except our keys are purely RSA (not PGP), we do not (yet) have cloud KMS integrations, and we require users connect to a server-side component
+* CyberArk's [Conjur](https://github.com/cyberark/conjur) - except our server **never** sees plaintext secrets, as obfuscation occurs at the client side through splitting with Shamir's Secret Sharing algorithm
+
+The goal is to create a secrets management solution with minimal set-up time, high-level abstractions, and great usability.
 
 ## Contents
 
@@ -19,7 +26,6 @@ padl is an attempt at simplyfing secrets management for inexperienced developers
 
 ### [KMS](#keys)
 * [Get Public Key](#get-a-public-key)
-// TODO
 
 ### [Project](#projects)
 
