@@ -11,7 +11,12 @@ const (
 	pemBlockType       = "PADL ENCRYPTED SECRET"
 	simpleFmtSeparator = "\n"
 
-	ErrMsgInvalidSimpleFmt  = "bad format"
+	// ErrMsgInvalidSimpleFmt is returned when trying to decode
+	// a simple-format secret that is not simple-encoded
+	ErrMsgInvalidSimpleFmt = "bad format"
+
+	// ErrMsgCouldNotDecodePEM is returned when trying to decode
+	// a PEM-format secret that is not PEM encoded
 	ErrMsgCouldNotDecodePEM = "could not decode pem block"
 )
 
