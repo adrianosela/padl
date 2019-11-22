@@ -44,11 +44,11 @@ func tablePrivsMap(t *tablewriter.Table, header string, m map[string]privilege.L
 	headerSet := false
 	for k, v := range m {
 		if !headerSet {
-			t.Append([]string{header, fmt.Sprintf("%s : %d", k, v)})
+			t.Append([]string{header, fmt.Sprintf("%s %d", k, v)})
 			headerSet = true
 			continue
 		}
-		t.Append([]string{"", fmt.Sprintf("%s : %d", k, v)})
+		t.Append([]string{"", fmt.Sprintf("%s %d", k, v)})
 	}
 }
 
