@@ -15,7 +15,7 @@ const (
 	// to create a shard with no data provided
 	ErrMsgEmptyValue = "shard can not have empty value"
 
-	// ErrMsgCouldNotDecrypt is returned when an error occurs
+	// ErrMsgCouldNotEncrypt is returned when an error occurs
 	// while attempting to encrypt a shard
 	ErrMsgCouldNotEncrypt = "could not encrypt shard value"
 
@@ -69,6 +69,7 @@ func (s *Shard) Encrypt(k *rsa.PublicKey) (*EncryptedShard, error) {
 	}, nil
 }
 
+// Decrypt removes the ASCII armour off a shard and decrypts its value
 func (es *EncryptedShard) Decrypt(k *rsa.PrivateKey) (*Shard, error) {
 	fp := keys.GetFingerprint(&k.PublicKey)
 	if es.KeyID != fp {
