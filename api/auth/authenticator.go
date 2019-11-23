@@ -8,10 +8,11 @@ import (
 
 const (
 	defaultPadlIssuer = "padl.adrianosela.com"
-	//PadlAPIAudience user audience for Padl API
+	// PadlAPIAudience user audience for Padl API
 	PadlAPIAudience = "api"
-	//PadlDeployKeyAudience deployKey audience for Padl API
-	PadlDeployKeyAudience = "DeployKey"
+	// PadlServiceAccountAudience is the service account
+	// audience for Padl API
+	PadlServiceAccountAudience = "decrypt"
 )
 
 // Authenticator is the module in charge of authentication

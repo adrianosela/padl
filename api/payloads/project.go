@@ -34,18 +34,18 @@ type RemoveUserFromProjectRequest struct {
 	Email string `json:"email"`
 }
 
-// CreateDeployKeyRequest TODO
-type CreateDeployKeyRequest struct {
-	DeployKeyName string `json:"name"`
+// CreatePadlServiceAccountRequest TODO
+type CreatePadlServiceAccountRequest struct {
+	PadlServiceAccountName string `json:"name"`
 }
 
-// DeleteDeployKeyRequest TODO
-type DeleteDeployKeyRequest struct {
-	DeployKeyName string `json:"deployKey"`
+// DeletePadlServiceAccountRequest TODO
+type DeletePadlServiceAccountRequest struct {
+	PadlServiceAccountName string `json:"serviceAccountName"`
 }
 
-// CreateDeployKeyResponse TODO
-type CreateDeployKeyResponse struct {
+// CreatePadlServiceAccountResponse TODO
+type CreatePadlServiceAccountResponse struct {
 	Token string `json:"token"`
 }
 
@@ -74,16 +74,16 @@ func (a *RemoveUserFromProjectRequest) Validate() error {
 }
 
 // Validate TODO
-func (r *CreateDeployKeyRequest) Validate() error {
-	if r.DeployKeyName == "" {
+func (r *CreatePadlServiceAccountRequest) Validate() error {
+	if r.PadlServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
 	return nil
 }
 
 // Validate TODO
-func (r *DeleteDeployKeyRequest) Validate() error {
-	if r.DeployKeyName == "" {
+func (r *DeletePadlServiceAccountRequest) Validate() error {
+	if r.PadlServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
 	return nil

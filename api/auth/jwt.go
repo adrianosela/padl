@@ -123,7 +123,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 
 	if aud == PadlAPIAudience {
 		lifetime = time.Duration(time.Hour * 12)
-	} else if aud == PadlDeployKeyAudience {
+	} else if aud == PadlServiceAccountAudience {
 		lifetime = time.Duration(time.Hour * 24 * 365) // FIXME: valid for a year
 	} else {
 		return "", "", errors.New("Audience not recognized")

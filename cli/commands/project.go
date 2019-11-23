@@ -56,27 +56,29 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
-			Name:  "deploykey",
+			Name:  "service_account",
 			Usage: "manage secrets for project",
 			Subcommands: []cli.Command{
 				{
 					Name:  "add",
-					Usage: "add a deploy key to the project",
+					Usage: "add a padl service account to the project",
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
 						jsonFlag,
 					},
-					Action: projectAddDeployKeyHandler,
+					Before: addPadlServiceAccountValidator,
+					Action: projectAddPadlServiceAccountHandler,
 				},
 				{
 					Name:  "remove",
-					Usage: "remove a deploy key from the project",
+					Usage: "remove a padl service account from the project",
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
 					},
-					Action: projectRemoveDeployKeyHandler,
+					Before: removePadlServiceAccountValidator,
+					Action: projectRemovePadlServiceAccountHandler,
 				},
 			},
 		},
@@ -113,6 +115,14 @@ var ProjectCmds = cli.Command{
 
 func addUserValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, emailFlag, privFlag)
+}
+
+func addPadlServiceAccountValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag, keyNameFlag)
+}
+
+func removePadlServiceAccountValidator(ctx *cli.Context) error {
+	return assertSet(ctx, nameFlag, keyNameFlag)
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -185,7 +195,7 @@ func getProjectHandler(ctx *cli.Context) error {
 	table.Append([]string{"KEY", project.ProjectKey})
 
 	tablePrivsMap(table, "MEMBERS", project.Members)
-	tableStringsMap(table, "DEPLOY KEYS", project.DeployKeys)
+	tableStringsMap(table, "PADL SERVICE ACCOUNTS", project.PadlServiceAccounts)
 
 	table.Render()
 	return nil
@@ -222,7 +232,7 @@ func projectListHandler(ctx *cli.Context) error {
 	return nil
 }
 
-func projectAddDeployKeyHandler(ctx *cli.Context) error {
+func projectAddPadlServiceAccountHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
@@ -231,9 +241,9 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	resp, err := c.CreateDeployKey(projectName, keyName)
+	resp, err := c.CreatePadlServiceAccount(projectName, keyName)
 	if err != nil {
-		return fmt.Errorf("error creating a deploy key: %s", err)
+		return fmt.Errorf("error creating service account: %s", err)
 	}
 
 	if ctx.Bool(name(jsonFlag)) {
@@ -249,7 +259,7 @@ func projectAddDeployKeyHandler(ctx *cli.Context) error {
 	return nil
 }
 
-func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
+func projectRemovePadlServiceAccountHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
@@ -258,9 +268,9 @@ func projectRemoveDeployKeyHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	err = c.RemoveDeployKey(projectName, keyName)
+	err = c.RemovePadlServiceAccount(projectName, keyName)
 	if err != nil {
-		return fmt.Errorf("error reomiving a deploy key: %s", err)
+		return fmt.Errorf("error removing padl service account: %s", err)
 	}
 	return nil
 }

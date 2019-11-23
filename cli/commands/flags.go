@@ -51,7 +51,7 @@ var (
 	}
 	keyNameFlag = cli.StringFlag{
 		Name:  "keyname",
-		Usage: "deploy key name",
+		Usage: "padl service account name",
 	}
 	descriptionFlag = cli.StringFlag{
 		Name:  "description",

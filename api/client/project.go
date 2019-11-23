@@ -55,10 +55,10 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 	return &pf, nil
 }
 
-//CreateDeployKey Creates a new DeployKey
-func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.CreateDeployKeyResponse, error) {
-	pl := &payloads.CreateDeployKeyRequest{
-		DeployKeyName: keyName,
+// CreatePadlServiceAccount Creates a new padl service account
+func (p *Padl) CreatePadlServiceAccount(projectName string, accountName string) (*payloads.CreatePadlServiceAccountResponse, error) {
+	pl := &payloads.CreatePadlServiceAccountRequest{
+		PadlServiceAccountName: accountName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
@@ -66,7 +66,7 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.Cr
 	}
 	req, err := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
+		fmt.Sprintf("%s/project/%s/service_account", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return nil, fmt.Errorf("could not build http requests: %s", err)
@@ -88,7 +88,7 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.Cr
 		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 
-	var createKeyResp payloads.CreateDeployKeyResponse
+	var createKeyResp payloads.CreatePadlServiceAccountResponse
 
 	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
@@ -97,17 +97,17 @@ func (p *Padl) CreateDeployKey(projectName string, keyName string) (*payloads.Cr
 	return &createKeyResp, nil
 }
 
-//RemoveDeployKey Creates a new DeployKey
-func (p *Padl) RemoveDeployKey(projectName string, keyName string) error {
-	pl := &payloads.DeleteDeployKeyRequest{
-		DeployKeyName: keyName,
+// RemovePadlServiceAccount Removes padl service account
+func (p *Padl) RemovePadlServiceAccount(projectName string, keyName string) error {
+	pl := &payloads.DeletePadlServiceAccountRequest{
+		PadlServiceAccountName: keyName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
 		return fmt.Errorf("could not marshall payload: %s", err)
 	}
 	req, err := http.NewRequest(http.MethodDelete,
-		fmt.Sprintf("%s/project/%s/deploy_key", p.HostURL, projectName),
+		fmt.Sprintf("%s/project/%s/service_account", p.HostURL, projectName),
 		bytes.NewBuffer(plBytes))
 	if err != nil {
 		return fmt.Errorf("could not build http requests: %s", err)
