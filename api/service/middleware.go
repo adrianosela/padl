@@ -20,7 +20,7 @@ var (
 
 // Auth wraps an HTTP handler function
 // and populates the access token claims object in the req ctx
-func (s *Service) Auth(h http.HandlerFunc) http.Handler {
+func (s *Service) Auth(h http.HandlerFunc, allowedAuds ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get token from request header
 		authorization := r.Header.Get("Authorization")
@@ -31,8 +31,7 @@ func (s *Service) Auth(h http.HandlerFunc) http.Handler {
 			return
 		}
 		// validate token
-		verifiedClaims, err := s.authenticator.ValidateJWT(tkStr)
-
+		verifiedClaims, err := s.authenticator.ValidateJWT(tkStr, allowedAuds...)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Fprint(w, "invalid access token")

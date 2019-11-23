@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/adrianosela/padl/lib/keys"
@@ -68,7 +67,7 @@ func (a *Authenticator) SignJWT(tk *jwt.Token) (string, error) {
 }
 
 // ValidateJWT returns the claims within a token as a CustomClaims obect and validates its fields
-func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
+func (a *Authenticator) ValidateJWT(tkString string, allowedAuds ...string) (*CustomClaims, error) {
 	var cc CustomClaims
 	//parse onto a jwt token object
 	keyfunc := func(tk *jwt.Token) (interface{}, error) {
@@ -91,8 +90,21 @@ func (a *Authenticator) ValidateJWT(tkString string) (*CustomClaims, error) {
 	if !cc.VerifyIssuer(a.iss, true) {
 		return nil, fmt.Errorf("Issuer: Expected %s but was %s", a.iss, cc.Issuer)
 	}
-	if !cc.VerifyAudience(a.aud, true) {
-		return nil, fmt.Errorf("Audience: Expected %s but was %s", a.aud, cc.Audience)
+	// check allowed audiences
+	if len(allowedAuds) == 0 {
+		if !cc.VerifyAudience(a.aud, true) {
+			return nil, fmt.Errorf("Audience: Expected %s but was %s", a.aud, cc.Audience)
+		}
+	} else {
+		var passed bool
+		for _, aud := range allowedAuds {
+			if passed = cc.VerifyAudience(aud, true); passed {
+				break
+			}
+		}
+		if !passed {
+			return nil, fmt.Errorf("token audience %s not allowed", cc.Audience)
+		}
 	}
 	//Verify time claims
 	if !cc.VerifyIssuedAt(now, true) {
@@ -112,7 +124,7 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	if aud == PadlAPIAudience {
 		lifetime = time.Duration(time.Hour * 12)
 	} else if aud == PadlDeployKeyAudience {
-		lifetime = time.Duration(math.MaxInt32)
+		lifetime = time.Duration(time.Hour * 24 * 365) // FIXME: valid for a year
 	} else {
 		return "", "", errors.New("Audience not recognized")
 	}
