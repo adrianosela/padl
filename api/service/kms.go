@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/payloads"
 	"github.com/adrianosela/padl/lib/keys"
 	"github.com/gorilla/mux"
@@ -13,7 +14,8 @@ import (
 
 func (s *Service) addKeyEndpoints() {
 	s.Router.Methods(http.MethodGet).Path("/key/{kid}").HandlerFunc(s.getPubKeyHandler) // note no auth
-	s.Router.Methods(http.MethodPost).Path("/key/{kid}/decrypt").Handler(s.Auth(s.decryptSecretHandler))
+	s.Router.Methods(http.MethodPost).Path("/key/{kid}/decrypt").Handler(
+		s.Auth(s.createDeployKeyHandler, []string{auth.PadlDeployKeyAudience, auth.PadlAPIAudience}...))
 }
 
 func (s *Service) getPubKeyHandler(w http.ResponseWriter, r *http.Request) {
