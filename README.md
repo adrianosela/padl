@@ -19,7 +19,7 @@ The goal is to create a secrets management solution with minimal set-up time, hi
 
 * [Before You Begin](#prereading)
 * [Running the API](#getting-started-with-the-api)
-* [Command Line Interface (client)](cli-reference)
+* [Command Line Interface (client)](#cli-reference)
 * [Disclaimer](#disclaimer-and-recommendations)
 
 ## Prereading
