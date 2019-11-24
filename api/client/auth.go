@@ -89,6 +89,34 @@ func (p *Padl) Login(email, password string) (string, error) {
 	return lr.Token, nil
 }
 
+// RotateUserKey rotates the key for a given user
+func (p *Padl) RotateUserKey(pubPEM string) error {
+	plBytes, err := json.Marshal(&payloads.RegistrationRequest{PubKey: pubPEM})
+	if err != nil {
+		return fmt.Errorf("could not marshall payload: %s", err)
+	}
+	req, err := http.NewRequest(http.MethodPost,
+		fmt.Sprintf("%s/rotate", p.HostURL),
+		bytes.NewBuffer(plBytes))
+	p.setAuth(req)
+	if err != nil {
+		return fmt.Errorf("could not build http request: %s", err)
+	}
+	resp, err := p.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not send http request: %s", err)
+	}
+	respByt, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return fmt.Errorf("could not read http response body: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: %s", string(respByt))
+	}
+	return nil
+}
+
 // Valid checks whether a client has a valid token or not and returns the
 // claims represented by the token body
 func (p *Padl) Valid() (*auth.CustomClaims, error) {

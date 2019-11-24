@@ -1,6 +1,10 @@
 package payloads
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/adrianosela/padl/lib/keys"
+)
 
 // RegistrationRequest contains input for user registration
 type RegistrationRequest struct {
@@ -13,6 +17,11 @@ type RegistrationRequest struct {
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// RotateKeyRequest contains input for key rotation
+type RotateKeyRequest struct {
+	PubKey string `json:"public_key"`
 }
 
 // LoginResponse contains the response to a login request
@@ -28,11 +37,12 @@ func (r *RegistrationRequest) Validate() error {
 	if r.Password == "" {
 		return errors.New("no password provided")
 	}
-	// TODO: check PW complex enough
 	if r.PubKey == "" {
 		return errors.New("no public key provided")
 	}
-	// TODO: check pub key is valid RSA and at least 2048 bit
+	if _, err := keys.DecodePubKeyPEM([]byte(r.PubKey)); err != nil {
+		return errors.New("provided key is not a PEM encoded RSA public key")
+	}
 	return nil
 }
 
@@ -43,6 +53,17 @@ func (l *LoginRequest) Validate() error {
 	}
 	if l.Password == "" {
 		return errors.New("no password provided")
+	}
+	return nil
+}
+
+// Validate validates a key rotation request
+func (r *RotateKeyRequest) Validate() error {
+	if r.PubKey == "" {
+		return errors.New("no public key provided")
+	}
+	if _, err := keys.DecodePubKeyPEM([]byte(r.PubKey)); err != nil {
+		return errors.New("provided key is not a PEM encoded RSA public key")
 	}
 	return nil
 }
