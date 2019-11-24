@@ -34,18 +34,18 @@ type RemoveUserFromProjectRequest struct {
 	Email string `json:"email"`
 }
 
-// CreateDeployKeyRequest TODO
-type CreateDeployKeyRequest struct {
-	DeployKeyName string `json:"name"`
+// CreateServiceAccountRequest TODO
+type CreateServiceAccountRequest struct {
+	ServiceAccountName string `json:"name"`
 }
 
-// DeleteDeployKeyRequest TODO
-type DeleteDeployKeyRequest struct {
-	DeployKeyName string `json:"deployKey"`
+// DeleteServiceAccountRequest TODO
+type DeleteServiceAccountRequest struct {
+	ServiceAccountName string `json:"serviceAccountName"`
 }
 
-// CreateDeployKeyResponse TODO
-type CreateDeployKeyResponse struct {
+// CreateServiceAccountResponse TODO
+type CreateServiceAccountResponse struct {
 	Token string `json:"token"`
 }
 
@@ -74,16 +74,16 @@ func (a *RemoveUserFromProjectRequest) Validate() error {
 }
 
 // Validate TODO
-func (r *CreateDeployKeyRequest) Validate() error {
-	if r.DeployKeyName == "" {
+func (r *CreateServiceAccountRequest) Validate() error {
+	if r.ServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
 	return nil
 }
 
 // Validate TODO
-func (r *DeleteDeployKeyRequest) Validate() error {
-	if r.DeployKeyName == "" {
+func (r *DeleteServiceAccountRequest) Validate() error {
+	if r.ServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
 	return nil

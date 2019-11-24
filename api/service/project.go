@@ -24,8 +24,8 @@ func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project/{name}/user").Handler(s.Auth(s.addUserHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{name}/user").Handler(s.Auth(s.removeUserHandler))
 
-	s.Router.Methods(http.MethodPost).Path("/project/{name}/deploy_key").Handler(s.Auth(s.createDeployKeyHandler))
-	s.Router.Methods(http.MethodDelete).Path("/project/{name}/deploy_key").Handler(s.Auth(s.removeDeployKeyHandler))
+	s.Router.Methods(http.MethodPost).Path("/project/{name}/service_account").Handler(s.Auth(s.createServiceAccountHandler))
+	s.Router.Methods(http.MethodDelete).Path("/project/{name}/service_account").Handler(s.Auth(s.removeServiceAccountHandler))
 }
 
 func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
@@ -397,7 +397,7 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) createServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
@@ -406,7 +406,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// get payload data
-	var dkeyPl *payloads.CreateDeployKeyRequest
+	var dkeyPl *payloads.CreateServiceAccountRequest
 	if err := unmarshalRequestBody(r, &dkeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
@@ -434,22 +434,22 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Only Owners can create deploy Keys")))
+		w.Write([]byte(fmt.Sprintf("Only Owners can create service accounts")))
 		return
 	}
 
-	keyEmail := dkeyPl.DeployKeyName + "." + p.Name + "@padl.adrianosela.com"
+	keyEmail := dkeyPl.ServiceAccountName + "." + p.Name + "@padl.adrianosela.com"
 
-	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.PadlDeployKeyAudience)
+	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.ServiceAccountAudience)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not generate keyToken: %s", err)))
 		return
 	}
 
-	if err = p.SetDeployKey(dkeyPl.DeployKeyName, keyID); err != nil {
+	if err = p.SetServiceAccount(dkeyPl.ServiceAccountName, keyID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not set new deploy key: %s", err)))
+		w.Write([]byte(fmt.Sprintf("could not set new service account: %s", err)))
 		return
 	}
 	// update project
@@ -459,7 +459,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// marshall response
-	byt, err := json.Marshal(&payloads.CreateDeployKeyResponse{
+	byt, err := json.Marshal(&payloads.CreateServiceAccountResponse{
 		Token: keyToken,
 	})
 	if err != nil {
@@ -473,7 +473,7 @@ func (s *Service) createDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 	return
 }
 
-func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) removeServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
@@ -482,7 +482,7 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// get payload data
-	var deleteKeyPl payloads.DeleteDeployKeyRequest
+	var deleteKeyPl payloads.DeleteServiceAccountRequest
 	if err := unmarshalRequestBody(r, &deleteKeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not unmarshall request body: %s", err)))
@@ -510,19 +510,19 @@ func (s *Service) removeDeployKeyHandler(w http.ResponseWriter, r *http.Request)
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Only Owners can remove deploy Keys")))
+		w.Write([]byte(fmt.Sprintf("Only Owners can remove service accounts")))
 		return
 	}
 
 	// update project
-	p.RemoveDeployKey(deleteKeyPl.DeployKeyName)
+	p.RemoveServiceAccount(deleteKeyPl.ServiceAccountName)
 	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("successfully removed deploy key from project %s", p.Name)))
+	w.Write([]byte(fmt.Sprintf("successfully removed service account from project %s", p.Name)))
 	return
 }
 

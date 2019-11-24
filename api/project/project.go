@@ -8,11 +8,11 @@ import (
 
 // Project represents a project in Padl
 type Project struct {
-	Name        string
-	Description string
-	Members     map[string]privilege.Level
-	ProjectKey  string
-	DeployKeys  map[string]string
+	Name            string
+	Description     string
+	Members         map[string]privilege.Level
+	ProjectKey      string
+	ServiceAccounts map[string]string
 }
 
 // Summary TODO
@@ -30,7 +30,7 @@ func NewProject(name, description, creator, projectKey string) *Project {
 		Members: map[string]privilege.Level{
 			creator: privilege.PrivilegeLvlOwner,
 		},
-		DeployKeys: make(map[string]string),
+		ServiceAccounts: make(map[string]string),
 	}
 }
 
@@ -65,19 +65,19 @@ func (p *Project) RemoveUser(email string) {
 	}
 }
 
-// SetDeployKey sets a deploy key on a project
-func (p *Project) SetDeployKey(name string, tokenID string) error {
-	if _, ok := p.DeployKeys[name]; ok {
-		return errors.New("a deploy key with this name exists")
+// SetServiceAccount sets a service account for a project
+func (p *Project) SetServiceAccount(name string, tokenID string) error {
+	if _, ok := p.ServiceAccounts[name]; ok {
+		return errors.New("a service account with this name exists")
 	}
-	p.DeployKeys[name] = tokenID
+	p.ServiceAccounts[name] = tokenID
 	return nil
 }
 
-// RemoveDeployKey removes a deploy key from a project
-func (p *Project) RemoveDeployKey(name string) {
-	if _, ok := p.DeployKeys[name]; ok {
-		delete(p.DeployKeys, name)
+// RemoveServiceAccount removes a service account
+func (p *Project) RemoveServiceAccount(name string) {
+	if _, ok := p.ServiceAccounts[name]; ok {
+		delete(p.ServiceAccounts, name)
 	}
 }
 
