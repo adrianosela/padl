@@ -1,9 +1,6 @@
 package padlfile
 
 import (
-	"crypto/hmac"
-	"crypto/sha512"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,38 +22,7 @@ type Body struct {
 
 // File represents the entire contents of a Padlfile
 type File struct {
-	Data Body   `json:"data" yaml:"data"`
-	HMAC string `json:"HMAC" yaml:"HMAC"`
-}
-
-// HashAndSign returns the finalized padlfile contents
-// including a signed hash (HMAC)
-func (b *Body) HashAndSign(secret []byte) (*File, error) {
-	jsonByt, err := json.Marshal(&b)
-	if err != nil {
-		return nil, fmt.Errorf("could not encode body contents: %s", err)
-	}
-	h := hmac.New(sha512.New, secret)
-	h.Write(jsonByt)
-	return &File{
-		Data: *b,
-		HMAC: hex.EncodeToString(h.Sum(nil)),
-	}, nil
-}
-
-// VerifySignature verifies the hash and signature on the file
-func (f *File) VerifySignature(secret []byte) (bool, error) {
-	decoded, err := hex.DecodeString(f.HMAC)
-	if err != nil {
-		return false, fmt.Errorf("could not decode file's HMAC: %s", err)
-	}
-	jsonByt, err := json.Marshal(&f.Data)
-	if err != nil {
-		return false, fmt.Errorf("could not encode body contents: %s", err)
-	}
-	h := hmac.New(sha512.New, secret)
-	h.Write(jsonByt)
-	return hmac.Equal(h.Sum(nil), decoded), nil
+	Data Body `json:"data" yaml:"data"`
 }
 
 // ReadPadlfile reads a padlfile from the given path
