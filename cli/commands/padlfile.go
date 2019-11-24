@@ -141,6 +141,7 @@ func padlfilePullHandler(ctx *cli.Context) error {
 	// set new fields in padlfile before encrypting again
 	pf.Data.SharedKey = projKeys.ProjectKey
 	pf.Data.MemberKeys = projKeys.MemberKeys
+	pf.Data.ServiceKeys = projKeys.DeployKeys
 	pf.Data.Variables = decrypted
 
 	encrypted, err := secMgr.EncryptPadlfileSecrets()

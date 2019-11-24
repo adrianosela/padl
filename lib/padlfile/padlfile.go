@@ -14,10 +14,11 @@ import (
 
 // Body represents the body of a Padlfile
 type Body struct {
-	Project    string            `json:"project_id" yaml:"project_id"` // id of the project for this padlfile
-	Variables  map[string]string `json:"variables" yaml:"variables"`   // map of ENV_VAR to hash
-	MemberKeys []string          `json:"keys" yaml:"keys"`             // project member key ids
-	SharedKey  string            `json:"shared_key" yaml:"shared_key"` // shared project key id
+	Project     string            `json:"project_id" yaml:"project_id"`     // id of the project for this padlfile
+	Variables   map[string]string `json:"variables" yaml:"variables"`       // map of ENV_VAR secret
+	MemberKeys  []string          `json:"user_keys" yaml:"user_keys"`       // project member key ids
+	ServiceKeys []string          `json:"service_keys" yaml:"service_keys"` // service account key ids
+	SharedKey   string            `json:"shared_key" yaml:"shared_key"`     // shared project key id
 }
 
 // File represents the entire contents of a Padlfile
