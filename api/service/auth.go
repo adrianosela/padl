@@ -14,6 +14,7 @@ import (
 func (s *Service) addAuthEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/register").HandlerFunc(s.registrationHandler)
 	s.Router.Methods(http.MethodPost).Path("/login").HandlerFunc(s.loginHandler)
+	s.Router.Methods(http.MethodPost).Path("/rotate").Handler(s.Auth(s.rotateKeyHandler))
 	s.Router.Methods(http.MethodGet).Path("/valid").Handler(s.Auth(s.validHandler))
 }
 
@@ -31,7 +32,7 @@ func (s *Service) registrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// create padl pub key object and store it publically
+	// create padl pub key object and store it publicly
 	pub, err := kms.NewPublicKey(regPl.PubKey)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -106,6 +107,52 @@ func (s *Service) loginHandler(w http.ResponseWriter, r *http.Request) {
 	// return success
 	w.WriteHeader(http.StatusOK)
 	w.Write(byt)
+	return
+}
+
+func (s *Service) rotateKeyHandler(w http.ResponseWriter, r *http.Request) {
+	claims := GetClaims(r)
+	// unmarshal payload
+	var rotatePl *payloads.RotateKeyRequest
+	if err := unmarshalRequestBody(r, &rotatePl); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("could not unmarshal request body"))
+		return
+	}
+	// validate payload
+	if err := rotatePl.Validate(); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	// create padl pub key object and store it publicly
+	pub, err := kms.NewPublicKey(rotatePl.PubKey)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if err := s.keystore.PutPubKey(pub); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not store user's public key: %s", err)))
+		return
+	}
+	// update user in db
+	user, err := s.database.GetUser(claims.Subject)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
+		return
+	}
+	user.KeyID = pub.ID
+	if err := s.database.UpdateUser(user); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to update user in the database: %s", err)))
+		return
+	}
+	// send success
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("rotated user's key successfully!"))
 	return
 }
 

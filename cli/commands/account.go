@@ -44,6 +44,14 @@ var AccountCmds = cli.Command{
 			Action: loginAccountHandler,
 		},
 		{
+			Name:  "rotate-key",
+			Usage: "create a fresh user key and publish the public key",
+			Flags: []cli.Flag{
+				pathFlag,
+			},
+			Action: rotateKeyHandler,
+		},
+		{
 			Name:  "show",
 			Usage: "show account details based on padl token",
 			Flags: []cli.Flag{
@@ -108,6 +116,32 @@ func createAccountHandler(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("registered user %s successfully!\n", email)
+	return nil
+}
+
+func rotateKeyHandler(ctx *cli.Context) error {
+	c, err := getClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not initialize client: %s", err)
+	}
+	// create new key
+	priv, pub, err := keys.GenerateRSAKeyPair(4096)
+	if err != nil {
+		return fmt.Errorf("could not generate key pair: %s", err)
+	}
+	// save private key in filesystem
+	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
+	if err != nil {
+		return fmt.Errorf("could not establish key manager: %s", err)
+	}
+	if err = keyMgr.PutPriv(keys.GetFingerprint(pub), string(keys.EncodePrivKeyPEM(priv))); err != nil {
+		return fmt.Errorf("could not save private key: %s", err)
+	}
+	// rotate key
+	if err = c.RotateUserKey(string(keys.EncodePubKeyPEM(pub))); err != nil {
+		return err
+	}
+	fmt.Println("rotated user key successfully!")
 	return nil
 }
 
