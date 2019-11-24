@@ -56,7 +56,7 @@ var ProjectCmds = cli.Command{
 			Action: projectListHandler,
 		},
 		{
-			Name:  "service_account",
+			Name:  "service-account",
 			Usage: "manage secrets for project",
 			Subcommands: []cli.Command{
 				{
