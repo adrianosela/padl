@@ -15,7 +15,7 @@ import (
 func (s *Service) addKeyEndpoints() {
 	s.Router.Methods(http.MethodGet).Path("/key/{kid}").HandlerFunc(s.getPubKeyHandler) // note no auth
 	s.Router.Methods(http.MethodPost).Path("/key/{kid}/decrypt").Handler(
-		s.Auth(s.createServiceAccountHandler, []string{auth.ServiceAccountAudience, auth.PadlAPIAudience}...))
+		s.Auth(s.decryptSecretHandler, []string{auth.ServiceAccountAudience, auth.PadlAPIAudience}...))
 }
 
 func (s *Service) getPubKeyHandler(w http.ResponseWriter, r *http.Request) {
