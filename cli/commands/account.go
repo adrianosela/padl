@@ -12,6 +12,10 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
+const (
+	defaultHostURL = "https://padl.adrianosela.com"
+)
+
 // AccountCmds - manage accounts and auth flows
 var AccountCmds = cli.Command{
 	Name:    "account",
@@ -25,6 +29,7 @@ var AccountCmds = cli.Command{
 				emailFlag,
 				passwordFlag,
 			},
+			Before: createConfigIfDoesNotExist,
 			Action: createAccountHandler,
 		},
 		{
@@ -35,6 +40,7 @@ var AccountCmds = cli.Command{
 				passwordFlag,
 				pathFlag,
 			},
+			Before: createConfigIfDoesNotExist,
 			Action: loginAccountHandler,
 		},
 		{
@@ -46,6 +52,18 @@ var AccountCmds = cli.Command{
 			Action: showAccountHandler,
 		},
 	},
+}
+
+func createConfigIfDoesNotExist(ctx *cli.Context) error {
+	cPath := ctx.GlobalString(name(ConfigFlag))
+	if _, err := config.GetConfig(cPath); err == nil {
+		return nil
+	}
+	c := &config.Config{HostURL: defaultHostURL}
+	if err := config.SetConfig(c, cPath); err != nil {
+		return fmt.Errorf("could not set configuration: %s", err)
+	}
+	return nil
 }
 
 func createAccountHandler(ctx *cli.Context) error {
