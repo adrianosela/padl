@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+
+	"github.com/adrianosela/padl/lib/keys"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -32,7 +34,7 @@ var ProjectCmds = cli.Command{
 			Name:  "delete",
 			Usage: "delete a padl project",
 			Flags: []cli.Flag{
-				asMandatory(nameFlag),
+				asMandatory(projectFlag),
 			},
 			Before: deleteProjectValidator,
 			Action: deleteProjectHandler,
@@ -41,7 +43,7 @@ var ProjectCmds = cli.Command{
 			Name:  "get",
 			Usage: "get a padl project by name",
 			Flags: []cli.Flag{
-				asMandatory(nameFlag),
+				asMandatory(projectFlag),
 				jsonFlag,
 			},
 			Before: getProjectValidator,
@@ -60,10 +62,10 @@ var ProjectCmds = cli.Command{
 			Usage: "manage secrets for project",
 			Subcommands: []cli.Command{
 				{
-					Name:  "add",
-					Usage: "add a service account to the project",
+					Name:  "create",
+					Usage: "create a service account in the project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(keyNameFlag),
 						jsonFlag,
 					},
@@ -72,9 +74,9 @@ var ProjectCmds = cli.Command{
 				},
 				{
 					Name:  "remove",
-					Usage: "remove a service account from the project",
+					Usage: "delete a service account from the project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(keyNameFlag),
 					},
 					Before: removeServiceAccountValidator,
@@ -91,9 +93,9 @@ var ProjectCmds = cli.Command{
 					Name:  "add",
 					Usage: "add a user to a project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(emailFlag),
-						asMandatoryInt(privFlag),
+						withDefaultInt(privFlag, 0),
 					},
 					Before: addUserValidator,
 					Action: addUserHandler,
@@ -102,7 +104,7 @@ var ProjectCmds = cli.Command{
 					Name:  "remove",
 					Usage: "remove a user from a project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(emailFlag),
 					},
 					Before: removeUserValidator,
@@ -114,15 +116,15 @@ var ProjectCmds = cli.Command{
 }
 
 func addUserValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, emailFlag, privFlag)
+	return assertSet(ctx, projectFlag, emailFlag, privFlag)
 }
 
 func addServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, keyNameFlag)
 }
 
 func removeServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, keyNameFlag)
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -130,15 +132,15 @@ func createProjectValidator(ctx *cli.Context) error {
 }
 
 func deleteProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag)
+	return assertSet(ctx, projectFlag)
 }
 
 func getProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag)
+	return assertSet(ctx, projectFlag)
 }
 
 func removeUserValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, emailFlag)
+	return assertSet(ctx, projectFlag, emailFlag)
 }
 
 func createProjectHandler(ctx *cli.Context) error {
@@ -177,7 +179,7 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 
 	project, err := c.GetProject(projectName)
 	if err != nil {
@@ -238,23 +240,37 @@ func projectAddServiceAccountHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	resp, err := c.CreateServiceAccount(projectName, keyName)
+	priv, pub, err := keys.GenerateRSAKeyPair(4096)
+	if err != nil {
+		return fmt.Errorf("could not generate key pair: %s", err)
+	}
+
+	resp, err := c.CreateServiceAccount(projectName, keyName, string(keys.EncodePubKeyPEM(pub)))
 	if err != nil {
 		return fmt.Errorf("error creating service account: %s", err)
 	}
 
-	if ctx.Bool(name(jsonFlag)) {
-		return printJSON(resp)
+	data := struct {
+		PrivateKey string `json:"private_key"`
+		JWT        string `json:"jwt"`
+	}{
+		PrivateKey: string(keys.EncodePrivKeyPEM(priv)),
+		JWT:        resp.Token,
 	}
 
-	fmt.Println(resp.Token)
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(data)
+	}
 
-	//TODO Generate a user "deploy" key
-
-	//TODO Generate a file to store token and key
+	fmt.Println("---------------------- IMPORTANT NOTE ----------------------")
+	fmt.Println(">> Both the RSA private key and and auth token are secret <<")
+	fmt.Println(">> If either is disclosed you MUST delete the svc account <<")
+	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("\nSERVICE ACCOUNT PRIVATE KEY:\n%s", data.PrivateKey)
+	fmt.Printf("\nSERVICE ACCOUNT AUTH TOKEN:\n%s\n", data.JWT)
 
 	return nil
 }
@@ -265,7 +281,7 @@ func projectRemoveServiceAccountHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
 	err = c.RemoveServiceAccount(projectName, keyName)
@@ -281,7 +297,7 @@ func addUserHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	email := ctx.String(name(emailFlag))
 	privLevel := ctx.Int(name(privFlag))
 
@@ -298,7 +314,7 @@ func removeUserHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	email := ctx.String(name(emailFlag))
 
 	if err = c.RemoveUserFromProject(projectName, email); err != nil {
@@ -314,7 +330,7 @@ func deleteProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	if err := c.DeleteProject(projectName); err != nil {
 		return fmt.Errorf("error deleting project: %s", err)
 	}

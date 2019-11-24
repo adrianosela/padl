@@ -66,12 +66,8 @@ func (p *Project) RemoveUser(email string) {
 }
 
 // SetServiceAccount sets a service account for a project
-func (p *Project) SetServiceAccount(name string, tokenID string) error {
-	if _, ok := p.ServiceAccounts[name]; ok {
-		return errors.New("a service account with this name exists")
-	}
-	p.ServiceAccounts[name] = tokenID
-	return nil
+func (p *Project) SetServiceAccount(name string, keyID string) {
+	p.ServiceAccounts[name] = keyID
 }
 
 // RemoveServiceAccount removes a service account

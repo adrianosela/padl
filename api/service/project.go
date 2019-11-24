@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/adrianosela/padl/api/auth"
@@ -12,6 +13,10 @@ import (
 	"github.com/adrianosela/padl/api/project"
 	"github.com/adrianosela/padl/lib/padlfile"
 	"github.com/gorilla/mux"
+)
+
+const (
+	defaultSvcAccountEmailDomain = "@padl.adrianosela.com"
 )
 
 func (s *Service) addProjectEndpoints() {
@@ -229,17 +234,22 @@ func (s *Service) deleteProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("only owners can delete a project")))
 		return
 	}
+	// delete project's private key
+	if err = s.keystore.DeletePrivKey(p.ProjectKey); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
+	}
 	// delete project's public key
-	err = s.keystore.DeletePubKey(p.ProjectKey)
-	if err != nil {
+	if err = s.keystore.DeletePubKey(p.ProjectKey); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to delete project's public key: %s", err)))
 	}
-	// delete project's private key
-	err = s.keystore.DeletePrivKey(p.ProjectKey)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
+	// delete all service account public keys
+	for _, keyID := range p.ServiceAccounts {
+		if err = s.keystore.DeletePubKey(keyID); err != nil {
+			// fail open, just log
+			log.Printf("unable to delete project service account key %s: %s", keyID, err)
+		}
 	}
 	// remove project from all users
 	for member := range p.Members {
@@ -318,7 +328,6 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(claims.Subject) // REMOVE
 	if err = p.AddUser(addUserPl.Email, privilege.Level(addUserPl.PrivilegeLvl)); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could add user to project: %s", err)))
@@ -405,13 +414,14 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) createServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
+	// get project name from request URL
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no project Name in request URL"))
 		return
 	}
-	// get payload data
+	// get payload data (svc acct name + pub key)
 	var dkeyPl *payloads.CreateServiceAccountRequest
 	if err := unmarshalRequestBody(r, &dkeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -431,49 +441,53 @@ func (s *Service) createServiceAccountHandler(w http.ResponseWriter, r *http.Req
 		w.Write([]byte(fmt.Sprintf("could not find project: %s", err)))
 		return
 	}
-
+	// check if caller is authorized to create a service account for project
 	if _, ok := p.Members[claims.Subject]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
 		return
 	}
-
-	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
+	if p.Members[claims.Subject] < privilege.PrivilegeLvlEditor {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Only Owners can create service accounts")))
+		w.Write([]byte(fmt.Sprintf("Only owners and editors can create service accounts")))
 		return
 	}
-
-	keyEmail := dkeyPl.ServiceAccountName + "." + p.Name + "@padl.adrianosela.com"
-
-	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.ServiceAccountAudience)
+	// create padl pub key object for svc account and store it publicly
+	pub, err := kms.NewPublicKey(dkeyPl.PubKey)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if err := s.keystore.PutPubKey(pub); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not store service account's public key: %s", err)))
+		return
+	}
+	// build a service account email of the form {name}.{project_name}@{padl_hostname}
+	// i.e. cicd.my-first-project@api.padl.com
+	svcEmail := dkeyPl.ServiceAccountName + "." + p.Name + defaultSvcAccountEmailDomain
+	keyToken, err := s.authenticator.GenerateJWT(svcEmail, auth.ServiceAccountAudience)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not generate keyToken: %s", err)))
 		return
 	}
-
-	if err = p.SetServiceAccount(dkeyPl.ServiceAccountName, keyID); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not set new service account: %s", err)))
-		return
-	}
-	// update project
+	// add service account to project object and save it
+	p.SetServiceAccount(dkeyPl.ServiceAccountName, pub.ID)
 	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
 	}
 	// marshall response
-	byt, err := json.Marshal(&payloads.CreateServiceAccountResponse{
-		Token: keyToken,
-	})
+	byt, err := json.Marshal(&payloads.CreateServiceAccountResponse{Token: keyToken})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("could not marshal project json: %s", err)))
 		return
 	}
-	// send resp
+	// send success
 	w.WriteHeader(http.StatusOK)
 	w.Write(byt)
 	return
