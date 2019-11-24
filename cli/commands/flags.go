@@ -54,7 +54,7 @@ var (
 		Usage: "project name",
 	}
 	keyNameFlag = cli.StringFlag{
-		Name:  "keyname",
+		Name:  "key-name",
 		Usage: "service account name",
 	}
 	descriptionFlag = cli.StringFlag{

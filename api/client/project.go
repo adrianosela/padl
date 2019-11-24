@@ -56,14 +56,15 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 }
 
 // CreateServiceAccount Creates a new service account
-func (p *Padl) CreateServiceAccount(projectName string, accountName string) (*payloads.CreateServiceAccountResponse, error) {
-	pl := &payloads.CreateServiceAccountRequest{
+func (p *Padl) CreateServiceAccount(projectName, accountName, pubKeyPEM string) (*payloads.CreateServiceAccountResponse, error) {
+	plBytes, err := json.Marshal(&payloads.CreateServiceAccountRequest{
 		ServiceAccountName: accountName,
-	}
-	plBytes, err := json.Marshal(&pl)
+		PubKey:             pubKeyPEM,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not marshall payload: %s", err)
 	}
+
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("%s/project/%s/service_account", p.HostURL, projectName),
@@ -89,7 +90,6 @@ func (p *Padl) CreateServiceAccount(projectName string, accountName string) (*pa
 	}
 
 	var createKeyResp payloads.CreateServiceAccountResponse
-
 	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
 	}

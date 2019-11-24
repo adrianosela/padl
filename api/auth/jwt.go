@@ -117,7 +117,7 @@ func (a *Authenticator) ValidateJWT(tkString string, allowedAuds ...string) (*Cu
 }
 
 // GenerateJWT generates and signs a token for a given user
-func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, error) {
+func (a *Authenticator) GenerateJWT(email string, aud string) (string, error) {
 
 	var lifetime time.Duration
 
@@ -126,17 +126,16 @@ func (a *Authenticator) GenerateJWT(email string, aud string) (string, string, e
 	} else if aud == ServiceAccountAudience {
 		lifetime = time.Duration(time.Hour * 24 * 365) // FIXME: valid for a year
 	} else {
-		return "", "", errors.New("Audience not recognized")
+		return "", errors.New("Audience not recognized")
 	}
 
 	cc := NewCustomClaims(email, aud, a.iss, lifetime)
 
-	id := cc.Id
 	tk := newJWT(cc, jwt.SigningMethodRS512)
 	tk.Header["kid"] = keys.GetFingerprint(&a.signer.PublicKey)
 	signedTk, err := a.SignJWT(tk)
 	if err != nil {
-		return "", "", fmt.Errorf("could not sign JWT: %s", err)
+		return "", fmt.Errorf("could not sign JWT: %s", err)
 	}
-	return signedTk, id, nil
+	return signedTk, nil
 }

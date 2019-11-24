@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+
+	"github.com/adrianosela/padl/lib/keys"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -241,20 +243,34 @@ func projectAddServiceAccountHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(projectFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	resp, err := c.CreateServiceAccount(projectName, keyName)
+	priv, pub, err := keys.GenerateRSAKeyPair(4096)
+	if err != nil {
+		return fmt.Errorf("could not generate key pair: %s", err)
+	}
+
+	resp, err := c.CreateServiceAccount(projectName, keyName, string(keys.EncodePubKeyPEM(pub)))
 	if err != nil {
 		return fmt.Errorf("error creating service account: %s", err)
 	}
 
-	if ctx.Bool(name(jsonFlag)) {
-		return printJSON(resp)
+	data := struct {
+		PrivateKey string `json:"private_key"`
+		JWT        string `json:"jwt"`
+	}{
+		PrivateKey: string(keys.EncodePrivKeyPEM(priv)),
+		JWT:        resp.Token,
 	}
 
-	fmt.Println(resp.Token)
+	if ctx.Bool(name(jsonFlag)) {
+		return printJSON(data)
+	}
 
-	//TODO Generate a user "deploy" key
-
-	//TODO Generate a file to store token and key
+	fmt.Println("---------------------- IMPORTANT NOTE ----------------------")
+	fmt.Println(">> Both the RSA private key and and auth token are secret <<")
+	fmt.Println(">> If either is disclosed you MUST delete the svc account <<")
+	fmt.Println("------------------------------------------------------------")
+	fmt.Printf("\nSERVICE ACCOUNT PRIVATE KEY:\n%s", data.PrivateKey)
+	fmt.Printf("\nSERVICE ACCOUNT AUTH TOKEN:\n%s\n", data.JWT)
 
 	return nil
 }
