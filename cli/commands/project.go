@@ -32,7 +32,7 @@ var ProjectCmds = cli.Command{
 			Name:  "delete",
 			Usage: "delete a padl project",
 			Flags: []cli.Flag{
-				asMandatory(nameFlag),
+				asMandatory(projectFlag),
 			},
 			Before: deleteProjectValidator,
 			Action: deleteProjectHandler,
@@ -41,7 +41,7 @@ var ProjectCmds = cli.Command{
 			Name:  "get",
 			Usage: "get a padl project by name",
 			Flags: []cli.Flag{
-				asMandatory(nameFlag),
+				asMandatory(projectFlag),
 				jsonFlag,
 			},
 			Before: getProjectValidator,
@@ -60,10 +60,10 @@ var ProjectCmds = cli.Command{
 			Usage: "manage secrets for project",
 			Subcommands: []cli.Command{
 				{
-					Name:  "add",
-					Usage: "add a service account to the project",
+					Name:  "create",
+					Usage: "create a service account in the project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(keyNameFlag),
 						jsonFlag,
 					},
@@ -72,9 +72,9 @@ var ProjectCmds = cli.Command{
 				},
 				{
 					Name:  "remove",
-					Usage: "remove a service account from the project",
+					Usage: "delete a service account from the project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(keyNameFlag),
 					},
 					Before: removeServiceAccountValidator,
@@ -91,9 +91,9 @@ var ProjectCmds = cli.Command{
 					Name:  "add",
 					Usage: "add a user to a project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(emailFlag),
-						asMandatoryInt(privFlag),
+						withDefaultInt(privFlag, 0),
 					},
 					Before: addUserValidator,
 					Action: addUserHandler,
@@ -102,7 +102,7 @@ var ProjectCmds = cli.Command{
 					Name:  "remove",
 					Usage: "remove a user from a project",
 					Flags: []cli.Flag{
-						asMandatory(nameFlag),
+						asMandatory(projectFlag),
 						asMandatory(emailFlag),
 					},
 					Before: removeUserValidator,
@@ -114,15 +114,15 @@ var ProjectCmds = cli.Command{
 }
 
 func addUserValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, emailFlag, privFlag)
+	return assertSet(ctx, projectFlag, emailFlag, privFlag)
 }
 
 func addServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, keyNameFlag)
 }
 
 func removeServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, keyNameFlag)
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -130,15 +130,15 @@ func createProjectValidator(ctx *cli.Context) error {
 }
 
 func deleteProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag)
+	return assertSet(ctx, projectFlag)
 }
 
 func getProjectValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag)
+	return assertSet(ctx, projectFlag)
 }
 
 func removeUserValidator(ctx *cli.Context) error {
-	return assertSet(ctx, nameFlag, emailFlag)
+	return assertSet(ctx, projectFlag, emailFlag)
 }
 
 func createProjectHandler(ctx *cli.Context) error {
@@ -177,7 +177,7 @@ func getProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 
 	project, err := c.GetProject(projectName)
 	if err != nil {
@@ -238,7 +238,7 @@ func projectAddServiceAccountHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
 	resp, err := c.CreateServiceAccount(projectName, keyName)
@@ -265,7 +265,7 @@ func projectRemoveServiceAccountHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
 	err = c.RemoveServiceAccount(projectName, keyName)
@@ -281,7 +281,7 @@ func addUserHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	email := ctx.String(name(emailFlag))
 	privLevel := ctx.Int(name(privFlag))
 
@@ -298,7 +298,7 @@ func removeUserHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	email := ctx.String(name(emailFlag))
 
 	if err = c.RemoveUserFromProject(projectName, email); err != nil {
@@ -314,7 +314,7 @@ func deleteProjectHandler(ctx *cli.Context) error {
 		return fmt.Errorf("could not initialize client: %s", err)
 	}
 
-	projectName := ctx.String(name(nameFlag))
+	projectName := ctx.String(name(projectFlag))
 	if err := c.DeleteProject(projectName); err != nil {
 		return fmt.Errorf("error deleting project: %s", err)
 	}

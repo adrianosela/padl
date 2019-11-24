@@ -318,7 +318,6 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(claims.Subject) // REMOVE
 	if err = p.AddUser(addUserPl.Email, privilege.Level(addUserPl.PrivilegeLvl)); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could add user to project: %s", err)))
