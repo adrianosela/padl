@@ -81,37 +81,50 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext string, userPriv *rsa.PrivateKe
 
 // EncryptSecret encrypts a single secret
 func (smgr *SecretsMgr) EncryptSecret(plaintext string) (string, error) {
+	// precache necessary encryption keys in the filesystem
 	pubs, err := smgr.PrecachePubs()
 	if err != nil {
 		return "", fmt.Errorf("could not precache public keys: %s", err)
 	}
-
-	// we need as many parts as we have keys
-	parts, err := shamir.Split([]byte(plaintext), len(smgr.padlFile.Data.MemberKeys)+1, 2)
+	// establish secret object
+	s := secret.Secret{Shards: []*secret.EncryptedShard{}}
+	// we begin by splitting the plaintext into two top-level shares
+	topLevelParts, err := shamir.Split([]byte(plaintext), 2, 2)
 	if err != nil {
 		return "", fmt.Errorf("could not split plaintext secret: %s", err)
 	}
-
-	s := secret.Secret{Shards: []*secret.EncryptedShard{}}
-
-	for i, part := range parts {
-		plainShard, err := secret.NewShard(part)
-		if err != nil {
-			return "", fmt.Errorf("could not build shard: %s", err)
-		}
-		encShard, err := plainShard.Encrypt(pubs[i])
-		if err != nil {
-			return "", fmt.Errorf("could not encrypt shard: %s", err)
-		}
-		s.Shards = append(s.Shards, encShard)
+	// we encrypt one of them with the shared public key
+	sharedShard, err := encryptPart(topLevelParts[0], pubs[smgr.padlFile.Data.SharedKey])
+	if err != nil {
+		return "", fmt.Errorf("could not encrypt shared shard: %s", err)
 	}
-
+	s.Shards = append(s.Shards, sharedShard)
+	// we encrypt the other top level shard N times (with each of the N user keys)
+	for _, k := range smgr.padlFile.Data.MemberKeys {
+		usrShard, err := encryptPart(topLevelParts[1], pubs[k])
+		if err != nil {
+			return "", fmt.Errorf("could not encrypt shared shard: %s", err)
+		}
+		s.Shards = append(s.Shards, usrShard)
+	}
+	// we then PEM encode the secret data
 	padlPEMSecret, err := s.EncodePEM()
 	if err != nil {
 		return "", fmt.Errorf("could not PEM encode secret: %s", err)
 	}
-
 	return padlPEMSecret, nil
+}
+
+func encryptPart(part []byte, pub *rsa.PublicKey) (*secret.EncryptedShard, error) {
+	plainShard, err := secret.NewShard(part)
+	if err != nil {
+		return nil, fmt.Errorf("could not build shard: %s", err)
+	}
+	encShard, err := plainShard.Encrypt(pub)
+	if err != nil {
+		return nil, fmt.Errorf("could not encrypt shard: %s", err)
+	}
+	return encShard, nil
 }
 
 // EncryptPadlfileSecrets uses the network and the file system to encrypt
@@ -129,8 +142,8 @@ func (smgr *SecretsMgr) EncryptPadlfileSecrets() (map[string]string, error) {
 
 // PrecachePubs gets (and caches) all public keys needed to encrypt
 // a padlfile
-func (smgr *SecretsMgr) PrecachePubs() ([]*rsa.PublicKey, error) {
-	pubs := []*rsa.PublicKey{}
+func (smgr *SecretsMgr) PrecachePubs() (map[string]*rsa.PublicKey, error) {
+	pubs := make(map[string]*rsa.PublicKey)
 	// for all keys (user keys + shared team key)
 	for _, k := range append(smgr.padlFile.Data.MemberKeys, smgr.padlFile.Data.SharedKey) {
 		// try to get pub from filesystem
@@ -138,7 +151,7 @@ func (smgr *SecretsMgr) PrecachePubs() ([]*rsa.PublicKey, error) {
 		if err == nil {
 			pubRSA, err := keys.DecodePubKeyPEM([]byte(pubPEM))
 			if err == nil {
-				pubs = append(pubs, pubRSA)
+				pubs[k] = pubRSA
 				continue // key already in fs
 			}
 			// fall back to server
@@ -154,7 +167,7 @@ func (smgr *SecretsMgr) PrecachePubs() ([]*rsa.PublicKey, error) {
 		if err != nil {
 			return nil, fmt.Errorf("unable to materialize padl pub key onto RSA public key: %s", err)
 		}
-		pubs = append(pubs, pubRSA)
+		pubs[k] = pubRSA
 
 		// store it to the file system
 		if err := smgr.keyManager.PutPub(pub.ID, pub.PEM); err != nil {
