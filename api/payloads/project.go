@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/adrianosela/padl/api/project"
+	"github.com/adrianosela/padl/lib/keys"
 )
 
-// NewProjectRequest TODO
+// NewProjectRequest is the expected payload for the
+// of the project creation endpooint
 type NewProjectRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -17,44 +19,50 @@ type NewProjectRequest struct {
 // GetProjectKeysReponse returns all the public
 // key ids associated with a project
 type GetProjectKeysReponse struct {
-	Name       string
-	MemberKeys []string
-	ProjectKey string
-	//	DeployKeys  []string (TODO)
+	Name       string   `json:"name"`
+	MemberKeys []string `json:"member_keys"`
+	ProjectKey string   `json:"project_key"`
+	DeployKeys []string `json:"deploy_keys"`
 }
 
-// AddUserToProjectRequest TODO
+// AddUserToProjectRequest is the expected payload
+// for the user addition to project endpoint
 type AddUserToProjectRequest struct {
 	Email        string `json:"email"`
 	PrivilegeLvl int    `json:"privilege"`
 }
 
-// RemoveUserFromProjectRequest TODO
+// RemoveUserFromProjectRequest is the expected payload
+// for the user removal from project endpoint
 type RemoveUserFromProjectRequest struct {
 	Email string `json:"email"`
 }
 
-// CreateServiceAccountRequest TODO
+// CreateServiceAccountRequest is the expected payload
+// for the service-account creation endpoint
 type CreateServiceAccountRequest struct {
 	ServiceAccountName string `json:"name"`
+	PubKey             string `json:"public_key"`
 }
 
-// DeleteServiceAccountRequest TODO
+// DeleteServiceAccountRequest is the expected payload
+// for the service-account deletion endpoint
 type DeleteServiceAccountRequest struct {
 	ServiceAccountName string `json:"serviceAccountName"`
 }
 
-// CreateServiceAccountResponse TODO
+// CreateServiceAccountResponse is the response
+// type of the service-account creation endpoint
 type CreateServiceAccountResponse struct {
 	Token string `json:"token"`
 }
 
-// ListProjectsResponse TODO
+// ListProjectsResponse is the response of the project list endpoint
 type ListProjectsResponse struct {
 	Projects []*project.Summary `json:"projects"`
 }
 
-// Validate TODO
+// Validate validates a user addition to project request
 func (a *AddUserToProjectRequest) Validate() error {
 	if a.Email == "" {
 		return errors.New("no email provided")
@@ -65,7 +73,7 @@ func (a *AddUserToProjectRequest) Validate() error {
 	return nil
 }
 
-// Validate TODO
+// Validate validates a user removal from project request
 func (a *RemoveUserFromProjectRequest) Validate() error {
 	if a.Email == "" {
 		return errors.New("no email provided")
@@ -73,15 +81,21 @@ func (a *RemoveUserFromProjectRequest) Validate() error {
 	return nil
 }
 
-// Validate TODO
+// Validate validates a service-account creation request
 func (r *CreateServiceAccountRequest) Validate() error {
 	if r.ServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
+	if r.PubKey == "" {
+		return errors.New("no public key provided")
+	}
+	if _, err := keys.DecodePubKeyPEM([]byte(r.PubKey)); err != nil {
+		return errors.New("provided key is not a PEM encoded RSA public key")
+	}
 	return nil
 }
 
-// Validate TODO
+// Validate validates a service-account deletion request
 func (r *DeleteServiceAccountRequest) Validate() error {
 	if r.ServiceAccountName == "" {
 		return errors.New("No name provided")
@@ -89,7 +103,7 @@ func (r *DeleteServiceAccountRequest) Validate() error {
 	return nil
 }
 
-// Validate validates a NewProjectRequest
+// Validate validates a project creation request
 func (p *NewProjectRequest) Validate() error {
 	if p.Name == "" {
 		return errors.New("no project name provided")
