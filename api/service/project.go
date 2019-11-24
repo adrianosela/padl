@@ -209,19 +209,21 @@ func (s *Service) getProjectKeysHandler(w http.ResponseWriter, r *http.Request) 
 
 func (s *Service) deleteProjectHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
+	// name from GET params
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no project Name in request URL"))
 		return
 	}
+	// get project from db
 	p, err := s.database.GetProject(name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not get project: %s", err)))
 		return
 	}
-
+	// check caller is owner, else reject request
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("only owners can delete a project")))
@@ -239,13 +241,19 @@ func (s *Service) deleteProjectHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to delete project's private key: %s", err)))
 	}
+	// remove project from all users
+	for member := range p.Members {
+		if u, err := s.database.GetUser(member); err == nil {
+			u.RemoveProject(p.Name)
+			s.database.UpdateUser(u) // note the ignored error here
+		}
+	}
 	// delete project
-	err = s.database.DeleteProject(name)
-	if err != nil {
+	if err = s.database.DeleteProject(name); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to delete project: %s", err)))
 	}
-
+	// send success
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf("project %s deleted successfully!", name)))
 }
@@ -291,7 +299,6 @@ func (s *Service) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := s.database.GetUser(addUserPl.Email)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))
@@ -358,7 +365,6 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := s.database.GetUser(rmUserPl.Email)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("unable to get user from the database: %s", err)))

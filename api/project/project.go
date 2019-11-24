@@ -15,7 +15,7 @@ type Project struct {
 	ServiceAccounts map[string]string
 }
 
-// Summary TODO
+// Summary is a name-description representation of a Project
 type Summary struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -79,10 +79,4 @@ func (p *Project) RemoveServiceAccount(name string) {
 	if _, ok := p.ServiceAccounts[name]; ok {
 		delete(p.ServiceAccounts, name)
 	}
-}
-
-// RotateProjectKey rotates the private key for a project
-func (p *Project) RotateProjectKey() error {
-	// TODO
-	return nil
 }
