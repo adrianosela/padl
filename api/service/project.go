@@ -108,10 +108,11 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// create and send padlFile
 	pf := &padlfile.File{
 		Data: padlfile.Body{
-			Project:    project.Name,
-			Variables:  make(map[string]string),
-			MemberKeys: []string{user.KeyID},
-			SharedKey:  pKey.ID,
+			Project:     project.Name,
+			Variables:   make(map[string]string),
+			MemberKeys:  []string{user.KeyID},
+			ServiceKeys: []string{},
+			SharedKey:   pKey.ID,
 		},
 	}
 

@@ -45,7 +45,7 @@ func (smgr *SecretsMgr) DecryptPadlFileSecrets(userPriv *rsa.PrivateKey) (map[st
 }
 
 // DecryptSecret ecrypts a single pem encoded secret
-func (smgr *SecretsMgr) DecryptSecret(ciphertext string, userPriv *rsa.PrivateKey) (string, error) {
+func (smgr *SecretsMgr) DecryptSecret(ciphertext string, usrOrSvcPriv *rsa.PrivateKey) (string, error) {
 	sec, err := secret.DecodePEM(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf("could not decode PEM secret %s", err)
@@ -59,8 +59,8 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext string, userPriv *rsa.PrivateKe
 				return "", fmt.Errorf("could not decrypt shared shard: %s", err)
 			}
 			parts = append(parts, []byte(decryptedSharedShard))
-		} else if sh.KeyID == keys.GetFingerprint(&userPriv.PublicKey) {
-			decryptedUserShard, err := sh.Decrypt(userPriv)
+		} else if sh.KeyID == keys.GetFingerprint(&usrOrSvcPriv.PublicKey) {
+			decryptedUserShard, err := sh.Decrypt(usrOrSvcPriv)
 			if err != nil {
 				return "", fmt.Errorf("could not decrypt user shard: %s", err)
 			}
@@ -99,8 +99,9 @@ func (smgr *SecretsMgr) EncryptSecret(plaintext string) (string, error) {
 		return "", fmt.Errorf("could not encrypt shared shard: %s", err)
 	}
 	s.Shards = append(s.Shards, sharedShard)
-	// we encrypt the other top level shard N times (with each of the N user keys)
-	for _, k := range smgr.padlFile.Data.MemberKeys {
+	// we encrypt the other top level shard N times (with each of the N user/service keys)
+	memberKeys, serviceKeys := smgr.padlFile.Data.MemberKeys, smgr.padlFile.Data.ServiceKeys
+	for _, k := range append(memberKeys, serviceKeys...) {
 		usrShard, err := encryptPart(topLevelParts[1], pubs[k])
 		if err != nil {
 			return "", fmt.Errorf("could not encrypt shared shard: %s", err)
