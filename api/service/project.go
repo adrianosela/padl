@@ -100,18 +100,14 @@ func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create padlfile
-	body := &padlfile.Body{
-		Project:    project.Name,
-		Variables:  make(map[string]string),
-		MemberKeys: []string{user.KeyID},
-		SharedKey:  pKey.ID,
-	}
-	pf, err := body.HashAndSign([]byte("Some crazy secret"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("unable to sign padlfile: %s", err)))
-		return
+	// create and send padlFile
+	pf := &padlfile.File{
+		Data: padlfile.Body{
+			Project:    project.Name,
+			Variables:  make(map[string]string),
+			MemberKeys: []string{user.KeyID},
+			SharedKey:  pKey.ID,
+		},
 	}
 
 	byt, err := json.Marshal(&pf)
