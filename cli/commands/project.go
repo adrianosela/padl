@@ -61,24 +61,24 @@ var ProjectCmds = cli.Command{
 			Subcommands: []cli.Command{
 				{
 					Name:  "add",
-					Usage: "add a padl service account to the project",
+					Usage: "add a service account to the project",
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
 						jsonFlag,
 					},
-					Before: addPadlServiceAccountValidator,
-					Action: projectAddPadlServiceAccountHandler,
+					Before: addServiceAccountValidator,
+					Action: projectAddServiceAccountHandler,
 				},
 				{
 					Name:  "remove",
-					Usage: "remove a padl service account from the project",
+					Usage: "remove a service account from the project",
 					Flags: []cli.Flag{
 						asMandatory(nameFlag),
 						asMandatory(keyNameFlag),
 					},
-					Before: removePadlServiceAccountValidator,
-					Action: projectRemovePadlServiceAccountHandler,
+					Before: removeServiceAccountValidator,
+					Action: projectRemoveServiceAccountHandler,
 				},
 			},
 		},
@@ -117,11 +117,11 @@ func addUserValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, emailFlag, privFlag)
 }
 
-func addPadlServiceAccountValidator(ctx *cli.Context) error {
+func addServiceAccountValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, keyNameFlag)
 }
 
-func removePadlServiceAccountValidator(ctx *cli.Context) error {
+func removeServiceAccountValidator(ctx *cli.Context) error {
 	return assertSet(ctx, nameFlag, keyNameFlag)
 }
 
@@ -195,7 +195,7 @@ func getProjectHandler(ctx *cli.Context) error {
 	table.Append([]string{"KEY", project.ProjectKey})
 
 	tablePrivsMap(table, "MEMBERS", project.Members)
-	tableStringsMap(table, "PADL SERVICE ACCOUNTS", project.PadlServiceAccounts)
+	tableStringsMap(table, "SERVICE ACCOUNTS", project.ServiceAccounts)
 
 	table.Render()
 	return nil
@@ -232,7 +232,7 @@ func projectListHandler(ctx *cli.Context) error {
 	return nil
 }
 
-func projectAddPadlServiceAccountHandler(ctx *cli.Context) error {
+func projectAddServiceAccountHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
@@ -241,7 +241,7 @@ func projectAddPadlServiceAccountHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	resp, err := c.CreatePadlServiceAccount(projectName, keyName)
+	resp, err := c.CreateServiceAccount(projectName, keyName)
 	if err != nil {
 		return fmt.Errorf("error creating service account: %s", err)
 	}
@@ -259,7 +259,7 @@ func projectAddPadlServiceAccountHandler(ctx *cli.Context) error {
 	return nil
 }
 
-func projectRemovePadlServiceAccountHandler(ctx *cli.Context) error {
+func projectRemoveServiceAccountHandler(ctx *cli.Context) error {
 	c, err := getClient(ctx)
 	if err != nil {
 		return fmt.Errorf("could not initialize client: %s", err)
@@ -268,9 +268,9 @@ func projectRemovePadlServiceAccountHandler(ctx *cli.Context) error {
 	projectName := ctx.String(name(nameFlag))
 	keyName := ctx.String(name(keyNameFlag))
 
-	err = c.RemovePadlServiceAccount(projectName, keyName)
+	err = c.RemoveServiceAccount(projectName, keyName)
 	if err != nil {
-		return fmt.Errorf("error removing padl service account: %s", err)
+		return fmt.Errorf("error removing service account: %s", err)
 	}
 	return nil
 }

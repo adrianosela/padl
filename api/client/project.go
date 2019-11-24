@@ -55,10 +55,10 @@ func (p *Padl) CreateProject(name, description string, bits int) (*padlfile.File
 	return &pf, nil
 }
 
-// CreatePadlServiceAccount Creates a new padl service account
-func (p *Padl) CreatePadlServiceAccount(projectName string, accountName string) (*payloads.CreatePadlServiceAccountResponse, error) {
-	pl := &payloads.CreatePadlServiceAccountRequest{
-		PadlServiceAccountName: accountName,
+// CreateServiceAccount Creates a new service account
+func (p *Padl) CreateServiceAccount(projectName string, accountName string) (*payloads.CreateServiceAccountResponse, error) {
+	pl := &payloads.CreateServiceAccountRequest{
+		ServiceAccountName: accountName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {
@@ -88,7 +88,7 @@ func (p *Padl) CreatePadlServiceAccount(projectName string, accountName string) 
 		return nil, fmt.Errorf("error: %s", string(respByt))
 	}
 
-	var createKeyResp payloads.CreatePadlServiceAccountResponse
+	var createKeyResp payloads.CreateServiceAccountResponse
 
 	if err := json.Unmarshal(respByt, &createKeyResp); err != nil {
 		return nil, fmt.Errorf("could not unmarshal http response body: %s", err)
@@ -97,10 +97,10 @@ func (p *Padl) CreatePadlServiceAccount(projectName string, accountName string) 
 	return &createKeyResp, nil
 }
 
-// RemovePadlServiceAccount Removes padl service account
-func (p *Padl) RemovePadlServiceAccount(projectName string, keyName string) error {
-	pl := &payloads.DeletePadlServiceAccountRequest{
-		PadlServiceAccountName: keyName,
+// RemoveServiceAccount Removes service account
+func (p *Padl) RemoveServiceAccount(projectName string, keyName string) error {
+	pl := &payloads.DeleteServiceAccountRequest{
+		ServiceAccountName: keyName,
 	}
 	plBytes, err := json.Marshal(&pl)
 	if err != nil {

@@ -24,8 +24,8 @@ func (s *Service) addProjectEndpoints() {
 	s.Router.Methods(http.MethodPost).Path("/project/{name}/user").Handler(s.Auth(s.addUserHandler))
 	s.Router.Methods(http.MethodDelete).Path("/project/{name}/user").Handler(s.Auth(s.removeUserHandler))
 
-	s.Router.Methods(http.MethodPost).Path("/project/{name}/service_account").Handler(s.Auth(s.createPadlServiceAccountHandler))
-	s.Router.Methods(http.MethodDelete).Path("/project/{name}/service_account").Handler(s.Auth(s.removePadlServiceAccountHandler))
+	s.Router.Methods(http.MethodPost).Path("/project/{name}/service_account").Handler(s.Auth(s.createServiceAccountHandler))
+	s.Router.Methods(http.MethodDelete).Path("/project/{name}/service_account").Handler(s.Auth(s.removeServiceAccountHandler))
 }
 
 func (s *Service) createProjectHandler(w http.ResponseWriter, r *http.Request) {
@@ -401,7 +401,7 @@ func (s *Service) removeUserHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (s *Service) createPadlServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) createServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
@@ -410,7 +410,7 @@ func (s *Service) createPadlServiceAccountHandler(w http.ResponseWriter, r *http
 		return
 	}
 	// get payload data
-	var dkeyPl *payloads.CreatePadlServiceAccountRequest
+	var dkeyPl *payloads.CreateServiceAccountRequest
 	if err := unmarshalRequestBody(r, &dkeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("could not unmarshall request body"))
@@ -438,22 +438,22 @@ func (s *Service) createPadlServiceAccountHandler(w http.ResponseWriter, r *http
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Only Owners can create padl service accounts")))
+		w.Write([]byte(fmt.Sprintf("Only Owners can create service accounts")))
 		return
 	}
 
-	keyEmail := dkeyPl.PadlServiceAccountName + "." + p.Name + "@padl.adrianosela.com"
+	keyEmail := dkeyPl.ServiceAccountName + "." + p.Name + "@padl.adrianosela.com"
 
-	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.PadlServiceAccountAudience)
+	keyToken, keyID, err := s.authenticator.GenerateJWT(keyEmail, auth.ServiceAccountAudience)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not generate keyToken: %s", err)))
 		return
 	}
 
-	if err = p.SetPadlServiceAccount(dkeyPl.PadlServiceAccountName, keyID); err != nil {
+	if err = p.SetServiceAccount(dkeyPl.ServiceAccountName, keyID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not set new padl service account: %s", err)))
+		w.Write([]byte(fmt.Sprintf("could not set new service account: %s", err)))
 		return
 	}
 	// update project
@@ -463,7 +463,7 @@ func (s *Service) createPadlServiceAccountHandler(w http.ResponseWriter, r *http
 		return
 	}
 	// marshall response
-	byt, err := json.Marshal(&payloads.CreatePadlServiceAccountResponse{
+	byt, err := json.Marshal(&payloads.CreateServiceAccountResponse{
 		Token: keyToken,
 	})
 	if err != nil {
@@ -477,7 +477,7 @@ func (s *Service) createPadlServiceAccountHandler(w http.ResponseWriter, r *http
 	return
 }
 
-func (s *Service) removePadlServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) removeServiceAccountHandler(w http.ResponseWriter, r *http.Request) {
 	claims := GetClaims(r)
 	var name string
 	if name = mux.Vars(r)["name"]; name == "" {
@@ -486,7 +486,7 @@ func (s *Service) removePadlServiceAccountHandler(w http.ResponseWriter, r *http
 		return
 	}
 	// get payload data
-	var deleteKeyPl payloads.DeletePadlServiceAccountRequest
+	var deleteKeyPl payloads.DeleteServiceAccountRequest
 	if err := unmarshalRequestBody(r, &deleteKeyPl); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not unmarshall request body: %s", err)))
@@ -514,19 +514,19 @@ func (s *Service) removePadlServiceAccountHandler(w http.ResponseWriter, r *http
 
 	if p.Members[claims.Subject] < privilege.PrivilegeLvlOwner {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Only Owners can remove padl service accounts")))
+		w.Write([]byte(fmt.Sprintf("Only Owners can remove service accounts")))
 		return
 	}
 
 	// update project
-	p.RemovePadlServiceAccount(deleteKeyPl.PadlServiceAccountName)
+	p.RemoveServiceAccount(deleteKeyPl.ServiceAccountName)
 	if err := s.database.UpdateProject(p); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("could not update project: %s", err)))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("successfully removed padl service account from project %s", p.Name)))
+	w.Write([]byte(fmt.Sprintf("successfully removed service account from project %s", p.Name)))
 	return
 }
 

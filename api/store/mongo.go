@@ -129,10 +129,10 @@ func (db *MongoDB) UpdateProject(project *project.Project) error {
 
 	update := bson.M{
 		"$set": bson.M{
-			"description":         project.Description,
-			"members":             project.Members,
-			"projectkey":          project.ProjectKey,
-			"padlServiceAccounts": project.PadlServiceAccounts,
+			"description":     project.Description,
+			"members":         project.Members,
+			"projectkey":      project.ProjectKey,
+			"serviceAccounts": project.ServiceAccounts,
 		},
 	}
 	_, err := db.projectsCollection.UpdateOne(context.TODO(), query, update)

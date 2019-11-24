@@ -10,9 +10,9 @@ const (
 	defaultPadlIssuer = "padl.adrianosela.com"
 	// PadlAPIAudience user audience for Padl API
 	PadlAPIAudience = "api"
-	// PadlServiceAccountAudience is the service account
+	// ServiceAccountAudience is the service account
 	// audience for Padl API
-	PadlServiceAccountAudience = "decrypt"
+	ServiceAccountAudience = "decrypt"
 )
 
 // Authenticator is the module in charge of authentication
