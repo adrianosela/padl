@@ -30,8 +30,8 @@ var (
 		Name:  "service-account-token",
 		Usage: "override defult token with service jwt",
 	}
-	// HostURL host server url
-	HostURL = cli.StringFlag{
+	// HostURLFlag host server url
+	HostURLFlag = cli.StringFlag{
 		Name:  "host-url",
 		Usage: "override default host url",
 	}
