@@ -25,6 +25,16 @@ var (
 		Name:  "verbose, vv",
 		Usage: "print process logs",
 	}
+	// JWTFlag service account JWT token
+	JWTFlag = cli.StringFlag{
+		Name:  "service-account-token",
+		Usage: "override defult token with service jwt",
+	}
+	// HostURL host server url
+	HostURL = cli.StringFlag{
+		Name:  "host-url",
+		Usage: "override default host url",
+	}
 	urlFlag = cli.StringFlag{
 		Name:  "url, u",
 		Usage: "host URL to use",

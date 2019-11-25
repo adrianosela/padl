@@ -14,9 +14,12 @@ type Padl struct {
 }
 
 // NewPadlClient is the constructor for the Client object
-func NewPadlClient(hostURL, token string, httpClient *http.Client) (*Padl, error) {
+func NewPadlClient(hostURL, token string, jwt string, httpClient *http.Client) (*Padl, error) {
 	if hostURL == "" {
 		return nil, errors.New("host cannot be empty")
+	}
+	if jwt != "" {
+		token = jwt
 	}
 	if httpClient == nil {
 		httpClient = http.DefaultClient
