@@ -43,7 +43,7 @@ func runHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not read padlfile: %s", err)
 	}
-	// get key panager
+	// get key manager
 	keyMgr, err := keymgr.NewFSManager(config.GetDefaultPath())
 	if err != nil {
 		return fmt.Errorf("could not establish key manager: %s", err)

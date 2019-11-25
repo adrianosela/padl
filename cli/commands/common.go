@@ -18,10 +18,18 @@ import (
 
 func getClient(ctx *cli.Context) (*client.Padl, error) {
 	config, err := config.GetConfig(ctx.GlobalString("config"))
+	authToken := ctx.GlobalString("auth-token")
+	hostURL := ctx.GlobalString("host-url")
+	if hostURL == "" {
+		hostURL = config.HostURL
+	}
+	if authToken == "" {
+		authToken = config.Token
+	}
 	if err != nil {
 		return nil, err
 	}
-	return client.NewPadlClient(config.HostURL, config.Token, nil)
+	return client.NewPadlClient(hostURL, authToken, nil)
 }
 
 func printJSON(i interface{}) error {

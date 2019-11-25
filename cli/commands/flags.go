@@ -25,6 +25,16 @@ var (
 		Name:  "verbose, vv",
 		Usage: "print process logs",
 	}
+	// TokenFlag auth token
+	TokenFlag = cli.StringFlag{
+		Name:  "auth-token",
+		Usage: "override defult token",
+	}
+	// HostURLFlag host server url
+	HostURLFlag = cli.StringFlag{
+		Name:  "host-url",
+		Usage: "override default host url",
+	}
 	urlFlag = cli.StringFlag{
 		Name:  "url, u",
 		Usage: "host URL to use",
