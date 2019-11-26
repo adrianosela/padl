@@ -12,6 +12,8 @@ var version string // injected at build-time
 
 var appflags = []cli.Flag{
 	commands.ConfigFlag,
+	commands.HostURLFlag,
+	commands.TokenFlag,
 	commands.VerboseFlag,
 }
 
