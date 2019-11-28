@@ -104,7 +104,7 @@ func (db *MockDatabase) ListProjects(names []string) ([]*project.Project, error)
 	return prjs, nil
 }
 
-// DeleteProject TODO
+// DeleteProject deletes a project from the database
 func (db *MockDatabase) DeleteProject(projectName string) error {
 	if _, ok := db.projects[projectName]; !ok {
 		return errors.New("project not found")
