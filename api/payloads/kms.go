@@ -7,7 +7,7 @@ type DecryptSecretRequest struct {
 	Secret string `json:"secret"`
 }
 
-// DecryptSecretResponse contains reponse message to a secret decryption request
+// DecryptSecretResponse contains response message to a secret decryption request
 type DecryptSecretResponse struct {
 	Message string `json:"message"`
 }
