@@ -58,6 +58,12 @@ func (p *Project) HasUser(email string) bool {
 	return ok
 }
 
+// HasServiceAccount checks whether a project has given service account
+func (p *Project) HasServiceAccount(name string) bool {
+	_, ok := p.ServiceAccounts[name]
+	return ok
+}
+
 // RemoveUser removes a user from the project
 func (p *Project) RemoveUser(email string) {
 	if _, ok := p.Members[email]; ok {
