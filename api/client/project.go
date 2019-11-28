@@ -215,7 +215,7 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	return &listProjResp, nil
 }
 
-// AddUserToProject adds another user to a project with a given privalge permissions
+// AddUserToProject adds another user to a project with given privalge permission
 func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl int) error {
 	pl := &payloads.AddUserToProjectRequest{
 		Email:        email,
