@@ -185,7 +185,7 @@ func (p *Padl) GetProjectKeys(name string) (*payloads.GetProjectKeysReponse, err
 	return &keysResp, nil
 }
 
-// ListProjects TODO
+// ListProjects lists the users padl projects
 func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/projects", p.HostURL), nil)
 	if err != nil {
@@ -215,7 +215,7 @@ func (p *Padl) ListProjects() (*payloads.ListProjectsResponse, error) {
 	return &listProjResp, nil
 }
 
-// AddUserToProject TODO
+// AddUserToProject adds another user to a project with a given privalge permissions
 func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl int) error {
 	pl := &payloads.AddUserToProjectRequest{
 		Email:        email,
@@ -251,7 +251,8 @@ func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl i
 	return nil
 }
 
-// RemoveUserFromProject TODO
+// RemoveUserFromProject removes another user from the project
+// fails if the current user  does not have owner privilage or if an owner trys to remove themselves
 func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 	pl := &payloads.RemoveUserFromProjectRequest{
 		Email: email,
@@ -288,7 +289,8 @@ func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 	return nil
 }
 
-// DeleteProject TODO
+// DeleteProject deletes a project from the padl server
+// falis if the user does not have owner privlages
 func (p *Padl) DeleteProject(projectName string) error {
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/project/%s", p.HostURL, projectName), nil)
 	if err != nil {

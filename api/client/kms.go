@@ -37,7 +37,7 @@ func (p *Padl) GetPublicKey(kid string) (*kms.PublicKey, error) {
 	return &pub, nil
 }
 
-// DecryptSecret TODO
+// DecryptSecret decrypts and returns a secret in plaintext
 func (p *Padl) DecryptSecret(secret, kid string) (string, error) {
 	plBytes, err := json.Marshal(&payloads.DecryptSecretRequest{Secret: secret})
 	if err != nil {
