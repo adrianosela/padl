@@ -252,7 +252,7 @@ func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl i
 }
 
 // RemoveUserFromProject removes another user from the project
-// fails if the current user does not have owner privilege or if an owner trys to remove themselves
+// fails if the current user does not have owner privilege or if an owner tries to remove themselves
 func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 	pl := &payloads.RemoveUserFromProjectRequest{
 		Email: email,
