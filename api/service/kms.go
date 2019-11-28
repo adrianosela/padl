@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/adrianosela/padl/api/auth"
 	"github.com/adrianosela/padl/api/payloads"
@@ -86,8 +87,20 @@ func (s *Service) decryptSecretHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("could get project: %s", err)))
 		return
 	}
+	ok := p.HasUser(claims.Subject)
+	if !ok {
+		svcAcctParts := strings.Split(claims.Subject, ".")
+		if len(svcAcctParts) < 2 {
+			ok = false
+		} else {
+			// TODO: check service account is for this project
+			// i.e. a service account with the same name for a different
+			// project will get past this
+			ok = p.HasServiceAccount(svcAcctParts[0])
+		}
+	}
 	// treat not having visibility of a key the same as the key not existing
-	if key == nil || !p.HasUser(claims.Subject) {
+	if key == nil || !ok {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("key not found"))
 		return
