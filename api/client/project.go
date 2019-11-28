@@ -290,7 +290,7 @@ func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 }
 
 // DeleteProject deletes a project from the padl server
-// falis if the user does not have owner privlages
+// falis if the user does not have owner privilages
 func (p *Padl) DeleteProject(projectName string) error {
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/project/%s", p.HostURL, projectName), nil)
 	if err != nil {
