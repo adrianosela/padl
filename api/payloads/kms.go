@@ -2,7 +2,7 @@ package payloads
 
 import "errors"
 
-// DecryptSecretRequest contains secert to decrypt
+// DecryptSecretRequest contains secret to decrypt
 type DecryptSecretRequest struct {
 	Secret string `json:"secret"`
 }
