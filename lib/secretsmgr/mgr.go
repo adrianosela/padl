@@ -145,8 +145,12 @@ func (smgr *SecretsMgr) EncryptPadlfileSecrets() (map[string]string, error) {
 // a padlfile
 func (smgr *SecretsMgr) PrecachePubs() (map[string]*rsa.PublicKey, error) {
 	pubs := make(map[string]*rsa.PublicKey)
-	// for all keys (user keys + shared team key)
-	for _, k := range append(smgr.padlFile.Data.MemberKeys, smgr.padlFile.Data.SharedKey) {
+	// for all keys (user keys + service account keys + shared team key)
+	keysToFetch := append(
+		smgr.padlFile.Data.MemberKeys,
+		append(smgr.padlFile.Data.ServiceKeys, smgr.padlFile.Data.SharedKey)...,
+	)
+	for _, k := range keysToFetch {
 		// try to get pub from filesystem
 		pubPEM, err := smgr.keyManager.GetPub(k)
 		if err == nil {

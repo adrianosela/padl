@@ -66,7 +66,7 @@ var ProjectCmds = cli.Command{
 					Usage: "create a service account in the project",
 					Flags: []cli.Flag{
 						asMandatory(projectFlag),
-						asMandatory(keyNameFlag),
+						asMandatory(nameFlag),
 						jsonFlag,
 					},
 					Before: addServiceAccountValidator,
@@ -77,7 +77,7 @@ var ProjectCmds = cli.Command{
 					Usage: "delete a service account from the project",
 					Flags: []cli.Flag{
 						asMandatory(projectFlag),
-						asMandatory(keyNameFlag),
+						asMandatory(nameFlag),
 					},
 					Before: removeServiceAccountValidator,
 					Action: projectRemoveServiceAccountHandler,
@@ -120,11 +120,11 @@ func addUserValidator(ctx *cli.Context) error {
 }
 
 func addServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, projectFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, nameFlag)
 }
 
 func removeServiceAccountValidator(ctx *cli.Context) error {
-	return assertSet(ctx, projectFlag, keyNameFlag)
+	return assertSet(ctx, projectFlag, nameFlag)
 }
 
 func createProjectValidator(ctx *cli.Context) error {
@@ -241,7 +241,7 @@ func projectAddServiceAccountHandler(ctx *cli.Context) error {
 	}
 
 	projectName := ctx.String(name(projectFlag))
-	keyName := ctx.String(name(keyNameFlag))
+	keyName := ctx.String(name(nameFlag))
 
 	priv, pub, err := keys.GenerateRSAKeyPair(4096)
 	if err != nil {
@@ -282,7 +282,7 @@ func projectRemoveServiceAccountHandler(ctx *cli.Context) error {
 	}
 
 	projectName := ctx.String(name(projectFlag))
-	keyName := ctx.String(name(keyNameFlag))
+	keyName := ctx.String(name(nameFlag))
 
 	err = c.RemoveServiceAccount(projectName, keyName)
 	if err != nil {
