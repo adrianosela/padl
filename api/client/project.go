@@ -252,7 +252,7 @@ func (p *Padl) AddUserToProject(projectName string, email string, privilegeLvl i
 }
 
 // RemoveUserFromProject removes another user from the project
-// fails if the current user  does not have owner privilage or if an owner trys to remove themselves
+// fails if the current user does not have owner privilege or if an owner trys to remove themselves
 func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 	pl := &payloads.RemoveUserFromProjectRequest{
 		Email: email,
@@ -290,7 +290,7 @@ func (p *Padl) RemoveUserFromProject(projectName string, email string) error {
 }
 
 // DeleteProject deletes a project from the padl server
-// falis if the user does not have owner privilages
+// falis if the user does not have owner privileges
 func (p *Padl) DeleteProject(projectName string) error {
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/project/%s", p.HostURL, projectName), nil)
 	if err != nil {
