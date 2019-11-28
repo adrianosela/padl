@@ -184,7 +184,7 @@ func (s *Service) getProjectKeysHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	keyIDs := []string{}
+	memKeyIDs := []string{}
 	for member := range p.Members {
 		user, err := s.database.GetUser(member)
 		if err != nil {
@@ -192,12 +192,18 @@ func (s *Service) getProjectKeysHandler(w http.ResponseWriter, r *http.Request) 
 			w.Write([]byte(fmt.Sprintf("could not get a member user from db: %s", err)))
 			return
 		}
-		keyIDs = append(keyIDs, user.KeyID)
+		memKeyIDs = append(memKeyIDs, user.KeyID)
+	}
+
+	svcKeyIDs := []string{}
+	for _, svcKeyID := range p.ServiceAccounts {
+		svcKeyIDs = append(svcKeyIDs, svcKeyID)
 	}
 
 	getProjectKeysResp := payloads.GetProjectKeysReponse{
 		Name:       p.Name,
-		MemberKeys: keyIDs,
+		MemberKeys: memKeyIDs,
+		DeployKeys: svcKeyIDs,
 		ProjectKey: p.ProjectKey,
 	}
 
