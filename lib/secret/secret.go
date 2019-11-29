@@ -9,7 +9,7 @@ import (
 
 const (
 	pemBlockType       = "PADL ENCRYPTED SECRET"
-	simpleFmtSeparator = "\n"
+	simpleFmtSeparator = "-"
 
 	// ErrMsgInvalidSimpleFmt is returned when trying to decode
 	// a simple-format secret that is not simple-encoded

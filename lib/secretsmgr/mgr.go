@@ -46,11 +46,10 @@ func (smgr *SecretsMgr) DecryptPadlFileSecrets(userPriv *rsa.PrivateKey) (map[st
 
 // DecryptSecret ecrypts a single pem encoded secret
 func (smgr *SecretsMgr) DecryptSecret(ciphertext string, usrOrSvcPriv *rsa.PrivateKey) (string, error) {
-	sec, err := secret.DecodePEM(ciphertext)
+	sec, err := secret.DecodeSimpleSecret(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf("could not decode PEM secret %s", err)
 	}
-	
 	privID := keys.GetFingerprint(&usrOrSvcPriv.PublicKey)
 
 	parts := [][]byte{}
@@ -111,11 +110,7 @@ func (smgr *SecretsMgr) EncryptSecret(plaintext string) (string, error) {
 		s.Shards = append(s.Shards, usrShard)
 	}
 	// we then PEM encode the secret data
-	padlPEMSecret, err := s.EncodePEM()
-	if err != nil {
-		return "", fmt.Errorf("could not PEM encode secret: %s", err)
-	}
-	return padlPEMSecret, nil
+	return s.EncodeSimple(), nil
 }
 
 func encryptPart(part []byte, pub *rsa.PublicKey) (*secret.EncryptedShard, error) {
