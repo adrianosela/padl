@@ -322,7 +322,7 @@ MONGODB_HOST=127.0.0.1
 TERM_PROGRAM=iTerm.app
 SHELL=/bin/bash
 MONGODB_PORT=27017
-MONGODB_CONNSTR=mongo://user:supersecretstuff@mymongoins.com
+MONGODB_CONNSTR=mongo://user:supersecretstuff@mymongoinstance.com
 ```
 
 For a detailed walkthrough head over to [demos/simple](https://github.com/adrianosela/padl/tree/master/demos/simple).
