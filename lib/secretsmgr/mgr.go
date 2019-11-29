@@ -50,6 +50,8 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext string, usrOrSvcPriv *rsa.Priva
 	if err != nil {
 		return "", fmt.Errorf("could not decode PEM secret %s", err)
 	}
+	
+	privID := keys.GetFingerprint(&usrOrSvcPriv.PublicKey)
 
 	parts := [][]byte{}
 	for _, sh := range sec.Shards {
@@ -59,7 +61,7 @@ func (smgr *SecretsMgr) DecryptSecret(ciphertext string, usrOrSvcPriv *rsa.Priva
 				return "", fmt.Errorf("could not decrypt shared shard: %s", err)
 			}
 			parts = append(parts, []byte(decryptedSharedShard))
-		} else if sh.KeyID == keys.GetFingerprint(&usrOrSvcPriv.PublicKey) {
+		} else if sh.KeyID == privID {
 			decryptedUserShard, err := sh.Decrypt(usrOrSvcPriv)
 			if err != nil {
 				return "", fmt.Errorf("could not decrypt user shard: %s", err)
