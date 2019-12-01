@@ -86,6 +86,12 @@ func (r *CreateServiceAccountRequest) Validate() error {
 	if r.ServiceAccountName == "" {
 		return errors.New("No name provided")
 	}
+	if strings.Contains(r.ServiceAccountName, " ") {
+		return errors.New("no space characters allowed for service account name")
+	}
+	if strings.Contains(r.ServiceAccountName, ".") {
+		return errors.New("no . characters allowed for service account name")
+	}
 	if r.PubKey == "" {
 		return errors.New("no public key provided")
 	}
@@ -110,6 +116,9 @@ func (p *NewProjectRequest) Validate() error {
 	}
 	if strings.Contains(p.Name, " ") {
 		return errors.New("no space characters allowed for project name")
+	}
+	if strings.Contains(p.Name, ".") {
+		return errors.New("no . characters allowed for project name")
 	}
 	if p.Description == "" {
 		return errors.New("no project description provided")
