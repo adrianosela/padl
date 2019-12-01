@@ -22,7 +22,7 @@ var appcmds = []cli.Command{
 	commands.AccountCmds,
 	commands.ProjectCmds,
 	commands.PadlfileCmds,
-	commands.KMSCmds,
+	// commands.KMSCmds,
 	commands.RunCmds,
 }
 
