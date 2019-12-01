@@ -89,14 +89,20 @@ func (s *Service) decryptSecretHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ok := p.HasUser(claims.Subject)
 	if !ok {
-		svcAcctParts := strings.Split(claims.Subject, ".")
+		svcAcctParts := strings.Split(claims.Subject, "@")
 		if len(svcAcctParts) < 2 {
 			ok = false
 		} else {
-			// TODO: check service account is for this project
-			// i.e. a service account with the same name for a different
-			// project will get past this
-			ok = p.HasServiceAccount(svcAcctParts[0])
+			svcAcctDetails := strings.Split(svcAcctParts[0], ".")
+			if (len(svcAcctDetails) < 2) {
+				ok = false
+			} else {
+				ok = p.HasServiceAccount(svcAcctDetails[0])
+
+				if p.Name != svcAcctDetails[1] {
+					ok = false
+				} 
+			}
 		}
 	}
 	// treat not having visibility of a key the same as the key not existing
