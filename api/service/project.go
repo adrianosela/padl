@@ -531,7 +531,7 @@ func (s *Service) removeServiceAccountHandler(w http.ResponseWriter, r *http.Req
 
 	if _, ok := p.Members[claims.Subject]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", err)))
+		w.Write([]byte(fmt.Sprintf("User not in requested Project: %s", p.Name)))
 		return
 	}
 

@@ -288,6 +288,7 @@ func projectRemoveServiceAccountHandler(ctx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("error removing service account: %s", err)
 	}
+	fmt.Printf("Service account %s successfully deleted from project %s!\n", keyName, projectName)
 	return nil
 }
 
