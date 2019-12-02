@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/adrianosela/padl/cli/config"
 	"github.com/adrianosela/padl/lib/keymgr"
@@ -47,7 +48,8 @@ func getUserKey(keyMgrPath string, keyIDs []string) (string, string, error) {
 		}
 	}
 	if key == "" {
-		return "", "", fmt.Errorf("no valid decryption key found")
+		fmt.Println("error: no valid decryption key found")
+		os.Exit(1)
 	}
 	return key, id, nil
 }
