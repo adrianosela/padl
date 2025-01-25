@@ -9,7 +9,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.2
 	github.com/stretchr/testify v1.6.1
 	go.mongodb.org/mongo-driver v1.5.1
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
+	golang.org/x/crypto v0.31.0
 	gopkg.in/urfave/cli.v1 v1.20.0
 	gopkg.in/yaml.v2 v2.2.8
 )
